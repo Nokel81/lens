@@ -7,7 +7,7 @@ import * as version260Beta3 from "../migrations/cluster-store/2.6.0-beta.3"
 import * as version270Beta0 from "../migrations/cluster-store/2.7.0-beta.0"
 import * as version270Beta1 from "../migrations/cluster-store/2.7.0-beta.1"
 import * as version360Beta1 from "../migrations/cluster-store/3.6.0-beta.1"
-import { getAppVersion } from "./utils/app-version";
+import { getAppVersion } from "./utils";
 
 export class ClusterStore {
   private static instance: ClusterStore;

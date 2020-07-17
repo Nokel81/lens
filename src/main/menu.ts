@@ -4,35 +4,34 @@ import { isDevelopment, isMac, issuesTrackerUrl, isWindows, slackUrl } from "../
 // todo: refactor + split menu sections to separated files, e.g. menus/file.menu.ts
 
 export interface MenuOptions {
-  logoutHook: any;
-  addClusterHook: any;
-  clusterSettingsHook: any;
-  showWhatsNewHook: any;
-  showPreferencesHook: any;
-  // all the above are really () => void type functions
+  logoutHook: () => void;
+  addClusterHook: () => void;
+  clusterSettingsHook: () => void;
+  showWhatsNewHook: () => void;
+  showPreferencesHook: () => void;
 }
 
 function setClusterSettingsEnabled(enabled: boolean) {
-  const menuIndex = isMac ? 1 : 0
-  Menu.getApplicationMenu().items[menuIndex].submenu.items[1].enabled = enabled
+  Menu.getApplicationMenu().items[+isMac].submenu.items[1].enabled = enabled
 }
 
 function showAbout(_menuitem: MenuItem, browserWindow: BrowserWindow) {
   const appDetails = [
     `Version: ${app.getVersion()}`,
+    `Copyright 2020 Lakend Labs, Inc.`
   ]
-  appDetails.push(`Copyright 2020 Lakend Labs, Inc.`)
-  let title = "Lens"
-  if (isWindows) {
-    title = `  ${title}`
-  }
+
   dialog.showMessageBoxSync(browserWindow, {
-    title,
+    title: `${isWindows ? "  " : ""}Lens`,
     type: "info",
     buttons: ["Close"],
     message: `Lens`,
     detail: appDetails.join("\r\n")
   })
+}
+
+interface SimpleMenuItemConstructorOptions extends MenuItemConstructorOptions {
+  submenu?: MenuItemConstructorOptions[]
 }
 
 /**
@@ -42,62 +41,14 @@ function showAbout(_menuitem: MenuItem, browserWindow: BrowserWindow) {
  * @param ipc the main promiceIpc handle. Needed to be able to hook IPC sending into logout click handler.
  */
 export default function initMenu(opts: MenuOptions, promiseIpc: any) {
-  const mt: MenuItemConstructorOptions[] = [];
-  const macAppMenu: MenuItemConstructorOptions = {
-    label: app.getName(),
-    submenu: [
-      {
-        label: "About Lens",
-        click: showAbout
-      },
-      { type: 'separator' },
-      {
-        label: 'Preferences',
-        click: opts.showPreferencesHook,
-        enabled: true
-      },
-      { type: 'separator' },
-      { role: 'services' },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideOthers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' }
-    ]
-  };
+  const mt: SimpleMenuItemConstructorOptions[] = [];
   if (isMac) {
-    mt.push(macAppMenu);
-  }
-
-  let fileMenu: MenuItemConstructorOptions;
-  if (isMac) {
-    fileMenu = {
-      label: 'File',
-      submenu: [{
-        label: 'Add Cluster...',
-        click: opts.addClusterHook,
-      },
-      {
-        label: 'Cluster Settings',
-        click: opts.clusterSettingsHook,
-        enabled: false
-      }
-      ]
-    }
-  }
-  else {
-    fileMenu = {
-      label: 'File',
+    mt.push({
+      label: app.getName(),
       submenu: [
         {
-          label: 'Add Cluster...',
-          click: opts.addClusterHook,
-        },
-        {
-          label: 'Cluster Settings',
-          click: opts.clusterSettingsHook,
-          enabled: false
+          label: "About Lens",
+          click: showAbout
         },
         { type: 'separator' },
         {
@@ -106,13 +57,51 @@ export default function initMenu(opts: MenuOptions, promiseIpc: any) {
           enabled: true
         },
         { type: 'separator' },
-        { role: 'quit' }
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { 
+          role: 'quit',
+          accelerator: "CmdOrCtrl+q"
+        }
       ]
-    }
+    });
+  }
+
+  const fileMenu: SimpleMenuItemConstructorOptions = {
+    label: "File",
+    submenu: [{
+      label: 'Add Cluster...',
+      click: opts.addClusterHook,
+      accelerator: "CmdOrCtrl+Plus"
+    },
+    {
+      label: 'Cluster Settings',
+      click: opts.clusterSettingsHook,
+      enabled: false
+    }]
+  };
+  if (!isMac) {
+    fileMenu.submenu.push(
+      { type: 'separator' },
+      {
+        label: 'Preferences',
+        click: opts.showPreferencesHook,
+        enabled: true
+      },
+      { type: 'separator' },
+      { 
+        role: 'quit',
+        accelerator: "CmdOrCtrl+q"
+      }
+    );
   }
   mt.push(fileMenu);
 
-  const editMenu: MenuItemConstructorOptions = {
+  const editMenu: SimpleMenuItemConstructorOptions = {
     label: 'Edit',
     submenu: [
       { role: 'undo' },
@@ -128,7 +117,7 @@ export default function initMenu(opts: MenuOptions, promiseIpc: any) {
   };
   mt.push(editMenu);
 
-  const viewMenu: MenuItemConstructorOptions = {
+  const viewMenu: SimpleMenuItemConstructorOptions = {
     label: 'View',
     submenu: [
       {
@@ -163,7 +152,7 @@ export default function initMenu(opts: MenuOptions, promiseIpc: any) {
   };
   mt.push(viewMenu);
 
-  const helpMenu: MenuItemConstructorOptions = {
+  const helpMenu: SimpleMenuItemConstructorOptions = {
     role: 'help',
     submenu: [
       {
@@ -187,17 +176,18 @@ export default function initMenu(opts: MenuOptions, promiseIpc: any) {
       {
         label: "What's new?",
         click: opts.showWhatsNewHook,
-      },
-      ...(!isMac ? [{
-        label: "About Lens",
-        click: showAbout
-      } as MenuItemConstructorOptions] : [])
+      }
     ]
   };
+  if (!isMac) {
+    helpMenu.submenu.push({
+      label: "About Lens",
+      click: showAbout
+    })
+  }
   mt.push(helpMenu);
 
-  const menu = Menu.buildFromTemplate(mt);
-  Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(Menu.buildFromTemplate(mt));
 
   promiseIpc.on("enableClusterSettingsMenuItem", (clusterId: string) => {
     setClusterSettingsEnabled(true)

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import semver from "semver"
 import { userStore } from "../../../common/user-store"
-import { getAppVersion } from "../../../common/utils/app-version"
+import { getAppVersion } from "../../../common/utils"
 import KubeContexts from './modules/kube-contexts'
 import Clusters from './modules/clusters'
 import HelmRepos from './modules/helm-repos'

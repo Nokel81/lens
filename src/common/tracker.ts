@@ -22,15 +22,13 @@ export class Tracker {
   }
 
   public async event(eventCategory: string, eventAction: string) {
-    return new Promise(async (resolve, reject) => {
-      if (!this.telemetryAllowed()) {
-        resolve()
-        return
+    return new Promise(resolve => {
+      if (this.telemetryAllowed()) {
+        this.visitor.event({
+          ec: eventCategory,
+          ea: eventAction
+        }).send()
       }
-      this.visitor.event({
-        ec: eventCategory,
-        ea: eventAction
-      }).send()
       resolve()
     })
   }

@@ -1,7 +1,7 @@
 import fs from "fs";
 import logger from "./logger";
 import * as yaml from "js-yaml";
-import { promiseExec } from "./promise-exec";
+import { exec } from "./promise-exec";
 import { helmCli } from "./helm-cli";
 
 type HelmEnv = {
@@ -42,7 +42,7 @@ export class HelmRepoManager {
 
   protected async parseHelmEnv() {
     const helm = await helmCli.binaryPath()
-    const { stdout } = await promiseExec(`"${helm}" env`).catch((error) => { throw(error.stderr)})
+    const { stdout } = await exec(`"${helm}" env`).catch((error) => { throw(error.stderr)})
     const lines = stdout.split(/\r?\n/) // split by new line feed
     const env: HelmEnv = {}
     lines.forEach((line: string) => {
@@ -97,7 +97,7 @@ export class HelmRepoManager {
     const helm = await helmCli.binaryPath()
     logger.debug(`${helm} repo update`)
 
-    const {stdout } = await promiseExec(`"${helm}" repo update`).catch((error) => { return { stdout: error.stdout } })
+    const {stdout } = await exec(`"${helm}" repo update`).catch((error) => { return { stdout: error.stdout } })
     return stdout
   }
 
@@ -139,7 +139,7 @@ export class HelmRepoManager {
     const helm = await helmCli.binaryPath()
     logger.debug(`${helm} repo add ${repository.name} ${repository.url}`)
 
-    const {stdout } = await promiseExec(`"${helm}" repo add ${repository.name} ${repository.url}`).catch((error) => { throw(error.stderr)})
+    const {stdout } = await exec(`"${helm}" repo add ${repository.name} ${repository.url}`).catch((error) => { throw(error.stderr)})
     return stdout
   }
 
@@ -147,7 +147,7 @@ export class HelmRepoManager {
     const helm = await helmCli.binaryPath()
     logger.debug(`${helm} repo remove ${repository.name} ${repository.url}`)
 
-    const { stdout, stderr } = await promiseExec(`"${helm}" repo remove ${repository.name}`).catch((error) => { throw(error.stderr)})
+    const { stdout, stderr } = await exec(`"${helm}" repo remove ${repository.name}`).catch((error) => { throw(error.stderr)})
     return stdout
   }
 }

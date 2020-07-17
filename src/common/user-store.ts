@@ -1,6 +1,6 @@
 import ElectronStore from "electron-store"
 import * as version210Beta4 from "../migrations/user-store/2.1.0-beta.4"
-import { getAppVersion } from "./utils/app-version";
+import { getAppVersion } from "./utils";
 
 export interface User {
   id?: string;

@@ -63,7 +63,7 @@
     ]
   },
   "jest": {
-    "testRegex": ".*_(spec|test)\\.[jt]sx?$",
+    "testRegex": ".+\\.spec\\.[jt]sx?$",
     "collectCoverage": false,
     "verbose": true,
     "testEnvironment": "node",

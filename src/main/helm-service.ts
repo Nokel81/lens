@@ -2,11 +2,11 @@ import { Cluster } from "./cluster";
 import logger from "./logger";
 import { repoManager } from "./helm-repo-manager";
 import { HelmChartManager } from "./helm-chart-manager";
-import { releaseManager } from "./helm-release-manager";
+import * as helmReleases from "./helm-release-manager";
 
 class HelmService {
   public async installChart(cluster: Cluster, data: {chart: string; values: {}; name: string; namespace: string; version: string}) {
-    const installResult = await releaseManager.installChart(data.chart, data.values, data.name, data.namespace, data.version, cluster.proxyKubeconfigPath())
+    const installResult = await helmReleases.installChart(data.chart, data.values, data.name, data.namespace, data.version, cluster.proxyKubeconfigPath())
     return installResult
   }
 
@@ -48,43 +48,43 @@ class HelmService {
 
   public async listReleases(cluster: Cluster, namespace: string = null) {
     await repoManager.init()
-    const releases = await releaseManager.listReleases(cluster.proxyKubeconfigPath(), namespace)
+    const releases = await helmReleases.listReleases(cluster.proxyKubeconfigPath(), namespace)
     return releases
   }
 
   public async getRelease(cluster: Cluster,  releaseName: string, namespace: string) {
     logger.debug("Fetch release")
-    const release = await releaseManager.getRelease(releaseName, namespace, cluster)
+    const release = await helmReleases.getRelease(releaseName, namespace, cluster)
     return release
   }
 
   public async getReleaseValues(cluster: Cluster, releaseName: string, namespace: string) {
     logger.debug("Fetch release values")
-    const values = await releaseManager.getValues(releaseName, namespace, cluster.proxyKubeconfigPath())
+    const values = await helmReleases.getValues(releaseName, namespace, cluster.proxyKubeconfigPath())
     return values
   }
 
   public async getReleaseHistory(cluster: Cluster, releaseName: string, namespace: string) {
     logger.debug("Fetch release history")
-    const history = await releaseManager.getHistory(releaseName, namespace, cluster.proxyKubeconfigPath())
+    const history = await helmReleases.getHistory(releaseName, namespace, cluster.proxyKubeconfigPath())
     return(history)
   }
 
   public async deleteRelease(cluster: Cluster, releaseName: string, namespace: string) {
     logger.debug("Delete release")
-    const release = await releaseManager.deleteRelease(releaseName, namespace, cluster.proxyKubeconfigPath())
+    const release = await helmReleases.deleteRelease(releaseName, namespace, cluster.proxyKubeconfigPath())
     return release
   }
 
   public async updateRelease(cluster: Cluster, releaseName: string, namespace: string, data: {chart: string; values: {}; version: string}) {
     logger.debug("Upgrade release")
-    const release = await releaseManager.upgradeRelease(releaseName, data.chart, data.values, namespace, data.version, cluster)
+    const release = await helmReleases.upgradeRelease(releaseName, data.chart, data.values, namespace, data.version, cluster)
     return release
   }
 
   public async rollback(cluster: Cluster, releaseName: string, namespace: string, revision: number) {
     logger.debug("Rollback release")
-    const output = await releaseManager.rollback(releaseName, namespace, revision, cluster.proxyKubeconfigPath())
+    const output = await helmReleases.rollback(releaseName, namespace, revision, cluster.proxyKubeconfigPath())
     return({ message: output })
   }
 

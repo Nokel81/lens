@@ -3,7 +3,7 @@ import { app } from "electron"
 import  { ensureDirSync } from "fs-extra"
 import * as path from "path"
 import { KubeConfig } from "@kubernetes/client-node";
-import { writeEmbeddedKubeConfig } from "../../common/utils/kubeconfig"
+import { writeEmbeddedKubeConfig } from "../../common/utils"
 
 export function migration(store: any) {
   console.log("CLUSTER STORE, MIGRATION: 3.6.0-beta.1");

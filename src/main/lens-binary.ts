@@ -2,9 +2,10 @@ import path from "path"
 import fs from "fs"
 import request from "request"
 import logger from "./logger"
-import { ensureDir, pathExists } from "fs-extra"
 import * as tar from "tar"
 import { isWindows } from "../common/vars";
+import { pathExists, ensureDir } from "fs-extra"
+const { promises: fsp } = fs;
 
 export type LensBinaryOpts = {
   version: string;
@@ -29,7 +30,7 @@ export class LensBinary {
   protected requestOpts: request.Options
 
   constructor(opts: LensBinaryOpts) {
-    const baseDir = opts.baseDir
+    const baseDir = opts.baseDir || __dirname;
     this.originalBinaryName = opts.originalBinaryName
     this.binaryName = opts.newBinaryName || opts.originalBinaryName
     this.binaryVersion = opts.version
@@ -72,7 +73,7 @@ export class LensBinary {
     return null
   }
 
-  protected getUrl() {
+  protected getUrl(): string {
     return ""
   }
 
@@ -99,16 +100,18 @@ export class LensBinary {
   }
 
   protected async checkBinary() {
-    const exists = await pathExists(this.getBinaryPath())
-    return exists
+    console.log(this.getBinaryPath())
+    return pathExists(this.getBinaryPath())
   }
 
   public async ensureBinary() {
     const isValid = await this.checkBinary()
     if (!isValid) {
-      await this.downloadBinary().catch((error) => {
+      try {
+        await this.downloadBinary()
+      } catch (error) {
         logger.error(error)
-      });
+      }
       if (this.tarPath) await this.untarBinary()
       if (this.originalBinaryName != this.binaryName) await this.renameBinary()
       logger.info(`${this.originalBinaryName} has been downloaded to ${this.getBinaryPath()}`)
@@ -128,17 +131,8 @@ export class LensBinary {
   }
 
   protected async renameBinary() {
-    return new Promise<void>((resolve, reject) => {
-      logger.debug(`Renaming ${this.originalBinaryName} binary to ${this.binaryName}`)
-      fs.rename(this.getOriginalBinaryPath(), this.getBinaryPath(), (err) => {
-        if (err) {
-          reject(err)
-        }
-        else {
-          resolve()
-        }
-      })
-    })
+    logger.debug(`Renaming ${this.originalBinaryName} binary to ${this.binaryName}`)
+    return fsp.rename(this.getOriginalBinaryPath(), this.getBinaryPath())
   }
 
   protected async downloadBinary() {
@@ -162,15 +156,16 @@ export class LensBinary {
       file.end()
     })
 
-    stream.on("error", (error) => {
+    stream.on("error", async (error) => {
       logger.error(error)
-      fs.unlink(binaryPath, null)
+      await fsp.unlink(binaryPath)
       throw(error)
     })
+    
     return new Promise((resolve, reject) => {
-      file.on("close", () => {
+      file.on("close", async () => {
         logger.debug(`${this.originalBinaryName} binary download closed`)
-        if (!this.tarPath) fs.chmod(binaryPath, 0o755, null)
+        if (!this.tarPath) await fsp.chmod(binaryPath, 0o755)
         resolve()
       })
       stream.pipe(file)

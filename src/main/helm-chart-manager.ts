@@ -2,7 +2,7 @@ import fs from "fs";
 import * as yaml from "js-yaml";
 import { HelmRepo, HelmRepoManager } from "./helm-repo-manager"
 import logger from "./logger";
-import { promiseExec } from "./promise-exec"
+import { exec } from "./promise-exec"
 import { helmCli } from "./helm-cli"
 
 type CachedYaml = {
@@ -35,10 +35,10 @@ export class HelmChartManager {
   public async getReadme(name: string, version = "") {
     const helm = await helmCli.binaryPath()
     if(version && version != "") {
-      const { stdout, stderr} = await promiseExec(`"${helm}" show readme ${this.repo.name}/${name} --version ${version}`).catch((error) => { throw(error.stderr)})
+      const { stdout, stderr} = await exec(`"${helm}" show readme ${this.repo.name}/${name} --version ${version}`).catch((error) => { throw(error.stderr)})
       return stdout
     } else {
-      const { stdout, stderr} = await promiseExec(`"${helm}" show readme ${this.repo.name}/${name}`).catch((error) => { throw(error.stderr)})
+      const { stdout, stderr} = await exec(`"${helm}" show readme ${this.repo.name}/${name}`).catch((error) => { throw(error.stderr)})
       return stdout
     }
   }
@@ -46,11 +46,11 @@ export class HelmChartManager {
   public async getValues(name: string, version = "") {
     const helm = await helmCli.binaryPath()
     if(version && version != "") {
-      const { stdout, stderr} = await promiseExec(`"${helm}" show values ${this.repo.name}/${name} --version ${version}`).catch((error) => { throw(error.stderr)})
+      const { stdout, stderr} = await exec(`"${helm}" show values ${this.repo.name}/${name} --version ${version}`).catch((error) => { throw(error.stderr)})
 
       return stdout
     } else {
-      const { stdout, stderr} = await promiseExec(`"${helm}" show values ${this.repo.name}/${name}`).catch((error) => { throw(error.stderr)})
+      const { stdout, stderr} = await exec(`"${helm}" show values ${this.repo.name}/${name}`).catch((error) => { throw(error.stderr)})
 
       return stdout
     }

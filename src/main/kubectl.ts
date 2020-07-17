@@ -2,14 +2,14 @@ import { app, remote } from "electron"
 import path from "path"
 import fs from "fs"
 import request from "request"
-import { promiseExec} from "./promise-exec"
+import { exec} from "./promise-exec"
 import logger from "./logger"
 import { ensureDir, pathExists } from "fs-extra"
 import { globalRequestOpts } from "../common/request"
 import * as lockFile from "proper-lockfile"
 import { helmCli } from "./helm-cli"
 import { userStore } from "../common/user-store"
-import { getBundledKubectlVersion} from "../common/utils/app-version"
+import { getBundledKubectlVersion} from "../common/utils"
 
 const bundledVersion = getBundledKubectlVersion()
 const kubectlMap: Map<string, string> = new Map([
@@ -125,7 +125,7 @@ export class Kubectl {
       }
 
       try {
-        const { stdout } = await promiseExec(`"${this.path}" version --client=true -o json`)
+        const { stdout } = await exec(`"${this.path}" version --client=true -o json`)
         const output = JSON.parse(stdout)
         let version: string = output.clientVersion.gitVersion
         if (version[0] === 'v') {

@@ -24,7 +24,8 @@ export const htmlTemplate = path.resolve(rendererDir, "template.html");
 export const sassCommonVars = path.resolve(rendererDir, "components/vars.scss");
 
 // Apis
-export const staticProto = "static://"
+export const staticScheme = "static"
+export const staticProto = `${staticScheme}://`
 
 export const apiPrefix = {
   BASE: '/api',

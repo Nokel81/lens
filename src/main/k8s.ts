@@ -2,6 +2,7 @@ import * as k8s from "@kubernetes/client-node"
 import * as os from "os"
 import * as yaml from "js-yaml"
 import logger from "./logger";
+import { path } from "filenamify";
 
 const kc = new k8s.KubeConfig()
 
@@ -31,15 +32,15 @@ export function loadConfig(kubeconfig: string): k8s.KubeConfig {
  */
 export function validateConfig(config: k8s.KubeConfig): boolean {
   logger.debug(`validating kube config: ${JSON.stringify(config)}`)
-  if(!config.users || config.users.length == 0) {
+  if((config?.users.length || 0) == 0) {
     throw new Error("No users provided in config")
   }
 
-  if(!config.clusters || config.clusters.length == 0) {
+  if((config?.clusters.length || 0) == 0) {
     throw new Error("No clusters provided in config")
   }
 
-  if(!config.contexts || config.contexts.length == 0) {
+  if((config?.contexts.length || 0) == 0) {
     throw new Error("No contexts provided in config")
   }
 
@@ -53,20 +54,15 @@ export function validateConfig(config: k8s.KubeConfig): boolean {
  * @param configString yaml string of kube config
  */
 export function splitConfig(kubeConfig: k8s.KubeConfig): k8s.KubeConfig[] {
-  const configs: k8s.KubeConfig[] = []
-  if(!kubeConfig.contexts) {
-    return configs;
-  }
-  kubeConfig.contexts.forEach(ctx => {
+  return (kubeConfig.contexts || []).map(ctx => {
     const kc = new k8s.KubeConfig();
     kc.clusters = [kubeConfig.getCluster(ctx.cluster)].filter(n => n);
     kc.users = [kubeConfig.getUser(ctx.user)].filter(n => n)
     kc.contexts = [kubeConfig.getContextObject(ctx.name)].filter(n => n)
     kc.setCurrentContext(ctx.name);
 
-    configs.push(kc);
-  });
-  return configs;
+    return kc;
+  })
 }
 
 /**
@@ -86,40 +82,39 @@ export function dumpConfigYaml(kc: k8s.KubeConfig): string {
     kind: "Config",
     preferences: {},
     'current-context': kc.currentContext,
-    clusters: kc.clusters.map(c => {
+    clusters: kc.clusters.map(({
+      name, caData, caFile, server, skipTLSVerify
+    }) => {
       return {
-        name: c.name,
+        name,
         cluster: {
-          'certificate-authority-data': c.caData,
-          'certificate-authority': c.caFile,
-          server: c.server,
-          'insecure-skip-tls-verify': c.skipTLSVerify
+          'certificate-authority-data': caData,
+          'certificate-authority': caFile,
+          'insecure-skip-tls-verify': skipTLSVerify,
+          server
         }
       }
     }),
-    contexts: kc.contexts.map(c => {
+    contexts: kc.contexts.map(({
+      name, cluster, user, namespace
+    }) => {
       return {
-        name: c.name,
-        context: {
-          cluster: c.cluster,
-          user: c.user,
-          namespace: c.namespace
-        }
+        name: name,
+        context: { cluster, user, namespace }
       }
     }),
-    users: kc.users.map(u => {
+    users: kc.users.map(({
+      name, certData, certFile, keyData, keyFile, authProvider, exec, token, username, password
+    }) => {
       return {
-        name: u.name,
+        name,
         user: {
-          'client-certificate-data': u.certData,
-          'client-certificate': u.certFile,
-          'client-key-data': u.keyData,
-          'client-key': u.keyFile,
-          'auth-provider': u.authProvider,
-          exec: u.exec,
-          token: u.token,
-          username: u.username,
-          password: u.password
+          'client-certificate-data': certData,
+          'client-certificate': certFile,
+          'client-key-data': keyData,
+          'client-key': keyFile,
+          'auth-provider': authProvider,
+          exec, token, username, password
         }
       }
     })
