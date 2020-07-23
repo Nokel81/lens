@@ -12,7 +12,7 @@ import { systemName } from "../input/input.validators";
 import { Secret, secretsApi, SecretType } from "../../api/endpoints";
 import { SubTitle } from "../layout/sub-title";
 import { NamespaceSelect } from "../+namespaces/namespace-select";
-import { Select, SelectOption } from "../select";
+import { Select, SelectOption, createSelectOptions } from "../select";
 import { Icon } from "../icon";
 import { IKubeObjectMetadata } from "../../api/kube-object";
 import { base64 } from "../../utils";
@@ -178,6 +178,7 @@ export class AddSecretDialog extends React.Component<Props> {
       <Dialog
         {...dialogProps}
         className="AddSecretDialog"
+        id="AddSecretDialog"
         isOpen={AddSecretDialog.isOpen}
         close={this.close}
       >
@@ -197,16 +198,19 @@ export class AddSecretDialog extends React.Component<Props> {
                 <SubTitle title={<Trans>Namespace</Trans>}/>
                 <NamespaceSelect
                   themeName="light"
-                  value={namespace}
-                  onChange={({ value }) => this.namespace = value}
+                  maxMenuHeight={200}
+                  value={{ value: namespace, label: namespace }}
+                  onNewSelection={(namespace: string) => this.namespace = namespace}
                 />
               </div>
               <div className="secret-type">
                 <SubTitle title={<Trans>Secret type</Trans>}/>
                 <Select
                   themeName="light"
-                  options={this.types}
-                  value={type} onChange={({ value }: SelectOption) => this.type = value}
+                  maxMenuHeight={200}
+                  options={createSelectOptions(this.types)}
+                  value={createSelectOptions([type])[0]} 
+                  onNewSelection={(secret: SecretType) => this.type = secret}
                 />
               </div>
             </div>

@@ -16,7 +16,7 @@ import { Button } from "../button";
 import { releaseURL } from "../+apps-releases";
 import { releaseStore } from "../+apps-releases/release.store";
 import { LogsDialog } from "../dialog/logs-dialog";
-import { Select, SelectOption } from "../select";
+import { Select, SelectOption, createSelectOptions, createSelectOption } from "../select";
 import { Input } from "../input";
 import { EditorPanel } from "./editor-panel";
 import { navigate } from "../../navigation";
@@ -70,8 +70,7 @@ export class InstallChart extends Component<Props> {
   }
 
   @autobind()
-  onVersionChange(option: SelectOption) {
-    const version = option.value;
+  onVersionChange(version: string) {
     this.save({ version, values: "" });
     installChartStore.loadValues(this.tabId);
   }
@@ -83,8 +82,8 @@ export class InstallChart extends Component<Props> {
   }
 
   @autobind()
-  onNamespaceChange(opt: SelectOption) {
-    this.save({ namespace: opt.value });
+  onNamespaceChange(namespace: string) {
+    this.save({ namespace });
   }
 
   @autobind()
@@ -148,9 +147,9 @@ export class InstallChart extends Component<Props> {
         <span><Trans>Version</Trans></span>
         <Select
           className="chart-version"
-          value={version}
-          options={versions}
-          onChange={this.onVersionChange}
+          value={createSelectOption(version)}
+          options={createSelectOptions(versions)}
+          onNewSelection={this.onVersionChange}
           menuPlacement="top"
           themeName="outlined"
         />
@@ -160,7 +159,7 @@ export class InstallChart extends Component<Props> {
           menuPlacement="top"
           themeName="outlined"
           value={namespace}
-          onChange={this.onNamespaceChange}
+          onNewSelection={this.onNamespaceChange}
         />
         <Input
           placeholder={_i18n._(t`Name (optional)`)}

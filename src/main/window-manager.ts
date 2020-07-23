@@ -4,6 +4,7 @@ import windowStateKeeper from "electron-window-state"
 import type { ClusterId } from "../common/cluster-store";
 import { clusterStore } from "../common/cluster-store";
 import logger from "./logger";
+import contextMenu from "electron-context-menu";
 
 // fixme: remove switching view delay on first load
 

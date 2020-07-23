@@ -11,7 +11,7 @@ import { crdStore } from "./crd.store";
 import { apiManager } from "../../api/api-manager";
 import { crdApi, CustomResourceDefinition } from "../../api/endpoints/crd.api";
 import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { Select, SelectOption } from "../select";
+import { Select, SelectOption, createSelectOptions } from "../select";
 import { navigation, setQueryParams } from "../../navigation";
 import { Icon } from "../icon";
 
@@ -64,25 +64,19 @@ export class CrdList extends React.Component {
           if (selectedGroups.length >= 2) placeholder = <><Trans>Groups</Trans>: {selectedGroups.join(", ")}</>
           return {
             // todo: move to global filters
-            filters: (
-              <Select
-                className="group-select"
-                placeholder={placeholder}
-                options={Object.keys(crdStore.groups)}
-                onChange={({ value: group }: SelectOption) => this.onGroupChange(group)}
-                controlShouldRenderValue={false}
-                formatOptionLabel={({ value: group }: SelectOption) => {
-                  const isSelected = selectedGroups.includes(group);
-                  return (
-                    <div className="flex gaps align-center">
-                      <Icon small material="folder"/>
-                      <span>{group}</span>
-                      {isSelected && <Icon small material="check" className="box right"/>}
-                    </div>
-                  )
-                }}
-              />
-            )
+            filters: <Select
+              className="group-select"
+              placeholder={placeholder}
+              options={createSelectOptions(Object.keys(crdStore.groups), group => (
+                <div className="flex gaps align-center">
+                  <Icon small material="folder" />
+                  <span>{group}</span>
+                  {selectedGroups.includes(group) && <Icon small material="check" className="box right" />}
+                </div>
+              ))}
+              onNewSelection={(group: string) => this.onGroupChange(group)}
+              controlShouldRenderValue={false}
+            />
           }
         }}
         renderTableHeader={[

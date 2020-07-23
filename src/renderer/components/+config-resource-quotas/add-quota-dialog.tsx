@@ -157,7 +157,7 @@ export class AddQuotaDialog extends React.Component<Props> {
               placeholder={_i18n._(t`Namespace`)}
               themeName="light"
               className="box grow"
-              onChange={({ value }) => this.namespace = value}
+              onNewSelection={(namespace: string) => this.namespace = namespace}
             />
 
             <SubTitle title={<Trans>Values</Trans>}/>
@@ -167,8 +167,8 @@ export class AddQuotaDialog extends React.Component<Props> {
                 themeName="light"
                 placeholder={_i18n._(t`Select a quota..`)}
                 options={this.quotaOptions}
-                value={this.quotaSelectValue}
-                onChange={({ value }) => this.quotaSelectValue = value}
+                value={this.quotaOptions.find(({ value }) => value === this.quotaSelectValue)}
+                onNewSelection={(quota: string) => this.quotaSelectValue = quota}
               />
               <Input
                 maxLength={10}

@@ -3,7 +3,7 @@
   --wizard-width: #{65 * $unit};
   --wizard-content-height: auto;
   --wizard-content-max-height: #{40 * $unit};
-  --wizard-spacing: #{$padding * 3};
+  --wizard-spacing: #{$padding * 1.5} #{$padding * 3};
   --wizard-step-bgc: #{$dialogBackground};
 
   width: var(--wizard-width);

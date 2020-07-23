@@ -4,20 +4,20 @@ import React from "react";
 import { computed } from "mobx";
 import { observer } from "mobx-react";
 import { t, Trans } from "@lingui/macro";
-import { Select, SelectOption, SelectProps } from "../select";
+import { Select, SelectOption, SingleSelectProps } from "../select";
 import { cssNames, noop } from "../../utils";
 import { Icon } from "../icon";
 import { namespaceStore } from "./namespace.store";
 import { _i18n } from "../../i18n";
 import { FilterIcon } from "../item-object-list/filter-icon";
 import { FilterType } from "../item-object-list/page-filters.store";
-import { isAllowedResource } from "../../api/rbac"
+import { Namespace } from "../../api/endpoints";
 
-interface Props extends SelectProps {
+interface Props extends Omit<SingleSelectProps<string>, "options"> {
   showIcons?: boolean;
   showClusterOption?: boolean; // show cluster option on the top (default: false)
   clusterOptionLabel?: React.ReactNode; // label for cluster option (default: "Cluster")
-  customizeOptions?(nsOptions: SelectOption[]): SelectOption[];
+  customizeOptions?(nsOptions: SelectOption<string>[]): SelectOption<string>[];
 }
 
 const defaultProps: Partial<Props> = {
@@ -44,9 +44,9 @@ export class NamespaceSelect extends React.Component<Props> {
     this.unsubscribe();
   }
 
-  @computed get options(): SelectOption[] {
+  @computed get options(): SelectOption<string>[] {
     const { customizeOptions, showClusterOption, clusterOptionLabel } = this.props;
-    let options: SelectOption[] = namespaceStore.items.map(ns => ({ value: ns.getName() }));
+    let options: SelectOption<string>[] = namespaceStore.items.map(ns => ({ value: ns.getName(), label: ns.getName() }));
     options = customizeOptions ? customizeOptions(options) : options;
     if (showClusterOption) {
       options.unshift({ value: null, label: clusterOptionLabel });
@@ -54,7 +54,7 @@ export class NamespaceSelect extends React.Component<Props> {
     return options;
   }
 
-  formatOptionLabel = (option: SelectOption) => {
+  formatOptionLabel = (option: SelectOption<string>) => {
     const { showIcons } = this.props;
     const { value, label } = option;
     return label || (
@@ -70,7 +70,6 @@ export class NamespaceSelect extends React.Component<Props> {
     return (
       <Select
         className={cssNames("NamespaceSelect", className)}
-        menuClass="NamespaceSelectMenu"
         formatOptionLabel={this.formatOptionLabel}
         options={this.options}
         {...selectProps}
@@ -92,8 +91,8 @@ export class NamespaceSelectFilter extends React.Component {
         closeMenuOnSelect={false}
         isOptionSelected={() => false}
         controlShouldRenderValue={false}
-        onChange={({ value: namespace }: SelectOption) => toggleContext(namespace)}
-        formatOptionLabel={({ value: namespace }: SelectOption) => {
+        onNewSelection={(namespace: string) => toggleContext(namespace)}
+        formatOptionLabel={({ value: namespace }: SelectOption<string>) => {
           const isSelected = hasContext(namespace);
           return (
             <div className="flex gaps align-center">

@@ -73,7 +73,7 @@ export class CreateServiceAccountDialog extends React.Component<Props> {
             <NamespaceSelect
               themeName="light"
               value={namespace}
-              onChange={({ value }) => this.namespace = value}
+              onNewSelection={(namespace: string) => this.namespace = namespace}
             />
           </WizardStep>
         </Wizard>

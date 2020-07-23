@@ -22,9 +22,7 @@ import { namespaceStore } from "../+namespaces/namespace.store";
 import { serviceAccountsStore } from "../+user-management-service-accounts/service-accounts.store";
 import { roleBindingsStore } from "./role-bindings.store";
 
-interface BindingSelectOption extends SelectOption {
-  value: string; // binding name
-  item?: ServiceAccount | any;
+interface BindingSelectOption<T> extends SelectOption<T> {
   subject?: IRoleBindingSubject; // used for new user/group when users-management-api not available
 }
 
@@ -151,36 +149,29 @@ export class AddRoleBindingDialog extends React.Component<Props> {
     }
   };
 
-  @computed get roleOptions(): BindingSelectOption[] {
+  @computed get roleOptions(): SelectOption<Role>[] {
     let roles = rolesStore.items as Role[]
     if (this.bindContext) {
       // show only cluster-roles or roles for selected context namespace
       roles = roles.filter(role => !role.getNs() || role.getNs() === this.bindContext);
     }
     return roles.map(role => {
-      const name = role.getName();
       const namespace = role.getNs();
       return {
-        value: role.getId(),
-        label: name + (namespace ? ` (${namespace})` : "")
+        value: role,
+        label: role.getName() + (namespace ? ` (${namespace})` : "")
       }
     })
   }
 
-  @computed get serviceAccountOptions(): BindingSelectOption[] {
-    return serviceAccountsStore.items.map(account => {
-      const name = account.getName();
-      const namespace = account.getNs();
-      return {
-        item: account,
-        value: name,
-        label: <><Icon small material="account_box"/> {name} ({namespace})</>
-      }
-    })
+  @computed get serviceAccountOptions(): SelectOption<ServiceAccount>[] {
+    return serviceAccountsStore.items.map(account => ({
+      value: account,
+      label: <><Icon small material="account_box" /> {name} ({account.getNs()})</>
+    }))
   }
 
   renderContents() {
-    const unwrapBindings = (options: BindingSelectOption[]) => options.map(option => option.item || option.subject);
     return (
       <>
         <SubTitle title={<Trans>Context</Trans>}/>
@@ -189,7 +180,7 @@ export class AddRoleBindingDialog extends React.Component<Props> {
           themeName="light"
           isDisabled={this.isEditing}
           value={this.bindContext}
-          onChange={({ value }) => this.onBindContextChange(value)}
+          onNewSelection={(ns: string) => this.onBindContextChange(ns)}
         />
 
         <SubTitle title={<Trans>Role</Trans>}/>
@@ -199,8 +190,8 @@ export class AddRoleBindingDialog extends React.Component<Props> {
           placeholder={_i18n._(t`Select role..`)}
           isDisabled={this.isEditing}
           options={this.roleOptions}
-          value={this.selectedRoleId}
-          onChange={({ value }) => this.selectedRoleId = value}
+          value={this.roleOptions.find(({ value }) => value.getId() === this.selectedRoleId)}
+          onNewSelection={(r: Role) => this.selectedRoleId = r.getId()}
         />
         {
           !this.isEditing && (
@@ -228,15 +219,11 @@ export class AddRoleBindingDialog extends React.Component<Props> {
 
         <SubTitle title={<Trans>Binding targets</Trans>}/>
         <Select
-          isMulti
           themeName="light"
+          value={[]}
           placeholder={_i18n._(t`Select service accounts`)}
-          autoConvertOptions={false}
           options={this.serviceAccountOptions}
-          onChange={(opts: BindingSelectOption[]) => {
-            if (!opts) opts = [];
-            this.selectedAccounts.replace(unwrapBindings(opts));
-          }}
+          onNewSelection={(selection: ServiceAccount[]) => this.selectedAccounts.replace(selection)}
           maxMenuHeight={200}
         />
       </>

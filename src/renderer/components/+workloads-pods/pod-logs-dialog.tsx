@@ -9,7 +9,7 @@ import { Dialog, DialogProps } from "../dialog";
 import { Wizard, WizardStep } from "../wizard";
 import { IPodContainer, Pod, podsApi } from "../../api/endpoints";
 import { Icon } from "../icon";
-import { Select, SelectOption } from "../select";
+import { Select, SelectOption, createSelectOption, GroupedSelectOption } from "../select";
 import { Spinner } from "../spinner";
 import { cssNames, downloadFile, interval } from "../../utils";
 import AnsiUp from "ansi_up";
@@ -55,11 +55,11 @@ export class PodLogsDialog extends React.Component<Props> {
   @observable showTimestamps = true;
   @observable tailLines = 1000;
 
-  lineOptions = [
+  lineOptions: SelectOption<number>[] = [
     { label: _i18n._(t`All logs`), value: Number.MAX_SAFE_INTEGER },
-    { label: 1000, value: 1000 },
-    { label: 10000, value: 10000 },
-    { label: 100000, value: 100000 },
+    { label: "1000", value: 1000 },
+    { label: "10000", value: 10000 },
+    { label: "100000", value: 100000 },
   ]
 
   onOpen = async () => {
@@ -158,21 +158,14 @@ export class PodLogsDialog extends React.Component<Props> {
     this.logsReady = false;
   }
 
-  onContainerChange = (option: SelectOption) => {
-    this.selectedContainer = this.containers
-      .concat(this.initContainers)
-      .find(container => container.name === option.value);
+  onContainerChange = (nc: IPodContainer) => {
+    this.selectedContainer = nc;
     this.reload();
   }
 
-  onTailLineChange = (option: SelectOption) => {
-    this.tailLines = option.value;
+  onTailLineChange = (numLines: number) => {
+    this.tailLines = numLines;
     this.reload();
-  }
-
-  formatOptionLabel = (option: SelectOption) => {
-    const { value, label } = option;
-    return label || <><Icon small material="view_carousel"/> {value}</>;
   }
 
   toggleTimestamps = () => {
@@ -186,19 +179,21 @@ export class PodLogsDialog extends React.Component<Props> {
     downloadFile(fileName, fileContents, "text/plain");
   }
 
-  get containerSelectOptions() {
+  get containerSelectOptions(): GroupedSelectOption<IPodContainer>[] {
     return [
       {
         label: _i18n._(t`Containers`),
-        options: this.containers.map(container => {
-          return { value: container.name }
-        }),
+        options: this.containers.map(container => ({
+          value: container,
+          label: <><Icon small material="view_carousel" /> {container.name}</>,
+        })),
       },
       {
         label: _i18n._(t`Init Containers`),
-        options: this.initContainers.map(container => {
-          return { value: container.name }
-        }),
+        options: this.initContainers.map(container => ({
+          value: container,
+          label: <><Icon small material="view_carousel" /> {container.name}</>,
+        })),
       }
     ];
   }
@@ -280,15 +275,13 @@ export class PodLogsDialog extends React.Component<Props> {
                     className="container-selector"
                     options={this.containerSelectOptions}
                     themeName="light"
-                    value={{ value: selectedContainer.name }}
-                    onChange={this.onContainerChange}
-                    formatOptionLabel={this.formatOptionLabel}
-                    autoConvertOptions={false}
+                    value={{ value: selectedContainer, label: selectedContainer.name }}
+                    onNewSelection={this.onContainerChange}
                   />
                 )}
                 <span><Trans>Lines</Trans></span>
                 <Select
-                  value={tailLines}
+                  value={createSelectOption(tailLines)}
                   options={this.lineOptions}
                   onChange={this.onTailLineChange}
                   themeName="light"

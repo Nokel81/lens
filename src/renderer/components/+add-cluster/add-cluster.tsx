@@ -18,6 +18,18 @@ import { workspaceStore } from "../../../common/workspace-store";
 import { v4 as uuid } from "uuid"
 import { navigation } from "../../navigation";
 
+function createKubeSelect(from: KubeConfig): SelectOption<KubeConfig> {
+  const isNew = false; // fixme: detect new context since last visit
+  
+  return {
+    value: from,
+    label: <>
+      {from.currentContext}
+      {isNew && <span className="new"> <Trans>(new)</Trans></span>}
+    </>
+  }
+}
+
 @observer
 export class AddCluster extends React.Component {
   readonly custom: any = "custom"
@@ -53,16 +65,7 @@ export class AddCluster extends React.Component {
       const contexts = splitConfig(this.kubeConfig)
         .filter(kc => !clusterStore.hasContext(kc.currentContext));
 
-      contexts.forEach(kubeConfig => {
-        const isNew = false; // fixme: detect new context since last visit
-        options.push({
-          value: kubeConfig,
-          label: <>
-            {kubeConfig.currentContext}
-            {isNew && <span className="new"> <Trans>(new)</Trans></span>}
-          </>,
-        })
-      })
+      options.push(...contexts.map(createKubeSelect))
     }
     options.push({
       label: <Trans>Custom..</Trans>,
@@ -109,9 +112,9 @@ export class AddCluster extends React.Component {
           <h2><Trans>Add Cluster</Trans></h2>
           <Select
             placeholder={<Trans>Select kubeconfig</Trans>}
-            value={this.clusterConfig}
+            value={createKubeSelect(this.clusterConfig)}
             options={this.clusterOptions}
-            onChange={({ value }: SelectOption) => this.clusterConfig = value}
+            onNewSelection={(conf: KubeConfig) => this.clusterConfig = conf}
           />
           <div className="cluster-settings">
             <a href="#" onClick={() => this.showSettings = !this.showSettings}>

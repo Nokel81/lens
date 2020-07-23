@@ -8,7 +8,7 @@ import { Dialog, DialogProps } from "../dialog";
 import { Wizard, WizardStep } from "../wizard";
 import { HelmRelease, helmReleasesApi, IReleaseRevision } from "../../api/endpoints/helm-releases.api";
 import { releaseStore } from "./release.store";
-import { Select, SelectOption } from "../select";
+import { Select, SelectOption, createSelectOptions } from "../select";
 import { Notifications } from "../notifications";
 import orderBy from "lodash/orderBy"
 
@@ -72,10 +72,9 @@ export class ReleaseRollbackDialog extends React.Component<Props> {
         <b><Trans>Revision</Trans></b>
         <Select
           themeName="light"
-          value={revision}
-          options={revisions}
-          formatOptionLabel={({ value }: SelectOption<IReleaseRevision>) => `${value.revision} - ${value.chart}`}
-          onChange={({ value }: SelectOption<IReleaseRevision>) => this.revision = value}
+          value={{value: revision, label: revision.revision}}
+          options={createSelectOptions(revisions, r => `${r.revision} - ${r.chart}`)}
+          onNewSelection={(rev: IReleaseRevision) => this.revision = rev}
         />
       </div>
     )

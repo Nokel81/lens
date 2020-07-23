@@ -16,7 +16,6 @@ import { SearchInput } from "../input";
 import { namespaceStore } from "../+namespaces/namespace.store";
 import { Filter, FilterType, pageFilters } from "./page-filters.store";
 import { PageFiltersList } from "./page-filters-list";
-import { PageFiltersSelect } from "./page-filters-select";
 import { NamespaceSelectFilter } from "../+namespaces/namespace-select";
 import { themeStore } from "../../theme.store";
 import { configStore } from "../../config.store";
@@ -347,9 +346,6 @@ export class ItemListLayout extends React.Component<ItemListLayoutProps> {
       info: this.renderInfo(),
       filters: <>
         {!isClusterScoped && <NamespaceSelectFilter/>}
-        <PageFiltersSelect allowEmpty disableFilters={{
-          [FilterType.NAMESPACE]: true, // namespace-select used instead
-        }}/>
       </>,
       search: <SearchInput/>,
     }

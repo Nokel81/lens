@@ -14,7 +14,7 @@ import { Badge } from "../badge";
 import { EditorPanel } from "./editor-panel";
 import { helmChartStore, IChartVersion } from "../+apps-helm-charts/helm-chart.store";
 import { HelmRelease } from "../../api/endpoints/helm-releases.api";
-import { Select, SelectOption } from "../select";
+import { Select, SelectOption, createSelectOptions, createSelectOption } from "../select";
 import { _i18n } from "../../i18n";
 
 interface Props {
@@ -81,9 +81,8 @@ export class UpgradeChart extends React.Component<Props> {
     )
   }
 
-  formatVersionLabel = ({ value }: SelectOption<IChartVersion>) => {
+  formatVersionLabel = ({ repo, version }: IChartVersion) => {
     const chartName = this.release.getChart();
-    const { repo, version } = value;
     return `${repo}/${chartName}-${version}`;
   }
 
@@ -104,10 +103,9 @@ export class UpgradeChart extends React.Component<Props> {
           className="chart-version"
           menuPlacement="top"
           themeName="outlined"
-          value={version}
-          options={versions}
-          formatOptionLabel={this.formatVersionLabel}          
-          onChange={({ value }: SelectOption) => this.version = value}
+          value={createSelectOption(version, this.formatVersionLabel)}
+          options={createSelectOptions(versions, this.formatVersionLabel)}       
+          onNewSelection={(version: IChartVersion) => this.version = version}
         />
       </div>
     )

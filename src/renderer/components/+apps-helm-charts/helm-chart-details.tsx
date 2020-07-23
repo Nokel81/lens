@@ -6,12 +6,12 @@ import { t, Trans } from "@lingui/macro";
 import { autorun, observable } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import { Drawer, DrawerItem } from "../drawer";
-import { autobind, stopPropagation } from "../../utils";
+import { autobind, stopPropagation, cssNames } from "../../utils";
 import { MarkdownViewer } from "../markdown-viewer";
 import { Spinner } from "../spinner";
 import { CancelablePromise } from "../../utils/cancelableFetch";
 import { Button } from "../button";
-import { Select, SelectOption } from "../select";
+import { Select, SelectOption, createSelectOptions } from "../select";
 import { createInstallChartTab } from "../dock/install-chart.store";
 import { Badge } from "../badge";
 import { _i18n } from "../../i18n";
@@ -36,10 +36,10 @@ export class HelmChartDetails extends Component<Props> {
     this.selectedChart = null;
     this.description = null;
     this.loadChartData();
-    this.chartPromise.then(data => {
-      this.description = data.readme;
-      this.chartVersions = data.versions;
-      this.selectedChart = data.versions[0];
+    this.chartPromise.then(({ readme, versions }) => {
+      this.description = readme;
+      this.chartVersions = versions;
+      this.selectedChart = versions[0];
     });
   });
 
@@ -50,11 +50,10 @@ export class HelmChartDetails extends Component<Props> {
   }
 
   @autobind()
-  onVersionChange(opt: SelectOption) {
-    const version = opt.value;
-    this.selectedChart = this.chartVersions.find(chart => chart.version === version);
+  onVersionChange(selected: HelmChart) {
+    this.selectedChart = this.chartVersions.find(chart => chart.version === selected.version);
     this.description = null;
-    this.loadChartData(version);
+    this.loadChartData(selected.version);
     this.chartPromise.then(data => {
       this.description = data.readme
     });
@@ -84,10 +83,9 @@ export class HelmChartDetails extends Component<Props> {
           <DrawerItem name={_i18n._(t`Version`)} className="version" onClick={stopPropagation}>
             <Select
               themeName="outlined"
-              menuPortalTarget={null}
-              options={chartVersions.map(chart => chart.version)}
-              value={selectedChart.getVersion()}
-              onChange={onVersionChange}
+              options={createSelectOptions(chartVersions, chart => chart.version)}
+              value={createSelectOptions([selectedChart], chart => chart.version)[0]}
+              onNewSelection={onVersionChange}
             />
           </DrawerItem>
           <DrawerItem name={_i18n._(t`Home`)}>
