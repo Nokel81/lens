@@ -1,6 +1,6 @@
 import "./sub-title.scss"
-import React from "react";
-import { cssNames } from "../../utils";
+import React from "react"
+import { cssNames } from "../../utils"
 
 interface Props {
   className?: string;
@@ -9,9 +9,9 @@ interface Props {
 }
 
 export class SubTitle extends React.Component<Props> {
-  render() {
-    const { compact, title, children } = this.props;
-    let { className } = this.props;
+  render(): React.ReactNode {
+    const { compact, title, children } = this.props
+    let { className } = this.props
     className = cssNames("SubTitle", className, {
       compact,
     })

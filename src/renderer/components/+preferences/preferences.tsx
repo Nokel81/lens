@@ -1,20 +1,20 @@
 import "./preferences.scss"
-import React, { Fragment } from "react";
-import { observer } from "mobx-react";
-import { action, computed, observable } from "mobx";
-import { t, Trans } from "@lingui/macro";
-import { _i18n } from "../../i18n";
-import { WizardLayout } from "../layout/wizard-layout";
-import { Icon } from "../icon";
-import { Select, SelectOption } from "../select";
-import { userStore } from "../../../common/user-store";
-import { HelmRepo, repoManager } from "../../../main/helm/helm-repo-manager";
-import { Input } from "../input";
-import { Checkbox } from "../checkbox";
-import { Notifications } from "../notifications";
-import { Badge } from "../badge";
-import { Spinner } from "../spinner";
-import { themeStore } from "../../theme.store";
+import React, { Fragment } from "react"
+import { observer } from "mobx-react"
+import { action, computed, observable } from "mobx"
+import { t, Trans } from "@lingui/macro"
+import { _i18n } from "../../i18n"
+import { WizardLayout } from "../layout/wizard-layout"
+import { Icon } from "../icon"
+import { Select, SelectOption } from "../select"
+import { userStore } from "../../../common/user-store"
+import { HelmRepo, repoManager } from "../../../main/helm/helm-repo-manager"
+import { Input } from "../input"
+import { Checkbox } from "../checkbox"
+import { Notifications } from "../notifications"
+import { Badge } from "../badge"
+import { Spinner } from "../spinner"
+import { themeStore } from "../../theme.store"
 
 @observer
 export class Preferences extends React.Component {
@@ -42,75 +42,75 @@ export class Preferences extends React.Component {
     }))
   }
 
-  async componentDidMount() {
-    await this.loadHelmRepos();
+  async componentDidMount(): Promise<void> {
+    await this.loadHelmRepos()
   }
 
   @action
-  async loadHelmRepos() {
-    this.helmLoading = true;
+  async loadHelmRepos(): Promise<void> {
+    this.helmLoading = true
     try {
       if (!this.helmRepos.length) {
-        this.helmRepos = await repoManager.loadAvailableRepos(); // via https://helm.sh
+        this.helmRepos = await repoManager.loadAvailableRepos() // via https://helm.sh
       }
-      const repos = await repoManager.repositories(); // via helm-cli
-      this.helmAddedRepos.clear();
-      repos.forEach(repo => this.helmAddedRepos.set(repo.name, repo));
+      const repos = await repoManager.repositories() // via helm-cli
+      this.helmAddedRepos.clear()
+      repos.forEach(repo => this.helmAddedRepos.set(repo.name, repo))
     } catch (err) {
-      Notifications.error(err);
+      Notifications.error(err)
     }
-    this.helmLoading = false;
+    this.helmLoading = false
   }
 
-  async addRepo(repo: HelmRepo) {
+  async addRepo(repo: HelmRepo): Promise<void> {
     try {
-      await repoManager.addRepo(repo);
-      this.helmAddedRepos.set(repo.name, repo);
+      await repoManager.addRepo(repo)
+      this.helmAddedRepos.set(repo.name, repo)
     } catch (err) {
       Notifications.error(<Trans>Adding helm branch <b>{repo.name}</b> has failed: {String(err)}</Trans>)
     }
   }
 
-  async removeRepo(repo: HelmRepo) {
+  async removeRepo(repo: HelmRepo): Promise<void> {
     try {
-      await repoManager.removeRepo(repo);
-      this.helmAddedRepos.delete(repo.name);
+      await repoManager.removeRepo(repo)
+      this.helmAddedRepos.delete(repo.name)
     } catch (err) {
       Notifications.error(
-        <Trans>Removing helm branch <b>{repo.name}</b> has failed: {String(err)}</Trans>
+        <Trans>Removing helm branch <b>{repo.name}</b> has failed: {String(err)}</Trans>,
       )
     }
   }
 
-  onRepoSelect = async ({ value: repo }: SelectOption<HelmRepo>) => {
-    const isAdded = this.helmAddedRepos.has(repo.name);
+  onRepoSelect = async ({ value: repo }: SelectOption<HelmRepo>): Promise<void> => {
+    const isAdded = this.helmAddedRepos.has(repo.name)
     if (isAdded) {
       Notifications.ok(<Trans>Helm branch <b>{repo.name}</b> already in use</Trans>)
-      return;
+      return
     }
-    this.helmUpdating = false;
-    await this.addRepo(repo);
-    this.helmUpdating = false;
+    this.helmUpdating = false
+    await this.addRepo(repo)
+    this.helmUpdating = false
   }
 
-  formatHelmOptionLabel = ({ value: repo }: SelectOption<HelmRepo>) => {
-    const isAdded = this.helmAddedRepos.has(repo.name);
+  renderHelmOptionLabel = ({ value: repo }: SelectOption<HelmRepo>): JSX.Element => {
+    const isAdded = this.helmAddedRepos.has(repo.name)
     return (
       <div className="flex gaps">
         <span>{repo.name}</span>
-        {isAdded && <Icon small material="check" className="box right"/>}
+        {isAdded && <Icon small material="check" className="box right" />}
       </div>
     )
   }
 
-  renderInfo() {
+  renderInfo(): React.ReactNode {
     return (
       <Fragment>
         <h2>
           <Trans>Preferences</Trans>
         </h2>
         <div className="info-block flex gaps align-flex-start">
-          <Icon small material="info"/>
+          <Icon small material="info" />
           <p>
             <Trans>Lens Global Settings</Trans> (<Trans>applicable to all clusters</Trans>)
           </p>
@@ -119,8 +119,8 @@ export class Preferences extends React.Component {
     )
   }
 
-  render() {
-    const { preferences } = userStore;
+  render(): React.ReactNode {
+    const { preferences } = userStore
     return (
       <WizardLayout className="Preferences" infoPanel={this.renderInfo()}>
         <h2><Trans>Color Theme</Trans></h2>
@@ -145,7 +145,7 @@ export class Preferences extends React.Component {
           isDisabled={this.helmUpdating}
           options={this.helmOptions}
           onChange={this.onRepoSelect}
-          formatOptionLabel={this.formatHelmOptionLabel}
+          formatOptionLabel={this.renderHelmOptionLabel}
           controlShouldRenderValue={false}
         />
         <div className="repos flex gaps align-center">
@@ -153,7 +153,7 @@ export class Preferences extends React.Component {
             <Trans>Added repos:</Trans>
           </div>
           <div className="repos-list">
-            {this.helmLoading && <Spinner/>}
+            {this.helmLoading && <Spinner />}
             {Array.from(this.helmAddedRepos).map(([name, repo]) => {
               return (
                 <Badge key={name} className="added-repo flex gaps align-center" title={repo.url}>

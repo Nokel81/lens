@@ -1,7 +1,7 @@
-import { KubeObject } from "../kube-object";
-import { unitsToBytes } from "../../utils/convertMemory";
-import { autobind } from "../../utils";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { unitsToBytes } from "../../utils/convertMemory"
+import { autobind } from "../../utils"
+import { KubeApi } from "../kube-api"
 
 @autobind()
 export class PersistentVolume extends KubeObject {
@@ -43,23 +43,23 @@ export class PersistentVolume extends KubeObject {
     reason?: string;
   }
 
-  getCapacity(inBytes = false) {
-    const capacity = this.spec.capacity;
+  getCapacity(inBytes = false): string | number {
+    const capacity = this.spec.capacity
     if (capacity) {
       if (inBytes) return unitsToBytes(capacity.storage)
-      return capacity.storage;
+      return capacity.storage
     }
-    return 0;
+    return 0
   }
 
-  getStatus() {
-    if (!this.status) return;
-    return this.status.phase || "-";
+  getStatus(): string {
+    if (!this.status) return
+    return this.status.phase || "-"
   }
 
-  getClaimRefName() {
-    const { claimRef } = this.spec;
-    return claimRef ? claimRef.name : "";
+  getClaimRefName(): string {
+    const { claimRef } = this.spec
+    return claimRef ? claimRef.name : ""
   }
 }
 
@@ -68,4 +68,4 @@ export const persistentVolumeApi = new KubeApi({
   apiBase: "/api/v1/persistentvolumes",
   isNamespaced: false,
   objectConstructor: PersistentVolume,
-});
+})

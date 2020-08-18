@@ -54,7 +54,7 @@ class ApiWatcher {
   private watchHandler(phase: string, obj: any) {
     this.eventBuffer.push({
       type: phase,
-      object: obj
+      object: obj,
     })
   }
 
@@ -65,14 +65,14 @@ class ApiWatcher {
 
   private sendEvent(evt: any) {
     // convert to "text/event-stream" format
-    this.response.write(`data: ${JSON.stringify(evt)}\n\n`);
+    this.response.write(`data: ${JSON.stringify(evt)}\n\n`)
   }
 }
 
 class WatchRoute extends LensApi {
 
   public async routeWatch(request: LensApiRequest) {
-    const { params, response, cluster} = request
+    const { response, cluster } = request
     const apis: string[] = request.query.getAll("api")
     const watchers: ApiWatcher[] = []
 

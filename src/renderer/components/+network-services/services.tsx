@@ -1,16 +1,16 @@
 import "./services.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { RouteComponentProps } from "react-router";
-import { IServicesRouteParams } from "./services.route";
-import { Service, serviceApi } from "../../api/endpoints/service.api";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { Badge } from "../badge";
-import { serviceStore } from "./services.store";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { RouteComponentProps } from "react-router"
+import { ServicesRouteParams } from "./services.route"
+import { Service, serviceApi } from "../../api/endpoints/service.api"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { Badge } from "../badge"
+import { serviceStore } from "./services.store"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -23,12 +23,12 @@ enum sortBy {
   status = "status",
 }
 
-interface Props extends RouteComponentProps<IServicesRouteParams> {
+interface Props extends RouteComponentProps<ServicesRouteParams> {
 }
 
 @observer
 export class Services extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="Services" store={serviceStore}
@@ -52,7 +52,7 @@ export class Services extends React.Component<Props> {
           { title: <Trans>Name</Trans>, className: "name", sortBy: sortBy.name },
           { title: <Trans>Namespace</Trans>, className: "namespace", sortBy: sortBy.namespace },
           { title: <Trans>Type</Trans>, className: "type", sortBy: sortBy.type },
-          { title: <Trans>Cluster IP</Trans>, className: "clusterIp", sortBy: sortBy.clusterIp, },
+          { title: <Trans>Cluster IP</Trans>, className: "clusterIp", sortBy: sortBy.clusterIp },
           { title: <Trans>Ports</Trans>, className: "ports", sortBy: sortBy.ports },
           { title: <Trans>External IP</Trans>, className: "externalIp" },
           { title: <Trans>Selector</Trans>, className: "selector", sortBy: sortBy.selector },
@@ -66,24 +66,24 @@ export class Services extends React.Component<Props> {
           service.getClusterIp(),
           service.getPorts().join(", "),
           service.getExternalIps().join(", ") || "-",
-          service.getSelector().map(label => <Badge key={label} label={label}/>),
+          service.getSelector().map(label => <Badge key={label} label={label} />),
           service.getAge(),
           { title: service.getStatus(), className: service.getStatus().toLowerCase() },
         ]}
         renderItemMenu={(item: Service) => {
-          return <ServiceMenu object={item}/>
+          return <ServiceMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function ServiceMenu(props: KubeObjectMenuProps<Service>) {
+export function ServiceMenu(props: KubeObjectMenuProps<Service>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 
 apiManager.registerViews(serviceApi, {
-  Menu: ServiceMenu
+  Menu: ServiceMenu,
 })

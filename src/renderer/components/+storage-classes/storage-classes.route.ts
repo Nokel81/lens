@@ -1,12 +1,12 @@
 import { RouteProps } from "react-router"
-import { buildURL } from "../../navigation";
+import { buildURL } from "../../navigation"
 
 export const storageClassesRoute: RouteProps = {
-  path: "/storage-classes"
+  path: "/storage-classes",
 }
 
-export interface IStorageClassesRouteParams {
+export interface StorageClassesRouteParams {
 }
 
-export const storageClassesURL = buildURL<IStorageClassesRouteParams>(storageClassesRoute.path)
+export const storageClassesURL = buildURL<StorageClassesRouteParams>(storageClassesRoute.path)
 

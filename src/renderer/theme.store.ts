@@ -1,7 +1,7 @@
-import { computed, observable, reaction } from "mobx";
-import { autobind } from "./utils";
-import { userStore } from "../common/user-store";
-import logger from "../main/logger";
+import { computed, observable, reaction } from "mobx"
+import { autobind } from "./utils"
+import { userStore } from "../common/user-store"
+import logger from "../main/logger"
 
 export type ThemeId = string;
 
@@ -29,12 +29,12 @@ export class ThemeStore {
     { id: "kontena-light", type: ThemeType.LIGHT },
   ];
 
-  @computed get activeThemeId() {
-    return userStore.preferences.colorTheme;
+  @computed get activeThemeId(): string {
+    return userStore.preferences.colorTheme
   }
 
   @computed get activeTheme(): Theme {
-    const activeTheme = this.themes.find(theme => theme.id === this.activeThemeId) || this.themes[0];
+    const activeTheme = this.themes.find(theme => theme.id === this.activeThemeId) || this.themes[0]
     return {
       colors: {},
       ...activeTheme,
@@ -45,21 +45,21 @@ export class ThemeStore {
     // auto-apply active theme
     reaction(() => this.activeThemeId, async themeId => {
       try {
-        await this.loadTheme(themeId);
-        this.applyTheme();
+        await this.loadTheme(themeId)
+        this.applyTheme()
       } catch (err) {
-        userStore.resetTheme();
+        userStore.resetTheme()
       }
     }, {
       fireImmediately: true,
     })
   }
 
-  async init() {
+  async init(): Promise<void> {
     // preload all themes
     await Promise.all(
-      this.themes.map(theme => this.loadTheme(theme.id))
-    );
+      this.themes.map(theme => this.loadTheme(theme.id)),
+    )
   }
 
   getThemeById(themeId: ThemeId): Theme {
@@ -71,29 +71,29 @@ export class ThemeStore {
       // todo: figure out why await import() doesn't work
       const theme = require( // eslint-disable-line @typescript-eslint/no-var-requires
         /* webpackChunkName: "themes/[name]" */
-        `./themes/${themeId}.json`
-      );
-      const existingTheme = this.getThemeById(themeId);
+        `./themes/${themeId}.json`,
+      )
+      const existingTheme = this.getThemeById(themeId)
       if (existingTheme) {
-        Object.assign(existingTheme, theme); // merge
+        Object.assign(existingTheme, theme) // merge
       }
-      return existingTheme;
+      return existingTheme
     } catch (err) {
-      logger.error(`Can't load theme "${themeId}": ${err}`);
+      logger.error(`Can't load theme "${themeId}": ${err}`)
     }
   }
 
-  protected applyTheme(theme = this.activeTheme) {
+  protected applyTheme(theme = this.activeTheme): void {
     if (!this.styles) {
-      this.styles = document.createElement("style");
+      this.styles = document.createElement("style")
       this.styles.id = "lens-theme"
-      document.head.prepend(this.styles);
+      document.head.prepend(this.styles)
     }
     const cssVars = Object.entries(theme.colors).map(([cssName, color]) => {
       return `--${cssName}: ${color} !important;`
-    });
-    this.styles.textContent = `:root {\n${cssVars.join("\n")}}`;
+    })
+    this.styles.textContent = `:root {\n${cssVars.join("\n")}}`
   }
 }
 
-export const themeStore = new ThemeStore();
+export const themeStore = new ThemeStore()

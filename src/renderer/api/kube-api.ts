@@ -1,23 +1,23 @@
 // Base class for building all kubernetes apis
 
 import merge from "lodash/merge"
-import { stringify } from "querystring";
-import { IKubeObjectConstructor, KubeObject } from "./kube-object";
-import { KubeJsonApi, KubeJsonApiData, KubeJsonApiDataList } from "./kube-json-api";
-import { apiKube } from "./index";
-import { kubeWatchApi } from "./kube-watch-api";
-import { apiManager } from "./api-manager";
-import { createKubeApiURL, parseKubeApi } from "./kube-api-parse";
+import { stringify } from "querystring"
+import { KubeObjectConstructor, KubeObject } from "./kube-object"
+import { KubeJsonApi, KubeJsonApiData, KubeJsonApiDataList } from "./kube-json-api"
+import { apiKube } from "./index"
+import { kubeWatchApi } from "./kube-watch-api"
+import { apiManager } from "./api-manager"
+import { createKubeApiURL, parseKubeApi } from "./kube-api-parse"
 
-export interface IKubeApiOptions<T extends KubeObject> {
+export interface KubeApiOptions<T extends KubeObject> {
   kind: string; // resource type within api-group, e.g. "Namespace"
   apiBase: string; // base api-path for listing all resources, e.g. "/api/v1/pods"
   isNamespaced: boolean;
-  objectConstructor?: IKubeObjectConstructor<T>;
+  objectConstructor?: KubeObjectConstructor<T>;
   request?: KubeJsonApi;
 }
 
-export interface IKubeApiQueryParams {
+export interface KubeApiQueryParams {
   watch?: boolean | number;
   resourceVersion?: string;
   timeoutSeconds?: number;
@@ -28,9 +28,9 @@ export interface IKubeApiQueryParams {
 export class KubeApi<T extends KubeObject = any> {
   static parseApi = parseKubeApi;
 
-  static watchAll(...apis: KubeApi[]) {
-    const disposers = apis.map(api => api.watch());
-    return () => disposers.forEach(unwatch => unwatch());
+  static watchAll(...apis: KubeApi[]): () => void {
+    const disposers = apis.map(api => api.watch())
+    return () => disposers.forEach(unwatch => unwatch())
   }
 
   readonly kind: string
@@ -42,98 +42,98 @@ export class KubeApi<T extends KubeObject = any> {
   readonly apiResource: string
   readonly isNamespaced: boolean
 
-  public objectConstructor: IKubeObjectConstructor<T>;
+  public objectConstructor: KubeObjectConstructor<T>;
   protected request: KubeJsonApi;
   protected resourceVersions = new Map<string, string>();
 
-  constructor(protected options: IKubeApiOptions<T>) {
+  constructor(protected options: KubeApiOptions<T>) {
     const {
       kind,
       isNamespaced = false,
-      objectConstructor = KubeObject as IKubeObjectConstructor,
-      request = apiKube
-    } = options || {};
-    const { apiBase, apiPrefix, apiGroup, apiVersion, apiVersionWithGroup, resource } = KubeApi.parseApi(options.apiBase);
+      objectConstructor = KubeObject as KubeObjectConstructor,
+      request = apiKube,
+    } = options || {}
+    const { apiBase, apiPrefix, apiGroup, apiVersion, apiVersionWithGroup, resource } = KubeApi.parseApi(options.apiBase)
 
-    this.kind = kind;
-    this.isNamespaced = isNamespaced;
-    this.apiBase = apiBase;
-    this.apiPrefix = apiPrefix;
-    this.apiGroup = apiGroup;
-    this.apiVersion = apiVersion;
-    this.apiVersionWithGroup = apiVersionWithGroup;
-    this.apiResource = resource;
-    this.request = request;
-    this.objectConstructor = objectConstructor;
+    this.kind = kind
+    this.isNamespaced = isNamespaced
+    this.apiBase = apiBase
+    this.apiPrefix = apiPrefix
+    this.apiGroup = apiGroup
+    this.apiVersion = apiVersion
+    this.apiVersionWithGroup = apiVersionWithGroup
+    this.apiResource = resource
+    this.request = request
+    this.objectConstructor = objectConstructor
 
-    this.parseResponse = this.parseResponse.bind(this);
-    apiManager.registerApi(apiBase, this);
+    this.parseResponse = this.parseResponse.bind(this)
+    apiManager.registerApi(apiBase, this)
   }
 
-  setResourceVersion(namespace = "", newVersion: string) {
-    this.resourceVersions.set(namespace, newVersion);
+  setResourceVersion(namespace = "", newVersion: string): void {
+    this.resourceVersions.set(namespace, newVersion)
   }
 
-  getResourceVersion(namespace = "") {
-    return this.resourceVersions.get(namespace);
+  getResourceVersion(namespace = ""): string {
+    return this.resourceVersions.get(namespace)
   }
 
-  async refreshResourceVersion(params?: { namespace: string }) {
-    return this.list(params, { limit: 1 });
+  async refreshResourceVersion(params?: { namespace: string }): Promise<T[]> {
+    return this.list(params, { limit: 1 })
   }
 
-  getUrl({ name = "", namespace = "" } = {}, query?: Partial<IKubeApiQueryParams>) {
-    const { apiPrefix, apiVersionWithGroup, apiResource } = this;
+  getUrl({ name = "", namespace = "" } = {}, query?: Partial<KubeApiQueryParams>): string {
+    const { apiPrefix, apiVersionWithGroup, apiResource } = this
     const resourcePath = createKubeApiURL({
-      apiPrefix: apiPrefix,
+      apiPrefix,
       apiVersion: apiVersionWithGroup,
       resource: apiResource,
       namespace: this.isNamespaced ? namespace : undefined,
-      name: name,
-    });
-    return resourcePath + (query ? `?` + stringify(query) : "");
+      name,
+    })
+    return resourcePath + (query ? `?` + stringify(query) : "")
   }
 
   protected parseResponse(data: KubeJsonApiData | KubeJsonApiData[] | KubeJsonApiDataList, namespace?: string): any {
-    const KubeObjectConstructor = this.objectConstructor;
+    const KubeObjectConstructor = this.objectConstructor
     if (KubeObject.isJsonApiData(data)) {
-      return new KubeObjectConstructor(data);
+      return new KubeObjectConstructor(data)
     }
 
     // process items list response
     if (KubeObject.isJsonApiDataList(data)) {
-      const { apiVersion, items, metadata } = data;
-      this.setResourceVersion(namespace, metadata.resourceVersion);
-      this.setResourceVersion("", metadata.resourceVersion);
+      const { apiVersion, items, metadata } = data
+      this.setResourceVersion(namespace, metadata.resourceVersion)
+      this.setResourceVersion("", metadata.resourceVersion)
       return items.map(item => new KubeObjectConstructor({
         kind: this.kind,
-        apiVersion: apiVersion,
+        apiVersion,
         ...item,
       }))
     }
 
     // custom apis might return array for list response, e.g. users, groups, etc.
     if (Array.isArray(data)) {
-      return data.map(data => new KubeObjectConstructor(data));
+      return data.map(data => new KubeObjectConstructor(data))
     }
 
-    return data;
+    return data
   }
 
-  async list({ namespace = "" } = {}, query?: IKubeApiQueryParams): Promise<T[]> {
+  async list({ namespace = "" } = {}, query?: KubeApiQueryParams): Promise<T[]> {
     return this.request
       .get(this.getUrl({ namespace }), { query })
-      .then(data => this.parseResponse(data, namespace));
+      .then(data => this.parseResponse(data, namespace))
   }
 
-  async get({ name = "", namespace = "default" } = {}, query?: IKubeApiQueryParams): Promise<T> {
+  async get({ name = "", namespace = "default" } = {}, query?: KubeApiQueryParams): Promise<T> {
     return this.request
       .get(this.getUrl({ namespace, name }), { query })
-      .then(this.parseResponse);
+      .then(this.parseResponse)
   }
 
   async create({ name = "", namespace = "default" } = {}, data?: Partial<T>): Promise<T> {
-    const apiUrl = this.getUrl({ namespace });
+    const apiUrl = this.getUrl({ namespace })
 
     return this.request
       .post(apiUrl, {
@@ -142,26 +142,26 @@ export class KubeApi<T extends KubeObject = any> {
           apiVersion: this.apiVersionWithGroup,
           metadata: {
             name,
-            namespace
-          }
-        }, data)
+            namespace,
+          },
+        }, data),
       })
-      .then(this.parseResponse);
+      .then(this.parseResponse)
   }
 
   async update({ name = "", namespace = "default" } = {}, data?: Partial<T>): Promise<T> {
-    const apiUrl = this.getUrl({ namespace, name });
+    const apiUrl = this.getUrl({ namespace, name })
     return this.request
       .put(apiUrl, { data })
       .then(this.parseResponse)
   }
 
-  async delete({ name = "", namespace = "default" }) {
-    const apiUrl = this.getUrl({ namespace, name });
+  async delete({ name = "", namespace = "default" } = {}): Promise<KubeJsonApiData> {
+    const apiUrl = this.getUrl({ namespace, name })
     return this.request.del(apiUrl)
   }
 
-  getWatchUrl(namespace = "", query: IKubeApiQueryParams = {}) {
+  getWatchUrl(namespace = "", query: KubeApiQueryParams = {}): string {
     return this.getUrl({ namespace }, {
       watch: 1,
       resourceVersion: this.getResourceVersion(namespace),
@@ -170,7 +170,7 @@ export class KubeApi<T extends KubeObject = any> {
   }
 
   watch(): () => void {
-    return kubeWatchApi.subscribe(this);
+    return kubeWatchApi.subscribe(this)
   }
 }
 

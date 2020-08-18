@@ -1,13 +1,13 @@
 import "./landing-page.scss"
-import React from "react";
-import { observer } from "mobx-react";
-import { clusterStore } from "../../../common/cluster-store";
-import { Trans } from "@lingui/macro";
+import React from "react"
+import { observer } from "mobx-react"
+import { clusterStore } from "../../../common/cluster-store"
+import { Trans } from "@lingui/macro"
 
 @observer
 export class LandingPage extends React.Component {
-  render() {
-    const noClusters = !clusterStore.hasClusters();
+  render(): React.ReactNode {
+    const noClusters = !clusterStore.hasClusters()
     return (
       <div className="LandingPage flex">
         {noClusters && (

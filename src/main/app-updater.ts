@@ -1,4 +1,4 @@
-import { autoUpdater } from "electron-updater"
+import { autoUpdater, UpdateCheckResult } from "electron-updater"
 import logger from "./logger"
 
 export default class AppUpdater {
@@ -9,7 +9,7 @@ export default class AppUpdater {
     autoUpdater.logger = logger
   }
 
-  public start() {
+  public start(): Promise<UpdateCheckResult> {
     setInterval(() => {
       autoUpdater.checkForUpdatesAndNotify()
     }, this.updateInterval)

@@ -1,20 +1,20 @@
-import "./daemonsets.scss";
+import "./daemonsets.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { RouteComponentProps } from "react-router";
-import { DaemonSet, daemonSetApi } from "../../api/endpoints";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { eventStore } from "../+events/event.store";
-import { daemonSetStore } from "./daemonsets.store";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { nodesStore } from "../+nodes/nodes.store";
-import { KubeObjectListLayout } from "../kube-object";
-import { IDaemonSetsRouteParams } from "../+workloads";
-import { Trans } from "@lingui/macro";
-import { Badge } from "../badge";
-import { KubeEventIcon } from "../+events/kube-event-icon";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { RouteComponentProps } from "react-router"
+import { DaemonSet, daemonSetApi } from "../../api/endpoints"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { eventStore } from "../+events/event.store"
+import { daemonSetStore } from "./daemonsets.store"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { nodesStore } from "../+nodes/nodes.store"
+import { KubeObjectListLayout } from "../kube-object"
+import { DaemonSetsRouteParams } from "../+workloads"
+import { Trans } from "@lingui/macro"
+import { Badge } from "../badge"
+import { KubeEventIcon } from "../+events/kube-event-icon"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -23,22 +23,22 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<IDaemonSetsRouteParams> {
+interface Props extends RouteComponentProps<DaemonSetsRouteParams> {
 }
 
 @observer
 export class DaemonSets extends React.Component<Props> {
-  getPodsLength(daemonSet: DaemonSet) {
-    return daemonSetStore.getChildPods(daemonSet).length;
+  getPodsLength(daemonSet: DaemonSet): number {
+    return daemonSetStore.getChildPods(daemonSet).length
   }
 
-  renderNodeSelector(daemonSet: DaemonSet) {
+  renderNodeSelector(daemonSet: DaemonSet): React.ReactNode {
     return daemonSet.getNodeSelectors().map(selector => (
-      <Badge key={selector} label={selector}/>
+      <Badge key={selector} label={selector} />
     ))
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="DaemonSets" store={daemonSetStore}
@@ -66,21 +66,21 @@ export class DaemonSets extends React.Component<Props> {
           daemonSet.getName(),
           daemonSet.getNs(),
           this.getPodsLength(daemonSet),
-          <KubeEventIcon object={daemonSet}/>,
+          <KubeEventIcon key="kube-event-icon" object={daemonSet} />,
           this.renderNodeSelector(daemonSet),
           daemonSet.getAge(),
         ]}
         renderItemMenu={(item: DaemonSet) => {
-          return <DaemonSetMenu object={item}/>
+          return <DaemonSetMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function DaemonSetMenu(props: KubeObjectMenuProps<DaemonSet>) {
+export function DaemonSetMenu(props: KubeObjectMenuProps<DaemonSet>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

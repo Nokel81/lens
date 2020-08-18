@@ -1,12 +1,12 @@
-import React from "react";
+import React from "react"
 import jsYaml from "js-yaml"
-import { observable } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { cssNames } from "../../utils";
-import { AceEditor } from "../ace-editor";
-import { dockStore, TabId } from "./dock.store";
-import { DockTabStore } from "./dock-tab.store";
-import { Ace } from "ace-builds";
+import { observable } from "mobx"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { cssNames } from "../../utils"
+import { AceEditor } from "../ace-editor"
+import { dockStore, TabId } from "./dock.store"
+import { DockTabStore } from "./dock-tab.store"
+import { Ace } from "ace-builds"
 
 interface Props {
   className?: string;
@@ -23,9 +23,9 @@ export class EditorPanel extends React.Component<Props> {
 
   @observable yamlError = ""
 
-  componentDidMount() {
+  componentDidMount(): void {
     // validate and run callback with optional error
-    this.onChange(this.props.value || "");
+    this.onChange(this.props.value || "")
 
     disposeOnUnmount(this, [
       dockStore.onTabChange(this.onTabChange, { delay: 250 }),
@@ -33,39 +33,39 @@ export class EditorPanel extends React.Component<Props> {
     ])
   }
 
-  validate(value: string) {
+  validate(value: string): void {
     try {
-      jsYaml.safeLoadAll(value);
-      this.yamlError = "";
+      jsYaml.safeLoadAll(value)
+      this.yamlError = ""
     } catch (err) {
-      this.yamlError = err.toString();
+      this.yamlError = err.toString()
     }
   }
 
-  onTabChange = () => {
-    this.editor.focus();
+  onTabChange = (): void => {
+    this.editor.focus()
   }
 
-  onResize = () => {
-    this.editor.resize();
+  onResize = (): void => {
+    this.editor.resize()
   }
 
-  onCursorPosChange = (pos: Ace.Point) => {
-    EditorPanel.cursorPos.setData(this.props.tabId, pos);
+  onCursorPosChange = (pos: Ace.Point): void => {
+    EditorPanel.cursorPos.setData(this.props.tabId, pos)
   }
 
-  onChange = (value: string) => {
-    this.validate(value);
+  onChange = (value: string): void => {
+    this.validate(value)
     if (this.props.onChange) {
-      this.props.onChange(value, this.yamlError);
+      this.props.onChange(value, this.yamlError)
     }
   }
 
-  render() {
-    const { value, tabId } = this.props;
-    let { className } = this.props;
-    className = cssNames("EditorPanel", className);
-    const cursorPos = EditorPanel.cursorPos.getData(tabId);
+  render(): React.ReactNode {
+    const { value, tabId } = this.props
+    let { className } = this.props
+    className = cssNames("EditorPanel", className)
+    const cursorPos = EditorPanel.cursorPos.getData(tabId)
     return (
       <AceEditor
         autoFocus mode="yaml"

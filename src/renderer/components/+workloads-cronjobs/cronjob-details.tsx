@@ -1,39 +1,39 @@
-import "./cronjob-details.scss";
+import "./cronjob-details.scss"
 
-import React from "react";
-import kebabCase from "lodash/kebabCase";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { Badge } from "../badge/badge";
-import { jobStore } from "../+workloads-jobs/job.store";
-import { Link } from "react-router-dom";
-import { KubeEventDetails } from "../+events/kube-event-details";
-import { cronJobStore } from "./cronjob.store";
-import { getDetailsUrl } from "../../navigation";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { CronJob, cronJobApi, Job } from "../../api/endpoints";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import React from "react"
+import kebabCase from "lodash/kebabCase"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { Badge } from "../badge/badge"
+import { jobStore } from "../+workloads-jobs/job.store"
+import { Link } from "react-router-dom"
+import { KubeEventDetails } from "../+events/kube-event-details"
+import { cronJobStore } from "./cronjob.store"
+import { getDetailsUrl } from "../../navigation"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { CronJob, cronJobApi, Job } from "../../api/endpoints"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<CronJob> {
 }
 
 @observer
 export class CronJobDetails extends React.Component<Props> {
-  async componentDidMount() {
+  async componentDidMount(): Promise<void> {
     if (!jobStore.isLoaded) {
-      jobStore.loadAll();
+      await jobStore.loadAll()
     }
   }
 
-  render() {
-    const { object: cronJob } = this.props;
-    if (!cronJob) return null;
+  render(): React.ReactNode {
+    const { object: cronJob } = this.props
+    if (!cronJob) return null
     const childJobs = jobStore.getJobsByOwner(cronJob)
     return (
       <div className="CronJobDetails">
-        <KubeObjectMeta object={cronJob}/>
+        <KubeObjectMeta object={cronJob} />
         <DrawerItem name={<Trans>Schedule</Trans>}>
           {cronJob.isNeverRun() ? (
             <>
@@ -52,7 +52,7 @@ export class CronJobDetails extends React.Component<Props> {
         </DrawerItem>
         {childJobs.length > 0 &&
           <>
-            <DrawerTitle title={<Trans>Jobs</Trans>}/>
+            <DrawerTitle title={<Trans>Jobs</Trans>} />
             {childJobs.map((job: Job) => {
               const selectors = job.getSelectors()
               const condition = job.getCondition()
@@ -73,15 +73,16 @@ export class CronJobDetails extends React.Component<Props> {
                   </DrawerItem>
                   <DrawerItem name={<Trans>Selector</Trans>} labelsOnly>
                     {
-                      selectors.map(label => <Badge key={label} label={label}/>)
+                      selectors.map(label => <Badge key={label} label={label} />)
                     }
                   </DrawerItem>
                 </div>
-              )})
+              )
+            })
             }
           </>
         }
-        <KubeEventDetails object={cronJob}/>
+        <KubeEventDetails object={cronJob} />
       </div>
     )
   }

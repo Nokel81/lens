@@ -1,25 +1,25 @@
-import { app, remote } from "electron";
-import { KubeConfig, V1Node, V1Pod } from "@kubernetes/client-node"
-import fse, { ensureDirSync, readFile, writeFileSync } from "fs-extra";
+import { app, remote } from "electron"
+import { KubeConfig, V1Node, V1Pod, V1NodeCondition } from "@kubernetes/client-node"
+import fse, { ensureDirSync, readFile, writeFileSync } from "fs-extra"
 import path from "path"
 import os from "os"
 import yaml from "js-yaml"
-import logger from "../main/logger";
+import logger from "../main/logger"
 
-function resolveTilde(filePath: string) {
+function resolveTilde(filePath: string): string {
   if (filePath[0] === "~" && (filePath[1] === "/" || filePath.length === 1)) {
-    return filePath.replace("~", os.homedir());
+    return filePath.replace("~", os.homedir())
   }
-  return filePath;
+  return filePath
 }
 
 export function loadConfig(pathOrContent?: string): KubeConfig {
-  const kc = new KubeConfig();
+  const kc = new KubeConfig()
 
   if (fse.pathExistsSync(pathOrContent)) {
-    kc.loadFromFile(path.resolve(resolveTilde(pathOrContent)));
+    kc.loadFromFile(path.resolve(resolveTilde(pathOrContent)))
   } else {
-    kc.loadFromString(pathOrContent);
+    kc.loadFromString(pathOrContent)
   }
 
   return kc
@@ -34,7 +34,7 @@ export function loadConfig(pathOrContent?: string): KubeConfig {
  */
 export function validateConfig(config: KubeConfig | string): KubeConfig {
   if (typeof config == "string") {
-    config = loadConfig(config);
+    config = loadConfig(config)
   }
   logger.debug(`validating kube config: ${JSON.stringify(config)}`)
   if (!config.users || config.users.length == 0) {
@@ -56,18 +56,18 @@ export function validateConfig(config: KubeConfig | string): KubeConfig {
 export function splitConfig(kubeConfig: KubeConfig): KubeConfig[] {
   const configs: KubeConfig[] = []
   if (!kubeConfig.contexts) {
-    return configs;
+    return configs
   }
   kubeConfig.contexts.forEach(ctx => {
-    const kc = new KubeConfig();
-    kc.clusters = [kubeConfig.getCluster(ctx.cluster)].filter(n => n);
+    const kc = new KubeConfig()
+    kc.clusters = [kubeConfig.getCluster(ctx.cluster)].filter(n => n)
     kc.users = [kubeConfig.getUser(ctx.user)].filter(n => n)
     kc.contexts = [kubeConfig.getContextObject(ctx.name)].filter(n => n)
-    kc.setCurrentContext(ctx.name);
+    kc.setCurrentContext(ctx.name)
 
-    configs.push(kc);
-  });
-  return configs;
+    configs.push(kc)
+  })
+  return configs
 }
 
 export function dumpConfigYaml(kubeConfig: Partial<KubeConfig>): string {
@@ -83,8 +83,8 @@ export function dumpConfigYaml(kubeConfig: Partial<KubeConfig>): string {
           'certificate-authority-data': cluster.caData,
           'certificate-authority': cluster.caFile,
           server: cluster.server,
-          'insecure-skip-tls-verify': cluster.skipTLSVerify
-        }
+          'insecure-skip-tls-verify': cluster.skipTLSVerify,
+        },
       }
     }),
     contexts: kubeConfig.contexts.map(context => {
@@ -93,8 +93,8 @@ export function dumpConfigYaml(kubeConfig: Partial<KubeConfig>): string {
         context: {
           cluster: context.cluster,
           user: context.user,
-          namespace: context.namespace
-        }
+          namespace: context.namespace,
+        },
       }
     }),
     users: kubeConfig.users.map(user => {
@@ -109,23 +109,23 @@ export function dumpConfigYaml(kubeConfig: Partial<KubeConfig>): string {
           exec: user.exec,
           token: user.token,
           username: user.username,
-          password: user.password
-        }
+          password: user.password,
+        },
       }
-    })
+    }),
   }
 
-  logger.debug("Dumping KubeConfig:", config);
+  logger.debug("Dumping KubeConfig:", config)
 
   // skipInvalid: true makes dump ignore undefined values
-  return yaml.safeDump(config, { skipInvalid: true });
+  return yaml.safeDump(config, { skipInvalid: true })
 }
 
-export function podHasIssues(pod: V1Pod) {
+export function podHasIssues(pod: V1Pod): boolean {
   // Logic adapted from dashboard
   const notReady = !!pod.status.conditions.find(condition => {
     return condition.type == "Ready" && condition.status !== "True"
-  });
+  })
 
   return (
     notReady ||
@@ -134,34 +134,34 @@ export function podHasIssues(pod: V1Pod) {
   )
 }
 
-export function getNodeWarningConditions(node: V1Node) {
+export function getNodeWarningConditions(node: V1Node): V1NodeCondition[] {
   return node.status.conditions.filter(c =>
-    c.status.toLowerCase() === "true" && c.type !== "Ready" && c.type !== "HostUpgrades"
+    c.status.toLowerCase() === "true" && c.type !== "Ready" && c.type !== "HostUpgrades",
   )
 }
 
 // Write kubeconfigs to "embedded" store, i.e. "/Users/ixrock/Library/Application Support/Lens/kubeconfigs"
 export function saveConfigToAppFiles(clusterId: string, kubeConfig: KubeConfig | string): string {
-  const userData = (app || remote.app).getPath("userData");
+  const userData = (app || remote.app).getPath("userData")
   const kubeConfigFile = path.join(userData, `kubeconfigs/${clusterId}`)
-  const kubeConfigContents = typeof kubeConfig == "string" ? kubeConfig : dumpConfigYaml(kubeConfig);
+  const kubeConfigContents = typeof kubeConfig == "string" ? kubeConfig : dumpConfigYaml(kubeConfig)
 
-  ensureDirSync(path.dirname(kubeConfigFile));
-  writeFileSync(kubeConfigFile, kubeConfigContents);
-  return kubeConfigFile;
+  ensureDirSync(path.dirname(kubeConfigFile))
+  writeFileSync(kubeConfigFile, kubeConfigContents)
+  return kubeConfigFile
 }
 
 export async function getKubeConfigLocal(): Promise<string> {
   try {
-    const configFile = path.join(process.env.HOME, '.kube', 'config');
-    const file = await readFile(configFile, "utf8");
-    const obj = yaml.safeLoad(file);
+    const configFile = path.join(process.env.HOME, '.kube', 'config')
+    const file = await readFile(configFile, "utf8")
+    const obj = yaml.safeLoad(file)
     if (obj.contexts) {
       obj.contexts = obj.contexts.filter((ctx: any) => ctx?.context?.cluster && ctx?.name)
     }
-    return yaml.safeDump(obj);
+    return yaml.safeDump(obj)
   } catch (err) {
     logger.debug(`Cannot read local kube-config: ${err}`)
-    return "";
+    return ""
   }
 }

@@ -1,9 +1,9 @@
-import { autobind, noop } from "../../utils";
-import { DockTabStore } from "./dock-tab.store";
-import { autorun, IReactionDisposer } from "mobx";
-import { dockStore, IDockTab, TabKind } from "./dock.store";
-import { KubeObject } from "../../api/kube-object";
-import { apiManager } from "../../api/api-manager";
+import { autobind, noop } from "../../utils"
+import { DockTabStore } from "./dock-tab.store"
+import { autorun, IReactionDisposer } from "mobx"
+import { dockStore, DockTabEntry, TabKind } from "./dock.store"
+import { KubeObject } from "../../api/kube-object"
+import { apiManager } from "../../api/api-manager"
 
 export interface KubeEditResource {
   resource: string; // resource path, e.g. /api/v1/namespaces/default
@@ -18,73 +18,73 @@ export class EditResourceStore extends DockTabStore<KubeEditResource> {
     super({
       storageName: "edit_resource_store",
       storageSerializer: ({ draft, ...data }) => data, // skip saving draft in local-storage
-    });
+    })
 
     autorun(() => {
       Array.from(this.data).forEach(([tabId, { resource }]) => {
         if (this.watchers.get(tabId)) {
-          return;
+          return
         }
         this.watchers.set(tabId, autorun(() => {
-          const store = apiManager.getStore(resource);
+          const store = apiManager.getStore(resource)
           if (store) {
-            const isActiveTab = dockStore.isOpen && dockStore.selectedTabId === tabId;
-            const obj = store.getByPath(resource);
+            const isActiveTab = dockStore.isOpen && dockStore.selectedTabId === tabId
+            const obj = store.getByPath(resource)
             // preload resource for editing
             if (!obj && !store.isLoaded && !store.isLoading && isActiveTab) {
-              store.loadFromPath(resource).catch(noop);
+              store.loadFromPath(resource).catch(noop)
             }
             // auto-close tab when resource removed from store
             else if (!obj && store.isLoaded) {
-              dockStore.closeTab(tabId);
+              dockStore.closeTab(tabId)
             }
           }
         }, {
-          delay: 100 // make sure all stores initialized
-        }));
+          delay: 100, // make sure all stores initialized
+        }))
       })
-    });
+    })
   }
 
-  getTabByResource(object: KubeObject): IDockTab {
-    const [tabId] = Array.from(this.data).find(([tabId, { resource }]) => {
-      return object.selfLink === resource;
-    }) || [];
-    return dockStore.getTabById(tabId);
+  getTabByResource(object: KubeObject): DockTabEntry {
+    const [tabId] = Array.from(this.data).find(([_tabId, { resource }]) => {
+      return object.selfLink === resource
+    }) || []
+    return dockStore.getTabById(tabId)
   }
 
-  reset() {
-    super.reset();
+  reset(): void {
+    super.reset()
     Array.from(this.watchers).forEach(([tabId, dispose]) => {
-      this.watchers.delete(tabId);
-      dispose();
+      this.watchers.delete(tabId)
+      dispose()
     })
   }
 }
 
-export const editResourceStore = new EditResourceStore();
+export const editResourceStore = new EditResourceStore()
 
-export function editResourceTab(object: KubeObject, tabParams: Partial<IDockTab> = {}) {
+export function editResourceTab(object: KubeObject, tabParams: Partial<DockTabEntry> = {}): DockTabEntry {
   // use existing tab if already opened
-  let tab = editResourceStore.getTabByResource(object);
+  let tab = editResourceStore.getTabByResource(object)
   if (tab) {
-    dockStore.open();
-    dockStore.selectTab(tab.id);
+    dockStore.open()
+    dockStore.selectTab(tab.id)
   }
   // or create new tab
   if (!tab) {
     tab = dockStore.createTab({
       title: `${object.kind}: ${object.getName()}`,
       kind: TabKind.EDIT_RESOURCE,
-      ...tabParams
-    }, false);
+      ...tabParams,
+    }, false)
     editResourceStore.setData(tab.id, {
       resource: object.selfLink,
-    });
+    })
   }
-  return tab;
+  return tab
 }
 
-export function isEditResourceTab(tab: IDockTab) {
-  return tab && tab.kind === TabKind.EDIT_RESOURCE;
+export function isEditResourceTab(tab: DockTabEntry): boolean {
+  return tab && tab.kind === TabKind.EDIT_RESOURCE
 }

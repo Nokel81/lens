@@ -1,23 +1,23 @@
 import "./volume-claim-details.scss"
 
-import React, { Fragment } from "react";
-import { reaction } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { t, Trans } from "@lingui/macro";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { Badge } from "../badge";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { Link } from "react-router-dom";
-import { KubeEventDetails } from "../+events/kube-event-details";
-import { volumeClaimStore } from "./volume-claim.store";
-import { getDetailsUrl } from "../../navigation";
-import { ResourceMetrics } from "../resource-metrics";
-import { VolumeClaimDiskChart } from "./volume-claim-disk-chart";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { PersistentVolumeClaim, pvcApi } from "../../api/endpoints";
-import { _i18n } from "../../i18n";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import React, { Fragment } from "react"
+import { reaction } from "mobx"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { t, Trans } from "@lingui/macro"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { Badge } from "../badge"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { Link } from "react-router-dom"
+import { KubeEventDetails } from "../+events/kube-event-details"
+import { volumeClaimStore } from "./volume-claim.store"
+import { getDetailsUrl } from "../../navigation"
+import { ResourceMetrics } from "../resource-metrics"
+import { VolumeClaimDiskChart } from "./volume-claim-disk-chart"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { PersistentVolumeClaim, pvcApi } from "../../api/endpoints"
+import { _i18n } from "../../i18n"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<PersistentVolumeClaim> {
 }
@@ -26,33 +26,33 @@ interface Props extends KubeObjectDetailsProps<PersistentVolumeClaim> {
 export class PersistentVolumeClaimDetails extends React.Component<Props> {
   @disposeOnUnmount
   clean = reaction(() => this.props.object, () => {
-    volumeClaimStore.reset();
+    volumeClaimStore.reset()
   });
 
-  componentWillUnmount() {
-    volumeClaimStore.reset();
+  componentWillUnmount(): void {
+    volumeClaimStore.reset()
   }
 
-  render() {
-    const { object: volumeClaim } = this.props;
+  render(): React.ReactNode {
+    const { object: volumeClaim } = this.props
     if (!volumeClaim) {
-      return null;
+      return null
     }
-    const { storageClassName, accessModes } = volumeClaim.spec;
-    const { metrics } = volumeClaimStore;
-    const pods = volumeClaim.getPods(podsStore.items);
+    const { storageClassName, accessModes } = volumeClaim.spec
+    const { metrics } = volumeClaimStore
+    const pods = volumeClaim.getPods(podsStore.items)
     const metricTabs = [
-      <Trans>Disk</Trans>
-    ];
+      <Trans key="disk">Disk</Trans>,
+    ]
     return (
       <div className="PersistentVolumeClaimDetails">
         <ResourceMetrics
           loader={() => volumeClaimStore.loadMetrics(volumeClaim)}
           tabs={metricTabs} object={volumeClaim} params={{ metrics }}
         >
-          <VolumeClaimDiskChart/>
+          <VolumeClaimDiskChart />
         </ResourceMetrics>
-        <KubeObjectMeta object={volumeClaim}/>
+        <KubeObjectMeta object={volumeClaim} />
         <DrawerItem name={<Trans>Access Modes</Trans>}>
           {accessModes.join(", ")}
         </DrawerItem>
@@ -73,10 +73,10 @@ export class PersistentVolumeClaimDetails extends React.Component<Props> {
           {volumeClaim.getStatus()}
         </DrawerItem>
 
-        <DrawerTitle title={_i18n._(t`Selector`)}/>
+        <DrawerTitle title={_i18n._(t`Selector`)} />
 
         <DrawerItem name={<Trans>Match Labels</Trans>} labelsOnly>
-          {volumeClaim.getMatchLabels().map(label => <Badge key={label} label={label}/>)}
+          {volumeClaim.getMatchLabels().map(label => <Badge key={label} label={label} />)}
         </DrawerItem>
 
         <DrawerItem name={<Trans>Match Expressions</Trans>}>
@@ -89,9 +89,9 @@ export class PersistentVolumeClaimDetails extends React.Component<Props> {
           ))}
         </DrawerItem>
 
-        <KubeEventDetails object={volumeClaim}/>
+        <KubeEventDetails object={volumeClaim} />
       </div>
-    );
+    )
   }
 }
 

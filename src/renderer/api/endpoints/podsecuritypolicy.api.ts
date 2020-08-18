@@ -1,6 +1,13 @@
-import { autobind } from "../../utils";
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { autobind } from "../../utils"
+import { KubeObject } from "../kube-object"
+
+export interface SecurityRules {
+  fsGroup: string;
+  runAsGroup: string;
+  runAsUser: string;
+  supplementalGroups: string;
+  seLinux: string;
+}
 
 @autobind()
 export class PodSecurityPolicy extends KubeObject {
@@ -66,29 +73,24 @@ export class PodSecurityPolicy extends KubeObject {
     volumes?: string[];
   }
 
-  isPrivileged() {
-    return !!this.spec.privileged;
+  isPrivileged(): boolean {
+    return !!this.spec.privileged
   }
 
-  getVolumes() {
-    return this.spec.volumes || [];
+  getVolumes(): string[] {
+    return this.spec.volumes || []
   }
 
-  getRules() {
-    const { fsGroup, runAsGroup, runAsUser, supplementalGroups, seLinux } = this.spec;
+  getRules(): SecurityRules {
+    const { fsGroup, runAsGroup, runAsUser, supplementalGroups, seLinux } = this.spec
     return {
       fsGroup: fsGroup ? fsGroup.rule : "",
       runAsGroup: runAsGroup ? runAsGroup.rule : "",
       runAsUser: runAsUser ? runAsUser.rule : "",
       supplementalGroups: supplementalGroups ? supplementalGroups.rule : "",
       seLinux: seLinux ? seLinux.rule : "",
-    };
+    }
   }
 }
 
-export const pspApi = new KubeApi({
-  kind: PodSecurityPolicy.kind,
-  apiBase: "/apis/policy/v1beta1/podsecuritypolicies",
-  isNamespaced: false,
-  objectConstructor: PodSecurityPolicy,
-});
+

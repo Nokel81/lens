@@ -1,5 +1,5 @@
-import { action, computed, observable, toJS } from "mobx";
-import { BaseStore } from "./base-store";
+import { action, computed, observable, toJS } from "mobx"
+import { BaseStore } from "./base-store"
 import { clusterStore } from "./cluster-store"
 
 export type WorkspaceId = string;
@@ -21,7 +21,7 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
   private constructor() {
     super({
       configName: "lens-workspace-store",
-    });
+    })
   }
 
   @observable currentWorkspaceId = WorkspaceStore.defaultId;
@@ -29,67 +29,67 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
   @observable workspaces = observable.map<WorkspaceId, Workspace>({
     [WorkspaceStore.defaultId]: {
       id: WorkspaceStore.defaultId,
-      name: "default"
-    }
+      name: "default",
+    },
   });
 
   @computed get currentWorkspace(): Workspace {
-    return this.getById(this.currentWorkspaceId);
+    return this.getById(this.currentWorkspaceId)
   }
 
-  @computed get workspacesList() {
-    return Array.from(this.workspaces.values());
+  @computed get workspacesList(): Workspace[] {
+    return Array.from(this.workspaces.values())
   }
 
-  isDefault(id: WorkspaceId) {
-    return id === WorkspaceStore.defaultId;
+  isDefault(id: WorkspaceId): boolean {
+    return id === WorkspaceStore.defaultId
   }
 
   getById(id: WorkspaceId): Workspace {
-    return this.workspaces.get(id);
+    return this.workspaces.get(id)
   }
 
   @action
-  setActive(id = WorkspaceStore.defaultId) {
+  setActive(id = WorkspaceStore.defaultId): void {
     if (!this.getById(id)) {
-      throw new Error(`workspace ${id} doesn't exist`);
+      throw new Error(`workspace ${id} doesn't exist`)
     }
 
-    this.currentWorkspaceId = id;
+    this.currentWorkspaceId = id
   }
 
   @action
-  saveWorkspace(workspace: Workspace) {
-    const id = workspace.id;
-    const existingWorkspace = this.getById(id);
+  saveWorkspace(workspace: Workspace): void {
+    const id = workspace.id
+    const existingWorkspace = this.getById(id)
     if (existingWorkspace) {
-      Object.assign(existingWorkspace, workspace);
+      Object.assign(existingWorkspace, workspace)
     } else {
-      this.workspaces.set(id, workspace);
+      this.workspaces.set(id, workspace)
     }
   }
 
   @action
-  removeWorkspace(id: WorkspaceId) {
-    const workspace = this.getById(id);
-    if (!workspace) return;
+  removeWorkspace(id: WorkspaceId): void {
+    const workspace = this.getById(id)
+    if (!workspace) return
     if (this.isDefault(id)) {
-      throw new Error("Cannot remove default workspace");
+      throw new Error("Cannot remove default workspace")
     }
     if (this.currentWorkspaceId === id) {
-      this.currentWorkspaceId = WorkspaceStore.defaultId; // reset to default
+      this.currentWorkspaceId = WorkspaceStore.defaultId // reset to default
     }
-    this.workspaces.delete(id);
+    this.workspaces.delete(id)
     clusterStore.removeByWorkspaceId(id)
   }
 
   @action
-  protected fromStore({ currentWorkspace, workspaces = [] }: WorkspaceStoreModel) {
+  protected fromStore({ currentWorkspace, workspaces = [] }: WorkspaceStoreModel): void {
     if (currentWorkspace) {
       this.currentWorkspaceId = currentWorkspace
     }
     if (workspaces.length) {
-      this.workspaces.clear();
+      this.workspaces.clear()
       workspaces.forEach(workspace => {
         this.workspaces.set(workspace.id, workspace)
       })
@@ -101,7 +101,7 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
       currentWorkspace: this.currentWorkspaceId,
       workspaces: this.workspacesList,
     }, {
-      recurseEverything: true
+      recurseEverything: true,
     })
   }
 }

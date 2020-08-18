@@ -1,15 +1,15 @@
-import "./status-brick.scss";
+import "./status-brick.scss"
 
-import React from "react";
-import { cssNames } from "../../utils";
-import { TooltipDecoratorProps, withTooltip } from "../tooltip";
+import React from "react"
+import { cssNames } from "../../utils"
+import { TooltipDecoratorProps, withTooltip } from "../tooltip"
 
 interface Props extends React.HTMLAttributes<any>, TooltipDecoratorProps {
 }
 
 @withTooltip
 export class StatusBrick extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     const { className, ...elemProps } = this.props
     return (
       <div

@@ -1,18 +1,18 @@
 import "./volumes.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { Link, RouteComponentProps } from "react-router-dom";
-import { PersistentVolume, persistentVolumeApi } from "../../api/endpoints/persistent-volume.api";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { IVolumesRouteParams } from "./volumes.route";
-import { stopPropagation } from "../../utils";
-import { getDetailsUrl } from "../../navigation";
-import { volumesStore } from "./volumes.store";
-import { pvcApi, storageClassApi } from "../../api/endpoints";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { Link, RouteComponentProps } from "react-router-dom"
+import { PersistentVolume, persistentVolumeApi } from "../../api/endpoints/persistent-volume.api"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { VolumesRouteParams } from "./volumes.route"
+import { stopPropagation } from "../../utils"
+import { getDetailsUrl } from "../../navigation"
+import { volumesStore } from "./volumes.store"
+import { pvcApi, storageClassApi } from "../../api/endpoints"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -22,12 +22,12 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<IVolumesRouteParams> {
+interface Props extends RouteComponentProps<VolumesRouteParams> {
 }
 
 @observer
 export class PersistentVolumes extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="PersistentVolumes"
@@ -53,13 +53,13 @@ export class PersistentVolumes extends React.Component<Props> {
           { title: <Trans>Status</Trans>, className: "status", sortBy: sortBy.status },
         ]}
         renderTableContents={(volume: PersistentVolume) => {
-          const { claimRef, storageClassName } = volume.spec;
+          const { claimRef, storageClassName } = volume.spec
           const storageClassDetailsUrl = getDetailsUrl(storageClassApi.getUrl({
-            name: storageClassName
-          }));
+            name: storageClassName,
+          }))
           return [
             volume.getName(),
-            <Link to={storageClassDetailsUrl} onClick={stopPropagation}>
+            <Link key="storage-class-link" to={storageClassDetailsUrl} onClick={stopPropagation}>
               {storageClassName}
             </Link>,
             volume.getCapacity(),
@@ -69,20 +69,20 @@ export class PersistentVolumes extends React.Component<Props> {
               </Link>
             ),
             volume.getAge(),
-            { title: volume.getStatus(), className: volume.getStatus().toLowerCase() }
+            { title: volume.getStatus(), className: volume.getStatus().toLowerCase() },
           ]
         }}
         renderItemMenu={(item: PersistentVolume) => {
-          return <PersistentVolumeMenu object={item}/>
+          return <PersistentVolumeMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function PersistentVolumeMenu(props: KubeObjectMenuProps<PersistentVolume>) {
+export function PersistentVolumeMenu(props: KubeObjectMenuProps<PersistentVolume>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

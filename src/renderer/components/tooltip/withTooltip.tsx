@@ -1,9 +1,9 @@
 // Tooltip decorator for simple composition with other components
 
 import React, { HTMLAttributes, ReactNode } from "react"
-import hoistNonReactStatics from "hoist-non-react-statics";
-import { Tooltip, TooltipProps } from "./tooltip";
-import { isReactNode } from "../../utils/isReactNode";
+import hoistNonReactStatics from "hoist-non-react-statics"
+import { Tooltip, TooltipProps } from "./tooltip"
+import { isReactNode } from "../../utils/isReactNode"
 import uniqueId from "lodash/uniqueId"
 
 export interface TooltipDecoratorProps {
@@ -16,25 +16,25 @@ export function withTooltip<T extends React.ComponentType<any>>(Target: T): T {
 
     protected tooltipId = uniqueId("tooltip_target_");
 
-    render() {
-      const { tooltip, ...targetProps } = this.props;
+    render(): React.ReactNode {
+      const { tooltip, ...targetProps } = this.props
       if (tooltip) {
-        const tooltipId = targetProps.id || this.tooltipId;
+        const tooltipId = targetProps.id || this.tooltipId
         const tooltipProps: TooltipProps = {
           targetId: tooltipId,
           ...(isReactNode(tooltip) ? { children: tooltip } : tooltip),
-        };
-        targetProps.id = tooltipId;
+        }
+        targetProps.id = tooltipId
         targetProps.children = (
           <>
             {targetProps.children}
-            <Tooltip {...tooltipProps}/>
+            <Tooltip {...tooltipProps} />
           </>
         )
       }
-      return <Target {...targetProps as any}/>;
+      return <Target {...targetProps as any} />
     }
   }
 
-  return hoistNonReactStatics(DecoratedComponent, Target) as any;
+  return hoistNonReactStatics(DecoratedComponent, Target) as any
 }

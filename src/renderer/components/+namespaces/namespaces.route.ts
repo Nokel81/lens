@@ -1,11 +1,11 @@
 import { RouteProps } from "react-router"
-import { buildURL } from "../../navigation";
+import { buildURL } from "../../navigation"
 
 export const namespacesRoute: RouteProps = {
-  path: "/namespaces"
+  path: "/namespaces",
 }
 
-export interface INamespacesRouteParams {
+export interface NamespacesRouteParams {
 }
 
-export const namespacesURL = buildURL<INamespacesRouteParams>(namespacesRoute.path)
+export const namespacesURL = buildURL<NamespacesRouteParams>(namespacesRoute.path)

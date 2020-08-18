@@ -1,15 +1,15 @@
-import "./info-panel.scss";
+import "./info-panel.scss"
 
-import React, { Component, ReactNode } from "react";
-import { computed, observable, reaction } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { cssNames } from "../../utils";
-import { Button } from "../button";
-import { Icon } from "../icon";
-import { Spinner } from "../spinner";
-import { dockStore, TabId } from "./dock.store";
-import { Notifications } from "../notifications";
+import React, { Component, ReactNode } from "react"
+import { computed, observable, reaction } from "mobx"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { cssNames } from "../../utils"
+import { Button } from "../button"
+import { Icon } from "../icon"
+import { Spinner } from "../spinner"
+import { dockStore, TabId } from "./dock.store"
+import { Notifications } from "../notifications"
 
 interface Props extends OptionalProps {
   tabId: TabId;
@@ -42,61 +42,61 @@ export class InfoPanel extends Component<Props> {
   @observable error = "";
   @observable waiting = false;
 
-  componentDidMount() {
+  componentDidMount(): void {
     disposeOnUnmount(this, [
       reaction(() => this.props.tabId, () => {
         this.result = ""
         this.error = ""
         this.waiting = false
-      })
+      }),
     ])
   }
 
-  @computed get errorInfo() {
-    return this.error || this.props.error;
+  @computed get errorInfo(): string | undefined {
+    return this.error || this.props.error
   }
 
-  submit = async () => {
-    const { showNotifications } = this.props;
-    this.result = "";
-    this.error = "";
-    this.waiting = true;
+  submit = async (): Promise<void> => {
+    const { showNotifications } = this.props
+    this.result = ""
+    this.error = ""
+    this.waiting = true
     try {
       this.result = await this.props.submit().finally(() => {
-        this.waiting = false;
-      });
-      if (showNotifications) Notifications.ok(this.result);
+        this.waiting = false
+      })
+      if (showNotifications) Notifications.ok(this.result)
     } catch (error) {
-      this.error = error.toString();
-      if (showNotifications) Notifications.error(this.error);
-      throw error;
+      this.error = error.toString()
+      if (showNotifications) Notifications.error(this.error)
+      throw error
     }
   }
 
-  submitAndClose = async () => {
-    await this.submit();
-    this.close();
+  submitAndClose = async (): Promise<void> => {
+    await this.submit()
+    this.close()
   }
 
-  close = () => {
-    dockStore.closeTab(this.props.tabId);
+  close = (): void => {
+    dockStore.closeTab(this.props.tabId)
   }
 
-  renderInfo() {
+  renderInfo(): React.ReactNode {
     if (!this.props.showInlineInfo) {
-      return;
+      return
     }
-    const { result, errorInfo } = this;
+    const { result, errorInfo } = this
     return (
       <>
         {result && (
           <div className="success flex align-center">
-            <Icon material="done"/> <span>{result}</span>
+            <Icon material="done" /> <span>{result}</span>
           </div>
         )}
         {errorInfo && (
           <div className="error flex align-center">
-            <Icon material="error_outline"/>
+            <Icon material="error_outline" />
             <span>{errorInfo}</span>
           </div>
         )}
@@ -104,19 +104,19 @@ export class InfoPanel extends Component<Props> {
     )
   }
 
-  render() {
-    const { className, controls, submitLabel, disableSubmit, error, submittingMessage, showSubmitClose } = this.props;
-    const { submit, close, submitAndClose, waiting } = this;
-    const isDisabled = !!(disableSubmit || waiting || error);
+  render(): React.ReactNode {
+    const { className, controls, submitLabel, disableSubmit, error, submittingMessage, showSubmitClose } = this.props
+    const { submit, close, submitAndClose, waiting } = this
+    const isDisabled = !!(disableSubmit || waiting || error)
     return (
       <div className={cssNames("InfoPanel flex gaps align-center", className)}>
         <div className="controls">
           {controls}
         </div>
         <div className="info flex gaps align-center">
-          {waiting ? <><Spinner/> {submittingMessage}</> : this.renderInfo()}
+          {waiting ? <><Spinner /> {submittingMessage}</> : this.renderInfo()}
         </div>
-        <Button plain label={<Trans>Cancel</Trans>} onClick={close}/>
+        <Button plain label={<Trans>Cancel</Trans>} onClick={close} />
         <Button
           primary active
           label={submitLabel}
@@ -132,6 +132,6 @@ export class InfoPanel extends Component<Props> {
           />
         )}
       </div>
-    );
+    )
   }
 }

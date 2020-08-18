@@ -1,34 +1,34 @@
 // Kubernetes watch-api consumer
 
-import { computed, observable, reaction } from "mobx";
+import { computed, observable, reaction } from "mobx"
 import { stringify } from "querystring"
-import { autobind, EventEmitter } from "../utils";
-import { KubeJsonApiData } from "./kube-json-api";
-import type { KubeObjectStore } from "../kube-object.store";
-import { KubeApi } from "./kube-api";
-import { apiManager } from "./api-manager";
-import { apiPrefix, isDevelopment } from "../../common/vars";
-import { getHostedCluster } from "../../common/cluster-store";
+import { autobind, EventEmitter } from "../utils"
+import { KubeJsonApiData } from "./kube-json-api"
+import type { KubeObjectStore } from "../kube-object.store"
+import { KubeApi } from "./kube-api"
+import { apiManager } from "./api-manager"
+import { apiPrefix, isDevelopment } from "../../common/vars"
+import { getHostedCluster } from "../../common/cluster-store"
 
-export interface IKubeWatchEvent<T = any> {
+export interface KubeWatchEvent<T = any> {
   type: "ADDED" | "MODIFIED" | "DELETED";
   object?: T;
 }
 
-export interface IKubeWatchRouteEvent {
+export interface KubeWatchRouteEvent {
   type: "STREAM_END";
   url: string;
   status: number;
 }
 
-export interface IKubeWatchRouteQuery {
+export interface KubeWatchRouteQuery {
   api: string | string[];
 }
 
 @autobind()
 export class KubeWatchApi {
   protected evtSource: EventSource;
-  protected onData = new EventEmitter<[IKubeWatchEvent]>();
+  protected onData = new EventEmitter<[KubeWatchEvent]>();
   protected subscribers = observable.map<KubeApi, number>();
   protected reconnectTimeoutMs = 5000;
   protected maxReconnectsOnError = 10;
@@ -38,86 +38,86 @@ export class KubeWatchApi {
     reaction(() => this.activeApis, () => this.connect(), {
       fireImmediately: true,
       delay: 500,
-    });
+    })
   }
 
-  @computed get activeApis() {
-    return Array.from(this.subscribers.keys());
+  @computed get activeApis(): KubeApi<any>[] {
+    return Array.from(this.subscribers.keys())
   }
 
-  getSubscribersCount(api: KubeApi) {
-    return this.subscribers.get(api) || 0;
+  getSubscribersCount(api: KubeApi): number {
+    return this.subscribers.get(api) || 0
   }
 
-  subscribe(...apis: KubeApi[]) {
+  subscribe(...apis: KubeApi[]): () => void {
     apis.forEach(api => {
-      this.subscribers.set(api, this.getSubscribersCount(api) + 1);
-    });
+      this.subscribers.set(api, this.getSubscribersCount(api) + 1)
+    })
     return () => apis.forEach(api => {
-      const count = this.getSubscribersCount(api) - 1;
-      if (count <= 0) this.subscribers.delete(api);
-      else this.subscribers.set(api, count);
-    });
+      const count = this.getSubscribersCount(api) - 1
+      if (count <= 0) this.subscribers.delete(api)
+      else this.subscribers.set(api, count)
+    })
   }
 
-  protected getQuery(): Partial<IKubeWatchRouteQuery> {
-    const { isAdmin, allowedNamespaces } = getHostedCluster();
+  protected getQuery(): Partial<KubeWatchRouteQuery> {
+    const { isAdmin, allowedNamespaces } = getHostedCluster()
     return {
       api: this.activeApis.map(api => {
-        if (isAdmin) return api.getWatchUrl();
+        if (isAdmin) return api.getWatchUrl()
         return allowedNamespaces.map(namespace => api.getWatchUrl(namespace))
-      }).flat()
+      }).flat(),
     }
   }
 
   // todo: maybe switch to websocket to avoid often reconnects
   @autobind()
-  protected connect() {
-    if (this.evtSource) this.disconnect(); // close previous connection
+  protected connect(): void {
+    if (this.evtSource) this.disconnect() // close previous connection
     if (!this.activeApis.length) {
-      return;
+      return
     }
-    const query = this.getQuery();
-    const apiUrl = `${apiPrefix}/watch?` + stringify(query);
-    this.evtSource = new EventSource(apiUrl);
-    this.evtSource.onmessage = this.onMessage;
-    this.evtSource.onerror = this.onError;
-    this.writeLog("CONNECTING", query.api);
+    const query = this.getQuery()
+    const apiUrl = `${apiPrefix}/watch?` + stringify(query)
+    this.evtSource = new EventSource(apiUrl)
+    this.evtSource.onmessage = this.onMessage
+    this.evtSource.onerror = this.onError
+    this.writeLog("CONNECTING", query.api)
   }
 
-  reconnect() {
+  reconnect(): void {
     if (!this.evtSource || this.evtSource.readyState !== EventSource.OPEN) {
-      this.reconnectAttempts = this.maxReconnectsOnError;
-      this.connect();
+      this.reconnectAttempts = this.maxReconnectsOnError
+      this.connect()
     }
   }
 
-  protected disconnect() {
-    if (!this.evtSource) return;
-    this.evtSource.close();
-    this.evtSource.onmessage = null;
-    this.evtSource = null;
+  protected disconnect(): void {
+    if (!this.evtSource) return
+    this.evtSource.close()
+    this.evtSource.onmessage = null
+    this.evtSource = null
   }
 
-  protected onMessage(evt: MessageEvent) {
-    if (!evt.data) return;
-    const data = JSON.parse(evt.data);
-    if ((data as IKubeWatchEvent).object) {
-      this.onData.emit(data);
+  protected onMessage(evt: MessageEvent): void {
+    if (!evt.data) return
+    const data = JSON.parse(evt.data)
+    if ((data as KubeWatchEvent).object) {
+      this.onData.emit(data)
     } else {
-      this.onRouteEvent(data);
+      this.onRouteEvent(data)
     }
   }
 
-  protected async onRouteEvent({ type, url }: IKubeWatchRouteEvent) {
+  protected async onRouteEvent({ type, url }: KubeWatchRouteEvent): Promise<void> {
     if (type === "STREAM_END") {
-      this.disconnect();
-      const { apiBase, namespace } = KubeApi.parseApi(url);
-      const api = apiManager.getApi(apiBase);
+      this.disconnect()
+      const { apiBase, namespace } = KubeApi.parseApi(url)
+      const api = apiManager.getApi(apiBase)
       if (api) {
         try {
-          await api.refreshResourceVersion({ namespace });
-          this.reconnect();
+          await api.refreshResourceVersion({ namespace })
+          this.reconnect()
         } catch (error) {
           console.debug("failed to refresh resource version", error)
         }
@@ -125,39 +125,39 @@ export class KubeWatchApi {
     }
   }
 
-  protected onError(evt: MessageEvent) {
-    const { reconnectAttempts: attemptsRemain, reconnectTimeoutMs } = this;
+  protected onError(evt: MessageEvent): void {
+    const { reconnectAttempts: attemptsRemain, reconnectTimeoutMs } = this
     if (evt.eventPhase === EventSource.CLOSED) {
       if (attemptsRemain > 0) {
-        this.reconnectAttempts--;
-        setTimeout(() => this.connect(), reconnectTimeoutMs);
+        this.reconnectAttempts--
+        setTimeout(() => this.connect(), reconnectTimeoutMs)
       }
     }
   }
 
-  protected writeLog(...data: any[]) {
+  protected writeLog(...data: any[]): void {
     if (isDevelopment) {
-      console.log('%cKUBE-WATCH-API:', `font-weight: bold`, ...data);
+      console.log('%cKUBE-WATCH-API:', `font-weight: bold`, ...data)
     }
   }
 
-  addListener(store: KubeObjectStore, callback: (evt: IKubeWatchEvent) => void) {
-    const listener = (evt: IKubeWatchEvent<KubeJsonApiData>) => {
-      const { selfLink, namespace, resourceVersion } = evt.object.metadata;
-      const api = apiManager.getApi(selfLink);
-      api.setResourceVersion(namespace, resourceVersion);
-      api.setResourceVersion("", resourceVersion);
+  addListener(store: KubeObjectStore, callback: (evt: KubeWatchEvent) => void): () => void {
+    const listener = (evt: KubeWatchEvent<KubeJsonApiData>) => {
+      const { selfLink, namespace, resourceVersion } = evt.object.metadata
+      const api = apiManager.getApi(selfLink)
+      api.setResourceVersion(namespace, resourceVersion)
+      api.setResourceVersion("", resourceVersion)
       if (store == apiManager.getStore(api)) {
-        callback(evt);
+        callback(evt)
       }
-    };
-    this.onData.addListener(listener);
-    return () => this.onData.removeListener(listener);
+    }
+    this.onData.addListener(listener)
+    return () => this.onData.removeListener(listener)
   }
 
-  reset() {
-    this.subscribers.clear();
+  reset(): void {
+    this.subscribers.clear()
   }
 }
 
-export const kubeWatchApi = new KubeWatchApi();
+export const kubeWatchApi = new KubeWatchApi()

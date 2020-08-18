@@ -3,10 +3,10 @@
 import "./ace-editor.scss"
 
 import React from "react"
-import { observer } from "mobx-react";
+import { observer } from "mobx-react"
 import AceBuild, { Ace } from "ace-builds"
-import { autobind, cssNames } from "../../utils";
-import { themeStore } from "../../theme.store";
+import { autobind, cssNames } from "../../utils"
+import { themeStore } from "../../theme.store"
 
 interface Props extends Partial<Ace.EditorOptions> {
   className?: string;
@@ -29,129 +29,125 @@ const defaultProps: Partial<Props> = {
   foldStyle: "markbegin",
   printMargin: false,
   useWorker: false,
-};
+}
 
 @observer
 export class AceEditor extends React.Component<Props, State> {
-  static defaultProps = defaultProps as object;
+  static defaultProps = defaultProps as Props;
 
   private editor: Ace.Editor;
   private elem: HTMLElement;
 
   constructor(props: Props) {
-    super(props);
+    super(props)
     require("ace-builds/src-noconflict/mode-yaml")
     require("ace-builds/src-noconflict/theme-dreamweaver")
     require("ace-builds/src-noconflict/theme-terminal")
     require("ace-builds/src-noconflict/ext-searchbox")
   }
 
-  get theme() {
+  get theme(): string {
     switch (themeStore.activeTheme.type) {
-    case "light":
-      return "dreamweaver"
-    case "dark":
-      return "terminal";
+      case "light":
+        return "dreamweaver"
+      case "dark":
+        return "terminal"
     }
   }
 
-  async componentDidMount() {
+  async componentDidMount(): Promise<void> {
     const {
       mode, autoFocus, className, hidden, cursorPos,
       onChange, onCursorPosChange, children,
       ...options
-    } = this.props;
+    } = this.props
 
     // setup editor
-    this.editor = AceBuild.edit(this.elem, options);
-    this.setTheme(this.theme);
-    this.setMode(mode);
-    this.setCursorPos(cursorPos);
+    this.editor = AceBuild.edit(this.elem, options)
+    this.setTheme(this.theme)
+    this.setMode(mode)
+    this.setCursorPos(cursorPos)
 
     // bind events
-    this.editor.on("change", this.onChange);
-    this.editor.selection.on("changeCursor", this.onCursorPosChange);
+    this.editor.on("change", this.onChange)
+    this.editor.selection.on("changeCursor", this.onCursorPosChange)
 
     if (autoFocus) {
-      this.focus();
+      this.focus()
     }
   }
 
-  componentDidUpdate() {
-    if (!this.editor) return;
-    const { value, cursorPos } = this.props;
+  componentDidUpdate(): void {
+    if (!this.editor) return
+    const { value, cursorPos } = this.props
     if (value !== this.getValue()) {
-      this.editor.setValue(value);
-      this.editor.clearSelection();
-      this.setCursorPos(cursorPos || this.editor.getCursorPosition());
+      this.editor.setValue(value)
+      this.editor.clearSelection()
+      this.setCursorPos(cursorPos || this.editor.getCursorPosition())
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     if (this.editor) {
-      this.editor.destroy();
+      this.editor.destroy()
     }
   }
 
-  resize() {
+  resize(): void {
     if (this.editor) {
-      this.editor.resize();
+      this.editor.resize()
     }
   }
 
-  focus() {
+  focus(): void {
     if (this.editor) {
-      this.editor.focus();
+      this.editor.focus()
     }
   }
 
-  getValue() {
+  getValue(): string {
     return this.editor.getValue()
   }
 
-  setValue(value: string, cursorPos?: number) {
-    return this.editor.setValue(value, cursorPos);
+  setMode(mode: string): void {
+    this.editor.session.setMode(`ace/mode/${mode}`)
   }
 
-  async setMode(mode: string) {
-    this.editor.session.setMode(`ace/mode/${mode}`);
+  setTheme(theme: string): void {
+    this.editor.setTheme(`ace/theme/${theme}`)
   }
 
-  async setTheme(theme: string) {
-    this.editor.setTheme(`ace/theme/${theme}`);
-  }
-
-  setCursorPos(pos: Ace.Point) {
-    if (!pos) return;
-    const { row, column } = pos;
-    this.editor.moveCursorToPosition(pos);
+  setCursorPos(pos: Ace.Point): void {
+    if (!pos) return
+    const { row, column } = pos
+    this.editor.moveCursorToPosition(pos)
     requestAnimationFrame(() => {
-      this.editor.gotoLine(row + 1, column, false);
-    });
+      this.editor.gotoLine(row + 1, column, false)
+    })
   }
 
   @autobind()
-  onCursorPosChange() {
-    const { onCursorPosChange } = this.props;
+  onCursorPosChange(): void {
+    const { onCursorPosChange } = this.props
     if (onCursorPosChange) {
-      onCursorPosChange(this.editor.getCursorPosition());
+      onCursorPosChange(this.editor.getCursorPosition())
     }
   }
 
   @autobind()
-  onChange(delta: Ace.Delta) {
-    const { onChange } = this.props;
+  onChange(delta: Ace.Delta): void {
+    const { onChange } = this.props
     if (onChange) {
-      onChange(this.getValue(), delta);
+      onChange(this.getValue(), delta)
     }
   }
 
-  render() {
-    const { className, hidden } = this.props;
-    const themeType = themeStore.activeTheme.type;
+  render(): React.ReactNode {
+    const { className, hidden } = this.props
+    const themeType = themeStore.activeTheme.type
     return (
       <div className={cssNames("AceEditor", className, { hidden }, themeType)}>
-        <div className="editor" ref={e => this.elem = e}/>
+        <div className="editor" ref={e => this.elem = e} />
       </div>
     )
   }

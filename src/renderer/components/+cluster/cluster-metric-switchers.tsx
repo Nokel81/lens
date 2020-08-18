@@ -1,19 +1,19 @@
-import "./cluster-metric-switchers.scss";
+import "./cluster-metric-switchers.scss"
 
-import React from "react";
-import { Trans } from "@lingui/macro";
-import { observer } from "mobx-react";
-import { nodesStore } from "../+nodes/nodes.store";
-import { cssNames } from "../../utils";
-import { Radio, RadioGroup } from "../radio";
-import { clusterStore, MetricNodeRole, MetricType } from "./cluster.store";
+import React from "react"
+import { Trans } from "@lingui/macro"
+import { observer } from "mobx-react"
+import { nodesStore } from "../+nodes/nodes.store"
+import { cssNames } from "../../utils"
+import { Radio, RadioGroup } from "../radio"
+import { clusterStore, MetricNodeRole, MetricType } from "./cluster.store"
 
 export const ClusterMetricSwitchers = observer(() => {
-  const { metricType, metricNodeRole, getMetricsValues, metrics } = clusterStore;
-  const { masterNodes, workerNodes } = nodesStore;
-  const metricsValues = getMetricsValues(metrics);
-  const disableRoles = !masterNodes.length || !workerNodes.length;
-  const disableMetrics = !metricsValues.length;
+  const { metricType, metricNodeRole, getMetricsValues, metrics } = clusterStore
+  const { masterNodes, workerNodes } = nodesStore
+  const metricsValues = getMetricsValues(metrics)
+  const disableRoles = !masterNodes.length || !workerNodes.length
+  const disableMetrics = !metricsValues.length
   return (
     <div className="ClusterMetricSwitchers flex gaps">
       <div className="box grow">
@@ -39,5 +39,5 @@ export const ClusterMetricSwitchers = observer(() => {
         </RadioGroup>
       </div>
     </div>
-  );
-});
+  )
+})

@@ -1,11 +1,11 @@
-import "./wizard.scss";
-import React from "react";
-import { Trans } from "@lingui/macro";
-import { cssNames, prevDefault } from "../../utils";
-import { Button } from "../button";
-import { Stepper } from "../stepper";
-import { SubTitle } from "../layout/sub-title";
-import { Spinner } from "../spinner";
+import "./wizard.scss"
+import React from "react"
+import { Trans } from "@lingui/macro"
+import { cssNames, prevDefault, IClassName } from "../../utils"
+import { Button } from "../button"
+import { Stepper } from "../stepper"
+import { SubTitle } from "../layout/sub-title"
+import { Spinner } from "../spinner"
 
 interface WizardCommonProps<D = any> {
   data?: Partial<D>;
@@ -29,14 +29,14 @@ interface State {
 
 export class Wizard extends React.Component<WizardProps, State> {
   public state: State = {
-    step: this.getValidStep(this.props.step)
+    step: this.getValidStep(this.props.step),
   };
 
-  get steps() {
-    const { className, title, step, header, onChange, children, ...commonProps } = this.props;
-    const steps = React.Children.toArray(children) as WizardStepElem[];
+  get steps(): WizardStepElem[] {
+    const { className, title, step, header, onChange, children, ...commonProps } = this.props
+    const steps = React.Children.toArray(children) as WizardStepElem[]
     return steps.filter(step => !step.props.skip).map((stepElem, i) => {
-      const stepProps = stepElem.props;
+      const stepProps = stepElem.props
       return React.cloneElement(stepElem, {
         step: i + 1,
         wizard: this,
@@ -47,59 +47,60 @@ export class Wizard extends React.Component<WizardProps, State> {
         isFirst: this.isFirstStep,
         isLast: this.isLastStep,
         ...commonProps,
-        ...stepProps
+        ...stepProps,
       } as WizardStepProps<any>)
-    });
+    })
   }
 
-  get step() {
-    return this.state.step;
+  get step(): number | undefined {
+    return this.state.step
   }
 
   set step(step: number) {
-    step = this.getValidStep(step);
-    if (step === this.step) return;
+    step = this.getValidStep(step)
+    if (step === this.step) return
 
+    // eslint-disable-next-line react/no-set-state
     this.setState({ step }, () => {
       if (this.props.onChange) {
-        this.props.onChange(step);
+        this.props.onChange(step)
       }
-    });
+    })
   }
 
-  protected getValidStep(step: number) {
-    return Math.min(Math.max(1, step), this.steps.length) || 1;
+  protected getValidStep(step: number): number {
+    return Math.min(Math.max(1, step), this.steps.length) || 1
   }
 
-  isFirstStep = () => this.step === 1;
-  isLastStep = () => this.step === this.steps.length;
-  firstStep = (): any => this.step = 1;
-  nextStep = (): any => this.step++;
-  prevStep = (): any => this.step--;
-  lastStep = (): any => this.step = this.steps.length;
+  isFirstStep = (): boolean => this.step === 1;
+  isLastStep = (): boolean => this.step === this.steps.length;
+  firstStep = (): number => this.step = 1;
+  nextStep = (): number => this.step++;
+  prevStep = (): number => this.step--;
+  lastStep = (): number => this.step = this.steps.length;
 
-  render() {
-    const { className, title, header, hideSteps } = this.props;
+  render(): React.ReactNode {
+    const { className, title, header, hideSteps } = this.props
     const steps = this.steps.map(stepElem => ({ title: stepElem.props.title }))
-    const step = React.cloneElement(this.steps[this.step - 1]);
+    const step = React.cloneElement(this.steps[this.step - 1])
     return (
       <div className={cssNames("Wizard", className)}>
         <div className="header">
           {header}
-          {title ? <SubTitle title={title}/> : null}
-          {!hideSteps && steps.length > 1 ? <Stepper steps={steps} step={this.step}/> : null}
+          {title ? <SubTitle title={title} /> : null}
+          {!hideSteps && steps.length > 1 ? <Stepper steps={steps} step={this.step} /> : null}
         </div>
         {step}
       </div>
-    );
+    )
   }
 }
 
 export interface WizardStepProps<D = any> extends WizardCommonProps<D> {
   wizard?: Wizard;
   title?: string;
-  className?: string | object;
-  contentClass?: string | object;
+  className?: IClassName;
+  contentClass?: IClassName;
   customButtons?: React.ReactNode; // render custom buttons block in footer
   moreButtons?: React.ReactNode; // add more buttons to section in the footer
   loading?: boolean; // indicator of loading content for the step
@@ -110,7 +111,7 @@ export interface WizardStepProps<D = any> extends WizardCommonProps<D> {
   step?: number;
   prevLabel?: React.ReactNode; // custom label for prev button
   nextLabel?: React.ReactNode; // custom label for next button
-  next?: () => void | boolean | Promise<any>; // custom action for next button
+  next?: () => void | boolean | number | Promise<any>; // custom action for next button
   prev?: () => void; // custom action for prev button
   first?: () => void;
   last?: () => void;
@@ -138,68 +139,70 @@ export class WizardStep extends React.Component<WizardStepProps, WizardStepState
     scrollable: true,
   }
 
-  componentWillUnmount() {
-    this.unmounting = true;
+  componentWillUnmount(): void {
+    this.unmounting = true
   }
 
-  prev = () => {
-    const { isFirst, prev, done } = this.props;
-    if (isFirst() && done) done();
-    else prev();
+  prev = (): void => {
+    const { isFirst, prev, done } = this.props
+    if (isFirst() && done) done()
+    else prev()
   }
 
-  next = () => {
-    const next = this.props.next;
-    const nextStep = this.props.wizard.nextStep;
+  next = (): void => {
+    const next = this.props.next
+    const nextStep = this.props.wizard.nextStep
     if (nextStep !== next) {
-      const result = next();
+      const result = next()
       if (result instanceof Promise) {
-        this.setState({ waiting: true });
+        // eslint-disable-next-line react/no-set-state
+        this.setState({ waiting: true })
         result.then(nextStep).finally(() => {
-          if (this.unmounting) return;
-          this.setState({ waiting: false });
-        });
+          if (this.unmounting) return
+          // eslint-disable-next-line react/no-set-state
+          this.setState({ waiting: false })
+        })
       }
       else if (typeof result === "boolean" && result) {
-        nextStep();
+        nextStep()
       }
     }
     else {
-      nextStep();
+      nextStep()
     }
   }
 
-  submit = () => {
+  submit = (): void => {
     if (!this.form.noValidate) {
-      const valid = this.form.checkValidity();
-      if (!valid) return;
+      const valid = this.form.checkValidity()
+      if (!valid) return
     }
-    this.next();
+    this.next()
   }
 
-  renderLoading() {
+  renderLoading(): React.ReactNode {
     return (
       <div className="step-loading flex center">
-        <Spinner/>
+        <Spinner />
       </div>
     )
   }
 
-  render() {
+  render(): React.ReactNode {
     const {
       step, isFirst, isLast, children,
       loading, customButtons, disabledNext, scrollable,
       hideNextBtn, hideBackBtn, beforeContent, afterContent, noValidate, skip, moreButtons,
-    } = this.props;
-    let { className, contentClass, nextLabel, prevLabel, waiting } = this.props;
+    } = this.props
+    let { className, contentClass, nextLabel, prevLabel, waiting } = this.props
     if (skip) {
-      return;
+      return
     }
-    waiting = (waiting !== undefined) ? waiting : this.state.waiting;
-    className = cssNames(`WizardStep step${step}`, className);
-    contentClass = cssNames("step-content", { scrollable }, contentClass);
-    prevLabel = prevLabel || (isFirst() ? <Trans>Cancel</Trans> : <Trans>Back</Trans>);
-    nextLabel = nextLabel || (isLast() ? <Trans>Submit</Trans> : <Trans>Next</Trans>);
+    waiting = (waiting !== undefined) ? waiting : this.state.waiting
+    className = cssNames(`WizardStep step${step}`, className)
+    contentClass = cssNames("step-content", { scrollable }, contentClass)
+    prevLabel = prevLabel || (isFirst() ? <Trans>Cancel</Trans> : <Trans>Back</Trans>)
+    nextLabel = nextLabel || (isLast() ? <Trans>Submit</Trans> : <Trans>Next</Trans>)
     return (
       <form className={className}
         onSubmit={prevDefault(this.submit)} noValidate={noValidate}

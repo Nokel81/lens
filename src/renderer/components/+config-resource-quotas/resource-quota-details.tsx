@@ -1,21 +1,19 @@
-import "./resource-quota-details.scss";
-import React from "react";
-import kebabCase from "lodash/kebabCase";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { cpuUnitsToNumber, cssNames, unitsToBytes, metricUnitsToNumber } from "../../utils";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { ResourceQuota, resourceQuotaApi } from "../../api/endpoints/resource-quota.api";
-import { LineProgress } from "../line-progress";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import "./resource-quota-details.scss"
+import React from "react"
+import kebabCase from "lodash/kebabCase"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { cpuUnitsToNumber, cssNames, unitsToBytes, metricUnitsToNumber } from "../../utils"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { ResourceQuota, resourceQuotaApi } from "../../api/endpoints/resource-quota.api"
+import { LineProgress } from "../line-progress"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<ResourceQuota> {
 }
-
-const onlyNumbers = /$[0-9]*^/g;
 
 function transformUnit(name: string, value: string): number {
   if (name.includes("memory") || name.includes("storage")) {
@@ -26,7 +24,7 @@ function transformUnit(name: string, value: string): number {
     return cpuUnitsToNumber(value)
   }
 
-  return metricUnitsToNumber(value);
+  return metricUnitsToNumber(value)
 }
 
 function renderQuotas(quota: ResourceQuota): JSX.Element[] {
@@ -37,7 +35,7 @@ function renderQuotas(quota: ResourceQuota): JSX.Element[] {
     .map(([name, value]) => {
       const current = transformUnit(name, used[name])
       const max = transformUnit(name, value)
-      const usage = max === 0 ? 100 : Math.ceil(current / max * 100); // special case 0 max as always 100% usage
+      const usage = max === 0 ? 100 : Math.ceil(current / max * 100) // special case 0 max as always 100% usage
 
       return (
         <div key={name} className={cssNames("param", kebabCase(name))}>
@@ -57,12 +55,12 @@ function renderQuotas(quota: ResourceQuota): JSX.Element[] {
 
 @observer
 export class ResourceQuotaDetails extends React.Component<Props> {
-  render() {
-    const { object: quota } = this.props;
-    if (!quota) return null;
+  render(): React.ReactNode {
+    const { object: quota } = this.props
+    if (!quota) return null
     return (
       <div className="ResourceQuotaDetails">
-        <KubeObjectMeta object={quota}/>
+        <KubeObjectMeta object={quota} />
 
         <DrawerItem name={<Trans>Quotas</Trans>} className="quota-list">
           {renderQuotas(quota)}
@@ -70,7 +68,7 @@ export class ResourceQuotaDetails extends React.Component<Props> {
 
         {quota.getScopeSelector().length > 0 && (
           <>
-            <DrawerTitle title={<Trans>Scope Selector</Trans>}/>
+            <DrawerTitle title={<Trans>Scope Selector</Trans>} />
             <Table className="paths">
               <TableHead>
                 <TableCell><Trans>Operator</Trans></TableCell>
@@ -79,24 +77,24 @@ export class ResourceQuotaDetails extends React.Component<Props> {
               </TableHead>
               {
                 quota.getScopeSelector().map((selector, index) => {
-                  const { operator, scopeName, values } = selector;
+                  const { operator, scopeName, values } = selector
                   return (
                     <TableRow key={index}>
                       <TableCell>{operator}</TableCell>
                       <TableCell>{scopeName}</TableCell>
                       <TableCell>{values.join(", ")}</TableCell>
                     </TableRow>
-                  );
+                  )
                 })
               }
             </Table>
           </>
         )}
       </div>
-    );
+    )
   }
 }
 
 apiManager.registerViews(resourceQuotaApi, {
-  Details: ResourceQuotaDetails
+  Details: ResourceQuotaDetails,
 })

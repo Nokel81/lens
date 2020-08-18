@@ -1,7 +1,6 @@
 import { Application } from "spectron"
 import * as util from "../helpers/utils"
 import { spawnSync } from "child_process"
-import { stat } from "fs"
 
 jest.setTimeout(20000)
 
@@ -50,7 +49,7 @@ describe("app start", () => {
   })
 
   it('allows to add a cluster', async () => {
-    const status = spawnSync("minikube status", {shell: true})
+    const status = spawnSync("minikube status", { shell: true })
     if (status.status !== 0) {
       console.warn("minikube not running, skipping test")
       return
@@ -63,7 +62,7 @@ describe("app start", () => {
   })
 
   it('allows to create a pod', async () => {
-    const status = spawnSync("minikube status", {shell: true})
+    const status = spawnSync("minikube status", { shell: true })
     if (status.status !== 0) {
       console.warn("minikube not running, skipping test")
       return

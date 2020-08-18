@@ -1,18 +1,18 @@
-import "./cronjobs.scss";
+import "./cronjobs.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { RouteComponentProps } from "react-router";
-import { Trans } from "@lingui/macro";
-import { CronJob, cronJobApi } from "../../api/endpoints/cron-job.api";
-import { cronJobStore } from "./cronjob.store";
-import { jobStore } from "../+workloads-jobs/job.store";
-import { eventStore } from "../+events/event.store";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { ICronJobsRouteParams } from "../+workloads";
-import { KubeObjectListLayout } from "../kube-object";
-import { KubeEventIcon } from "../+events/kube-event-icon";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { RouteComponentProps } from "react-router"
+import { Trans } from "@lingui/macro"
+import { CronJob, cronJobApi } from "../../api/endpoints/cron-job.api"
+import { cronJobStore } from "./cronjob.store"
+import { jobStore } from "../+workloads-jobs/job.store"
+import { eventStore } from "../+events/event.store"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { CronJobsRouteParams } from "../+workloads"
+import { KubeObjectListLayout } from "../kube-object"
+import { KubeEventIcon } from "../+events/kube-event-icon"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -23,12 +23,12 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<ICronJobsRouteParams> {
+interface Props extends RouteComponentProps<CronJobsRouteParams> {
 }
 
 @observer
 export class CronJobs extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="CronJobs" store={cronJobStore}
@@ -58,11 +58,11 @@ export class CronJobs extends React.Component<Props> {
         ]}
         renderTableContents={(cronJob: CronJob) => [
           cronJob.getName(),
-          <KubeEventIcon object={cronJob} filterEvents={events => {
-            if (!cronJob.isNeverRun()) return events;
-            return events.filter(event => event.reason != "FailedNeedsStart");
+          <KubeEventIcon key="kube-event-icon" object={cronJob} filterEvents={events => {
+            if (!cronJob.isNeverRun()) return events
+            return events.filter(event => event.reason != "FailedNeedsStart")
           }
-          }/>,
+          } />,
           cronJob.getNs(),
           cronJob.isNeverRun() ? <Trans>never</Trans> : cronJob.getSchedule(),
           cronJob.getSuspendFlag(),
@@ -71,16 +71,16 @@ export class CronJobs extends React.Component<Props> {
           cronJob.getAge(),
         ]}
         renderItemMenu={(item: CronJob) => {
-          return <CronJobMenu object={item}/>
+          return <CronJobMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function CronJobMenu(props: KubeObjectMenuProps<CronJob>) {
+export function CronJobMenu(props: KubeObjectMenuProps<CronJob>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

@@ -1,10 +1,10 @@
-import React from "react";
-import { Cluster } from "../../../../main/cluster";
-import { Input } from "../../input";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { SubTitle } from "../../layout/sub-title";
-import { isRequired } from "../../input/input.validators";
+import React from "react"
+import { Cluster } from "../../../../main/cluster"
+import { Input } from "../../input"
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { SubTitle } from "../../layout/sub-title"
+import { isRequired } from "../../input/input.validators"
 
 interface Props {
   cluster: Cluster;
@@ -14,18 +14,18 @@ interface Props {
 export class ClusterNameSetting extends React.Component<Props> {
   @observable name = this.props.cluster.preferences.clusterName || "";
 
-  save = () => {
-    this.props.cluster.preferences.clusterName = this.name;
+  save = (): void => {
+    this.props.cluster.preferences.clusterName = this.name
   };
 
-  onChange = (value: string) => {
-    this.name = value;
+  onChange = (value: string): void => {
+    this.name = value
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <>
-        <SubTitle title="Cluster Name"/>
+        <SubTitle title="Cluster Name" />
         <p>Define cluster name.</p>
         <Input
           theme="round-black"
@@ -35,6 +35,6 @@ export class ClusterNameSetting extends React.Component<Props> {
           onBlur={this.save}
         />
       </>
-    );
+    )
   }
 }

@@ -2,15 +2,22 @@ import './tooltip.scss'
 
 import React from "react"
 import { createPortal } from "react-dom"
-import { observer } from "mobx-react";
-import { autobind, cssNames, IClassName } from "../../utils";
-import { observable } from "mobx";
+import { observer } from "mobx-react"
+import { autobind, cssNames, IClassName } from "../../utils"
+import { observable } from "mobx"
 
 export enum TooltipPosition {
   TOP = "top",
   BOTTOM = "bottom",
   LEFT = "left",
   RIGHT = "right",
+}
+
+interface PositionData {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
 }
 
 export interface TooltipProps {
@@ -40,7 +47,7 @@ const defaultProps: Partial<TooltipProps> = {
 
 @observer
 export class Tooltip extends React.Component<TooltipProps> {
-  static defaultProps = defaultProps as object;
+  static defaultProps = defaultProps as TooltipProps;
 
   @observable.ref elem: HTMLElement;
   @observable activePosition: TooltipPosition;
@@ -50,35 +57,35 @@ export class Tooltip extends React.Component<TooltipProps> {
     return document.getElementById(this.props.targetId)
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.targetElem.addEventListener("mouseenter", this.onEnterTarget)
     this.targetElem.addEventListener("mouseleave", this.onLeaveTarget)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this.targetElem.removeEventListener("mouseenter", this.onEnterTarget)
     this.targetElem.removeEventListener("mouseleave", this.onLeaveTarget)
   }
 
   @autobind()
-  protected onEnterTarget(evt: MouseEvent) {
-    this.isVisible = true;
-    this.refreshPosition();
+  protected onEnterTarget(_evt: MouseEvent): void {
+    this.isVisible = true
+    this.refreshPosition()
   }
 
   @autobind()
-  protected onLeaveTarget(evt: MouseEvent) {
-    this.isVisible = false;
+  protected onLeaveTarget(_evt: MouseEvent): void {
+    this.isVisible = false
   }
 
   @autobind()
-  refreshPosition() {
-    const { position } = this.props;
-    const { elem, targetElem } = this;
+  refreshPosition(): void {
+    const { position } = this.props
+    const { elem, targetElem } = this
 
-    const positionPreference = new Set<TooltipPosition>();
+    const positionPreference = new Set<TooltipPosition>()
     if (typeof position !== "undefined") {
-      positionPreference.add(position);
+      positionPreference.add(position)
     }
     positionPreference.add(TooltipPosition.RIGHT)
       .add(TooltipPosition.BOTTOM)
@@ -86,87 +93,87 @@ export class Tooltip extends React.Component<TooltipProps> {
       .add(TooltipPosition.LEFT)
 
     // reset position first and get all possible client-rect area for tooltip element
-    this.setPosition({ left: 0, top: 0 });
+    this.setPosition({ left: 0, top: 0 })
 
-    const selfBounds = elem.getBoundingClientRect();
-    const targetBounds = targetElem.getBoundingClientRect();
-    const { innerWidth: viewportWidth, innerHeight: viewportHeight } = window;
+    const selfBounds = elem.getBoundingClientRect()
+    const targetBounds = targetElem.getBoundingClientRect()
+    const { innerWidth: viewportWidth, innerHeight: viewportHeight } = window
 
     // find proper position
     for (const pos of positionPreference) {
       const { left, top, right, bottom } = this.getPosition(pos, selfBounds, targetBounds)
-      const fitsToWindow = left >= 0 && top >= 0 && right <= viewportWidth && bottom <= viewportHeight;
+      const fitsToWindow = left >= 0 && top >= 0 && right <= viewportWidth && bottom <= viewportHeight
       if (fitsToWindow) {
-        this.activePosition = pos;
-        this.setPosition({ top, left });
-        
-        return;
+        this.activePosition = pos
+        this.setPosition({ top, left })
+
+        return
       }
     }
 
-    const preferedPosition = Array.from(positionPreference)[0];
+    const preferedPosition = Array.from(positionPreference)[0]
     const { left, top } = this.getPosition(preferedPosition, selfBounds, targetBounds)
-    this.activePosition = preferedPosition;
-    this.setPosition({ left, top });
+    this.activePosition = preferedPosition
+    this.setPosition({ left, top })
   }
 
-  protected setPosition(pos: { left: number, top: number }) {
-    const elemStyle = this.elem.style;
+  protected setPosition(pos: { left: number, top: number }): void {
+    const elemStyle = this.elem.style
     elemStyle.left = pos.left + "px"
     elemStyle.top = pos.top + "px"
   }
 
-  protected getPosition(position: TooltipPosition, selfBounds: DOMRect, targetBounds: DOMRect) {
+  protected getPosition(position: TooltipPosition, selfBounds: DOMRect, targetBounds: DOMRect): PositionData {
     let left: number
     let top: number
-    const offset = this.props.offset;
-    const horizontalCenter = targetBounds.left + (targetBounds.width - selfBounds.width) / 2;
-    const verticalCenter = targetBounds.top + (targetBounds.height - selfBounds.height) / 2;
+    const offset = this.props.offset
+    const horizontalCenter = targetBounds.left + (targetBounds.width - selfBounds.width) / 2
+    const verticalCenter = targetBounds.top + (targetBounds.height - selfBounds.height) / 2
     switch (position) {
-    case "top":
-      left = horizontalCenter;
-      top = targetBounds.top - selfBounds.height - offset;
-      break;
-    case "bottom":
-      left = horizontalCenter;
-      top = targetBounds.bottom + offset;
-      break;
-    case "left":
-      top = verticalCenter;
-      left = targetBounds.left - selfBounds.width - offset;
-      break;
-    case "right":
-      top = verticalCenter;
-      left = targetBounds.right + offset;
-      break;
+      case "top":
+        left = horizontalCenter
+        top = targetBounds.top - selfBounds.height - offset
+        break
+      case "bottom":
+        left = horizontalCenter
+        top = targetBounds.bottom + offset
+        break
+      case "left":
+        top = verticalCenter
+        left = targetBounds.left - selfBounds.width - offset
+        break
+      case "right":
+        top = verticalCenter
+        left = targetBounds.right + offset
+        break
     }
     return {
-      left: left,
-      top: top,
+      left,
+      top,
       right: left + selfBounds.width,
       bottom: top + selfBounds.height,
-    };
+    }
   }
 
   @autobind()
-  bindRef(elem: HTMLElement) {
-    this.elem = elem;
+  bindRef(elem: HTMLElement): void {
+    this.elem = elem
   }
 
-  render() {
-    const { style, formatters, usePortal, children } = this.props;
+  render(): React.ReactNode {
+    const { style, formatters, usePortal, children } = this.props
     const className = cssNames("Tooltip", this.props.className, formatters, this.activePosition, {
       hidden: !this.isVisible,
       formatter: !!formatters,
-    });
+    })
     const tooltip = (
       <div className={className} style={style} ref={this.bindRef}>
         {children}
       </div>
     )
     if (usePortal) {
-      return createPortal(tooltip, document.body,);
+      return createPortal(tooltip, document.body)
     }
-    return tooltip;
+    return tooltip
   }
 }

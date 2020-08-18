@@ -1,7 +1,7 @@
-import "./line-progress.scss";
-import React from "react";
-import { cssNames } from "../../utils";
-import { TooltipDecoratorProps, withTooltip } from "../tooltip";
+import "./line-progress.scss"
+import React from "react"
+import { cssNames } from "../../utils"
+import { TooltipDecoratorProps, withTooltip } from "../tooltip"
 
 interface Props extends React.HTMLProps<any>, TooltipDecoratorProps {
   value: number;
@@ -20,18 +20,18 @@ export class LineProgress extends React.PureComponent<Props> {
     precise: 2,
   };
 
-  render() {
-    const { className, min, max, value, precise, children, ...props } = this.props;
-    let valuePercents = Math.min(100, value / (max - min) * 100);
+  render(): React.ReactNode {
+    const { className, min, max, value, precise, children, ...props } = this.props
+    let valuePercents = Math.min(100, value / (max - min) * 100)
     const valuePercentsRounded = +valuePercents.toFixed(precise)
     if (valuePercentsRounded) {
-      valuePercents = valuePercentsRounded;
+      valuePercents = valuePercentsRounded
     }
     return (
       <div className={cssNames("LineProgress", className)} {...props}>
         <div className="line" style={{ width: valuePercents + "%" }}></div>
         {children}
       </div>
-    );
+    )
   }
 }

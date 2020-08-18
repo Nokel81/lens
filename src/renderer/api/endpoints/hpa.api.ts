@@ -1,5 +1,5 @@
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { KubeApi } from "../kube-api"
 
 export enum HpaMetricType {
   Resource = "Resource",
@@ -22,7 +22,7 @@ export type IHpaMetricData<T = any> = T & {
   targetAverageValue?: string;
 }
 
-export interface IHpaMetric {
+export interface HpaMetric {
   [kind: string]: IHpaMetricData;
 
   type: HpaMetricType;
@@ -38,6 +38,19 @@ export interface IHpaMetric {
   }>;
 }
 
+interface HpaCondition {
+  lastTransitionTime: string;
+  message: string;
+  reason: string;
+  status: string;
+  type: string;
+}
+
+interface HpaConditionAnnotated extends HpaCondition {
+  isReady: boolean;
+  tooltip: string;
+}
+
 export class HorizontalPodAutoscaler extends KubeObject {
   static kind = "HorizontalPodAutoscaler";
 
@@ -49,86 +62,80 @@ export class HorizontalPodAutoscaler extends KubeObject {
     };
     minReplicas: number;
     maxReplicas: number;
-    metrics: IHpaMetric[];
+    metrics: HpaMetric[];
   }
   status: {
     currentReplicas: number;
     desiredReplicas: number;
-    currentMetrics: IHpaMetric[];
-    conditions: {
-      lastTransitionTime: string;
-      message: string;
-      reason: string;
-      status: string;
-      type: string;
-    }[];
+    currentMetrics: HpaMetric[];
+    conditions: HpaCondition[];
   }
 
-  getMaxPods() {
-    return this.spec.maxReplicas || 0;
+  getMaxPods(): number {
+    return this.spec.maxReplicas || 0
   }
 
-  getMinPods() {
-    return this.spec.minReplicas || 0;
+  getMinPods(): number {
+    return this.spec.minReplicas || 0
   }
 
-  getReplicas() {
-    return this.status.currentReplicas;
+  getReplicas(): number {
+    return this.status.currentReplicas
   }
 
-  getConditions() {
-    if (!this.status.conditions) return [];
+  getConditions(): HpaConditionAnnotated[] {
+    if (!this.status.conditions) return []
     return this.status.conditions.map(condition => {
-      const { message, reason, lastTransitionTime, status } = condition;
+      const { message, reason, lastTransitionTime, status } = condition
       return {
         ...condition,
         isReady: status === "True",
-        tooltip: `${message || reason} (${lastTransitionTime})`
+        tooltip: `${message || reason} (${lastTransitionTime})`,
       }
-    });
+    })
   }
 
-  getMetrics() {
-    return this.spec.metrics || [];
+  getMetrics(): HpaMetric[] {
+    return this.spec.metrics || []
   }
 
-  getCurrentMetrics() {
-    return this.status.currentMetrics || [];
+  getCurrentMetrics(): HpaMetric[] {
+    return this.status.currentMetrics || []
   }
 
-  protected getMetricName(metric: IHpaMetric): string {
-    const { type, resource, pods, object, external } = metric;
+  protected getMetricName(metric: HpaMetric): string {
+    const { type, resource, pods, object, external } = metric
     switch (type) {
-    case HpaMetricType.Resource:
-      return resource.name
-    case HpaMetricType.Pods:
-      return pods.metricName;
-    case HpaMetricType.Object:
-      return object.metricName;
-    case HpaMetricType.External:
-      return external.metricName;
+      case HpaMetricType.Resource:
+        return resource.name
+      case HpaMetricType.Pods:
+        return pods.metricName
+      case HpaMetricType.Object:
+        return object.metricName
+      case HpaMetricType.External:
+        return external.metricName
     }
   }
 
   // todo: refactor
-  getMetricValues(metric: IHpaMetric): string {
-    const metricType = metric.type.toLowerCase();
+  getMetricValues(metric: HpaMetric): string {
+    const metricType = metric.type.toLowerCase()
     const currentMetric = this.getCurrentMetrics().find(current =>
-      metric.type == current.type && this.getMetricName(metric) == this.getMetricName(current)
-    );
-    const current = currentMetric ? currentMetric[metricType] : null;
-    const target = metric[metricType];
-    let currentValue = "unknown";
-    let targetValue = "unknown";
+      metric.type == current.type && this.getMetricName(metric) == this.getMetricName(current),
+    )
+    const current = currentMetric ? currentMetric[metricType] : null
+    const target = metric[metricType]
+    let currentValue = "unknown"
+    let targetValue = "unknown"
     if (current) {
-      currentValue = current.currentAverageUtilization || current.currentAverageValue || current.currentValue;
-      if (current.currentAverageUtilization) currentValue += "%";
+      currentValue = current.currentAverageUtilization || current.currentAverageValue || current.currentValue
+      if (current.currentAverageUtilization) currentValue += "%"
     }
     if (target) {
-      targetValue = target.targetAverageUtilization || target.targetAverageValue || target.targetValue;
+      targetValue = target.targetAverageUtilization || target.targetAverageValue || target.targetValue
       if (target.targetAverageUtilization) targetValue += "%"
     }
-    return `${currentValue} / ${targetValue}`;
+    return `${currentValue} / ${targetValue}`
   }
 }
 
@@ -137,4 +144,4 @@ export const hpaApi = new KubeApi({
   apiBase: "/apis/autoscaling/v2beta1/horizontalpodautoscalers",
   isNamespaced: true,
   objectConstructor: HorizontalPodAutoscaler,
-});
+})

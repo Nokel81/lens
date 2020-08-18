@@ -1,16 +1,16 @@
-import "./resource-quotas.scss";
+import "./resource-quotas.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { RouteComponentProps } from "react-router";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { ResourceQuota, resourceQuotaApi } from "../../api/endpoints/resource-quota.api";
-import { AddQuotaDialog } from "./add-quota-dialog";
-import { resourceQuotaStore } from "./resource-quotas.store";
-import { IResourceQuotaRouteParams } from "./resource-quotas.route";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { RouteComponentProps } from "react-router"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { ResourceQuota, resourceQuotaApi } from "../../api/endpoints/resource-quota.api"
+import { AddQuotaDialog } from "./add-quota-dialog"
+import { resourceQuotaStore } from "./resource-quotas.store"
+import { ResourceQuotaRouteParams } from "./resource-quotas.route"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -18,12 +18,12 @@ enum sortBy {
   age = "age"
 }
 
-interface Props extends RouteComponentProps<IResourceQuotaRouteParams> {
+interface Props extends RouteComponentProps<ResourceQuotaRouteParams> {
 }
 
 @observer
 export class ResourceQuotas extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <>
         <KubeObjectListLayout
@@ -49,23 +49,23 @@ export class ResourceQuotas extends React.Component<Props> {
             resourceQuota.getAge(),
           ]}
           renderItemMenu={(item: ResourceQuota) => {
-            return <ResourceQuotaMenu object={item}/>
+            return <ResourceQuotaMenu object={item} />
           }}
           addRemoveButtons={{
             onAdd: () => AddQuotaDialog.open(),
-            addTooltip: <Trans>Create new ResourceQuota</Trans>
+            addTooltip: <Trans>Create new ResourceQuota</Trans>,
           }}
         />
-        <AddQuotaDialog/>
+        <AddQuotaDialog />
       </>
-    );
+    )
   }
 }
 
-export function ResourceQuotaMenu(props: KubeObjectMenuProps<ResourceQuota>) {
+export function ResourceQuotaMenu(props: KubeObjectMenuProps<ResourceQuota>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
-  );
+    <KubeObjectMenu {...props} />
+  )
 }
 
 apiManager.registerViews(resourceQuotaApi, {

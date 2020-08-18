@@ -1,38 +1,38 @@
-import "./helm-charts.scss";
+import "./helm-charts.scss"
 
-import React, { Component } from "react";
-import { RouteComponentProps } from "react-router";
-import { observer } from "mobx-react";
-import { helmChartsURL, IHelmChartsRouteParams } from "./helm-charts.route";
-import { helmChartStore } from "./helm-chart.store";
-import { HelmChart } from "../../api/endpoints/helm-charts.api";
-import { HelmChartDetails } from "./helm-chart-details";
-import { navigation } from "../../navigation";
-import { ItemListLayout } from "../item-object-list/item-list-layout";
-import { t, Trans } from "@lingui/macro";
-import { _i18n } from "../../i18n";
-import { SearchInput } from "../input";
+import React, { Component } from "react"
+import { RouteComponentProps } from "react-router"
+import { observer } from "mobx-react"
+import { helmChartsURL, HelmChartsRouteParams } from "./helm-charts.route"
+import { helmChartStore } from "./helm-chart.store"
+import { HelmChart } from "../../api/endpoints/helm-charts.api"
+import { HelmChartDetails } from "./helm-chart-details"
+import { navigation } from "../../navigation"
+import { ItemListLayout } from "../item-object-list/item-list-layout"
+import { t, Trans } from "@lingui/macro"
+import { _i18n } from "../../i18n"
+import { SearchInput } from "../input"
 
 enum sortBy {
   name = "name",
   repo = "repo",
 }
 
-interface Props extends RouteComponentProps<IHelmChartsRouteParams> {
+interface Props extends RouteComponentProps<HelmChartsRouteParams> {
 }
 
 @observer
 export class HelmCharts extends Component<Props> {
-  componentDidMount() {
-    helmChartStore.loadAll();
+  async componentDidMount(): Promise<void> {
+    await helmChartStore.loadAll()
   }
 
-  get selectedChart() {
+  get selectedChart(): HelmChart {
     const { match: { params: { chartName, repo } } } = this.props
-    return helmChartStore.getByName(chartName, repo);
+    return helmChartStore.getByName(chartName, repo)
   }
 
-  showDetails = (chart: HelmChart) => {
+  showDetails = (chart: HelmChart): void => {
     if (!chart) {
       navigation.merge(helmChartsURL())
     }
@@ -41,16 +41,16 @@ export class HelmCharts extends Component<Props> {
         params: {
           chartName: chart.getName(),
           repo: chart.getRepository(),
-        }
+        },
       }))
     }
   }
 
-  hideDetails = () => {
-    this.showDetails(null);
+  hideDetails = (): void => {
+    this.showDetails(null)
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <>
         <ItemListLayout
@@ -69,10 +69,10 @@ export class HelmCharts extends Component<Props> {
             (chart: HelmChart) => chart.getKeywords(),
           ]}
           filterItems={[
-            (items: HelmChart[]) => items.filter(item => !item.deprecated)
+            (items: HelmChart[]) => items.filter(item => !item.deprecated),
           ]}
           customizeHeader={() => (
-            <SearchInput placeholder={_i18n._(t`Search Helm Charts`)}/>
+            <SearchInput placeholder={_i18n._(t`Search Helm Charts`)} />
           )}
           renderTableHeader={[
             { className: "icon" },
@@ -84,7 +84,7 @@ export class HelmCharts extends Component<Props> {
 
           ]}
           renderTableContents={(chart: HelmChart) => [
-            <figure>
+            <figure key={chart.getFullName()}>
               <img
                 src={chart.getIcon() || require("./helm-placeholder.svg")}
                 onLoad={evt => evt.currentTarget.classList.add("visible")}
@@ -94,7 +94,7 @@ export class HelmCharts extends Component<Props> {
             chart.getDescription(),
             chart.getVersion(),
             chart.getAppVersion(),
-            { title: chart.getRepository(), className: chart.getRepository().toLowerCase() }
+            { title: chart.getRepository(), className: chart.getRepository().toLowerCase() },
           ]}
           detailsItem={this.selectedChart}
           onDetails={this.showDetails}
@@ -104,6 +104,6 @@ export class HelmCharts extends Component<Props> {
           hideDetails={this.hideDetails}
         />
       </>
-    );
+    )
   }
 }

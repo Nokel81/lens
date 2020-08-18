@@ -1,17 +1,17 @@
-import "./replicasets.scss";
+import "./replicasets.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { ReplicaSet, replicaSetApi } from "../../api/endpoints";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { replicaSetStore } from "./replicasets.store";
-import { Spinner } from "../spinner";
-import { prevDefault, stopPropagation } from "../../utils";
-import { DrawerTitle } from "../drawer";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { showDetails } from "../../navigation";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { ReplicaSet, replicaSetApi } from "../../api/endpoints"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { replicaSetStore } from "./replicasets.store"
+import { Spinner } from "../spinner"
+import { prevDefault, stopPropagation } from "../../utils"
+import { DrawerTitle } from "../drawer"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { showDetails } from "../../navigation"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -33,19 +33,19 @@ export class ReplicaSets extends React.Component<Props> {
     [sortBy.pods]: (replicaSet: ReplicaSet) => this.getPodsLength(replicaSet),
   }
 
-  getPodsLength(replicaSet: ReplicaSet) {
-    return replicaSetStore.getChildPods(replicaSet).length;
+  getPodsLength(replicaSet: ReplicaSet): number {
+    return replicaSetStore.getChildPods(replicaSet).length
   }
 
-  render() {
-    const { replicaSets } = this.props;
+  render(): React.ReactNode {
+    const { replicaSets } = this.props
     if (!replicaSets.length && !replicaSetStore.isLoaded) return (
-      <div className="ReplicaSets"><Spinner center/></div>
-    );
-    if (!replicaSets.length) return null;
+      <div className="ReplicaSets"><Spinner center /></div>
+    )
+    if (!replicaSets.length) return null
     return (
       <div className="ReplicaSets flex column">
-        <DrawerTitle title={<Trans>Deploy Revisions</Trans>}/>
+        <DrawerTitle title={<Trans>Deploy Revisions</Trans>} />
         <Table
           selectable
           scrollable={false}
@@ -59,7 +59,7 @@ export class ReplicaSets extends React.Component<Props> {
             <TableCell className="namespace" sortBy={sortBy.namespace}>Namespace</TableCell>
             <TableCell className="pods" sortBy={sortBy.pods}><Trans>Pods</Trans></TableCell>
             <TableCell className="age" sortBy={sortBy.age}><Trans>Age</Trans></TableCell>
-            <TableCell className="actions"/>
+            <TableCell className="actions" />
           </TableHead>
           {
             replicaSets.map(replica => {
@@ -75,7 +75,7 @@ export class ReplicaSets extends React.Component<Props> {
                   <TableCell className="pods">{this.getPodsLength(replica)}</TableCell>
                   <TableCell className="age">{replica.getAge()}</TableCell>
                   <TableCell className="actions" onClick={stopPropagation}>
-                    <ReplicaSetMenu object={replica}/>
+                    <ReplicaSetMenu object={replica} />
                   </TableCell>
                 </TableRow>
               )
@@ -83,16 +83,16 @@ export class ReplicaSets extends React.Component<Props> {
           }
         </Table>
       </div>
-    );
+    )
   }
 }
 
-export function ReplicaSetMenu(props: KubeObjectMenuProps<ReplicaSet>) {
+export function ReplicaSetMenu(props: KubeObjectMenuProps<ReplicaSet>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 
 apiManager.registerViews(replicaSetApi, {
   Menu: ReplicaSetMenu,
-});
+})

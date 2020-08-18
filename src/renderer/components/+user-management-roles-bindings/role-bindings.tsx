@@ -1,18 +1,16 @@
 import "./role-bindings.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { RouteComponentProps } from "react-router";
-import { Icon } from "../icon";
-import { IRoleBindingsRouteParams } from "../+user-management/user-management.routes";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { clusterRoleBindingApi, RoleBinding, roleBindingApi } from "../../api/endpoints";
-import { roleBindingsStore } from "./role-bindings.store";
-import { KubeObjectListLayout } from "../kube-object";
-import { AddRoleBindingDialog } from "./add-role-binding-dialog";
-import { KubeObject } from "../../api/kube-object";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { RouteComponentProps } from "react-router"
+import { RoleBindingsRouteParams } from "../+user-management/user-management.routes"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { clusterRoleBindingApi, RoleBinding, roleBindingApi } from "../../api/endpoints"
+import { roleBindingsStore } from "./role-bindings.store"
+import { KubeObjectListLayout } from "../kube-object"
+import { AddRoleBindingDialog } from "./add-role-binding-dialog"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -21,12 +19,12 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<IRoleBindingsRouteParams> {
+interface Props extends RouteComponentProps<RoleBindingsRouteParams> {
 }
 
 @observer
 export class RoleBindings extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="RoleBindings"
@@ -55,7 +53,7 @@ export class RoleBindings extends React.Component<Props> {
           binding.getAge(),
         ]}
         renderItemMenu={(item: RoleBinding) => {
-          return <RoleBindingMenu object={item}/>
+          return <RoleBindingMenu object={item} />
         }}
         addRemoveButtons={{
           onAdd: () => AddRoleBindingDialog.open(),
@@ -66,9 +64,9 @@ export class RoleBindings extends React.Component<Props> {
   }
 }
 
-export function RoleBindingMenu(props: KubeObjectMenuProps<RoleBinding>) {
+export function RoleBindingMenu(props: KubeObjectMenuProps<RoleBinding>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

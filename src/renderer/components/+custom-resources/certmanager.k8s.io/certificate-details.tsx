@@ -1,33 +1,33 @@
 import "./certificate-details.scss"
 
-import React from "react";
+import React from "react"
 import moment from "moment"
-import { observer } from "mobx-react";
-import { Link } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { DrawerItem, DrawerTitle } from "../../drawer";
-import { Badge } from "../../badge";
-import { KubeEventDetails } from "../../+events/kube-event-details";
-import { KubeObjectDetailsProps } from "../../kube-object";
-import { Certificate, certificatesApi } from "../../../api/endpoints/cert-manager.api";
-import { cssNames } from "../../../utils";
-import { apiManager } from "../../../api/api-manager";
-import { KubeObjectMeta } from "../../kube-object/kube-object-meta";
+import { observer } from "mobx-react"
+import { Link } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { DrawerItem, DrawerTitle } from "../../drawer"
+import { Badge } from "../../badge"
+import { KubeEventDetails } from "../../+events/kube-event-details"
+import { KubeObjectDetailsProps } from "../../kube-object"
+import { Certificate, certificatesApi } from "../../../api/endpoints/cert-manager.api"
+import { cssNames } from "../../../utils"
+import { apiManager } from "../../../api/api-manager"
+import { KubeObjectMeta } from "../../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<Certificate> {
 }
 
 @observer
 export class CertificateDetails extends React.Component<Props> {
-  render() {
-    const { object: cert, className } = this.props;
-    if (!cert) return;
-    const { spec, status } = cert;
-    const { acme, isCA, commonName, secretName, dnsNames, duration, ipAddresses, keyAlgorithm, keySize, organization, renewBefore } = spec;
-    const { lastFailureTime, notAfter } = status;
+  render(): React.ReactNode {
+    const { object: cert, className } = this.props
+    if (!cert) return
+    const { spec, status } = cert
+    const { acme, isCA, commonName, secretName, dnsNames, duration, ipAddresses, keyAlgorithm, keySize, organization, renewBefore } = spec
+    const { lastFailureTime, notAfter } = status
     return (
       <div className={cssNames("CertificateDetails", className)}>
-        <KubeObjectMeta object={cert}/>
+        <KubeObjectMeta object={cert} />
 
         <DrawerItem name={<Trans>Issuer</Trans>}>
           <Link to={cert.getIssuerDetailsUrl()}>
@@ -52,7 +52,7 @@ export class CertificateDetails extends React.Component<Props> {
         )}
         {dnsNames && (
           <DrawerItem name={<Trans>DNS names</Trans>} labelsOnly>
-            {dnsNames.map(name => <Badge key={name} label={name}/>)}
+            {dnsNames.map(name => <Badge key={name} label={name} />)}
           </DrawerItem>
         )}
         {ipAddresses && (
@@ -110,12 +110,12 @@ export class CertificateDetails extends React.Component<Props> {
 
         {acme && (
           <>
-            <DrawerTitle title="ACME"/>
+            <DrawerTitle title="ACME" />
             {acme.config.map(({ domains, http01, dns01 }, index) => {
               return (
                 <div key={index} className="acme-config">
                   <DrawerItem name={<Trans>Domains</Trans>} labelsOnly>
-                    {domains.map(domain => <Badge key={domain} label={domain}/>)}
+                    {domains.map(domain => <Badge key={domain} label={domain} />)}
                   </DrawerItem>
                   <DrawerItem name={<Trans>Http01</Trans>}>
                     {Object.entries(http01).map(([key, val]) => `${key}: ${val}`)[0]}
@@ -131,12 +131,12 @@ export class CertificateDetails extends React.Component<Props> {
           </>
         )}
 
-        <KubeEventDetails object={cert}/>
+        <KubeEventDetails object={cert} />
       </div>
-    );
+    )
   }
 }
 
 apiManager.registerViews(certificatesApi, {
-  Details: CertificateDetails
+  Details: CertificateDetails,
 })

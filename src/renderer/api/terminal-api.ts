@@ -1,8 +1,8 @@
-import { stringify } from "querystring";
-import { autobind, base64, EventEmitter } from "../utils";
-import { WebSocketApi } from "./websocket-api";
+import { stringify } from "querystring"
+import { autobind, base64, EventEmitter } from "../utils"
+import { WebSocketApi } from "./websocket-api"
 import isEqual from "lodash/isEqual"
-import { isDevelopment } from "../../common/vars";
+import { isDevelopment } from "../../common/vars"
 
 export enum TerminalChannels {
   STDIN = 0,
@@ -41,104 +41,103 @@ export class TerminalApi extends WebSocketApi {
       logging: isDevelopment,
       flushOnOpen: false,
       pingIntervalSeconds: 30,
-    });
+    })
   }
 
-  async getUrl() {
-    let { port } = location;
-    const { hostname, protocol } = location;
-    const { id, node } = this.options;
-    const wss = `ws${protocol === "https:" ? "s" : ""}://`;
-    const query: TerminalApiQuery = { id };
+  async getUrl(): Promise<string> {
+    let { port } = location
+    const { hostname, protocol } = location
+    const { id, node } = this.options
+    const wss = `ws${protocol === "https:" ? "s" : ""}://`
+    const query: TerminalApiQuery = { id }
     if (port) {
       port = `:${port}`
     }
     if (node) {
-      query.node = node;
-      query.type = "node";
+      query.node = node
+      query.type = "node"
     }
-    return `${wss}${hostname}${port}/api?${stringify(query)}`;
+    return `${wss}${hostname}${port}/api?${stringify(query)}`
   }
 
-  async connect() {
-    const apiUrl = await this.getUrl();
-    this.emitStatus("Connecting ...");
-    this.onData.addListener(this._onReady, { prepend: true });
-    return super.connect(apiUrl);
+  async connect(): Promise<void> {
+    const apiUrl = await this.getUrl()
+    this.emitStatus("Connecting ...")
+    this.onData.addListener(this._onReady, { prepend: true })
+    return super.connect(apiUrl)
   }
 
-  destroy() {
-    if (!this.socket) return;
-    const exitCode = String.fromCharCode(4); // ctrl+d
-    this.sendCommand(exitCode);
-    setTimeout(() => super.destroy(), 2000);
+  destroy(): void {
+    if (!this.socket) return
+    const exitCode = String.fromCharCode(4) // ctrl+d
+    this.sendCommand(exitCode)
+    setTimeout(() => super.destroy(), 2000)
   }
 
-  removeAllListeners() {
-    super.removeAllListeners();
-    this.onReady.removeAllListeners();
+  removeAllListeners(): void {
+    super.removeAllListeners()
+    this.onReady.removeAllListeners()
   }
 
   @autobind()
-  protected _onReady(data: string) {
-    if (!data) return;
-    this.isReady = true;
-    this.onReady.emit();
-    this.onData.removeListener(this._onReady);
-    this.flush();
-    this.onData.emit(data); // re-emit data
-    return false; // prevent calling rest of listeners
+  protected _onReady(data: string): boolean {
+    if (!data) return
+    this.isReady = true
+    this.onReady.emit()
+    this.onData.removeListener(this._onReady)
+    this.flush()
+    this.onData.emit(data) // re-emit data
+    return false // prevent calling rest of listeners
   }
 
-  reconnect() {
-    const { reconnectDelaySeconds } = this.params;
-    super.reconnect();
+  reconnect(): void {
+    super.reconnect()
   }
 
-  sendCommand(key: string, channel = TerminalChannels.STDIN) {
-    return this.send(channel + base64.encode(key));
+  sendCommand(key: string, channel = TerminalChannels.STDIN): void {
+    return this.send(channel + base64.encode(key))
   }
 
-  sendTerminalSize(cols: number, rows: number) {
-    const newSize = { Width: cols, Height: rows };
+  sendTerminalSize(cols: number, rows: number): void {
+    const newSize = { Width: cols, Height: rows }
     if (!isEqual(this.size, newSize)) {
-      this.sendCommand(JSON.stringify(newSize), TerminalChannels.TERMINAL_SIZE);
-      this.size = newSize;
+      this.sendCommand(JSON.stringify(newSize), TerminalChannels.TERMINAL_SIZE)
+      this.size = newSize
     }
   }
 
-  protected parseMessage(data: string) {
-    data = data.substr(1); // skip channel
-    return base64.decode(data);
+  protected parseMessage(data: string): any {
+    data = data.substr(1) // skip channel
+    return base64.decode(data)
   }
 
-  protected _onOpen(evt: Event) {
+  protected _onOpen(evt: Event): void {
     // Client should send terminal size in special channel 4,
     // But this size will be changed by terminal.fit()
-    this.sendTerminalSize(120, 80);
-    super._onOpen(evt);
+    this.sendTerminalSize(120, 80)
+    super._onOpen(evt)
   }
 
-  protected _onClose(evt: CloseEvent) {
-    super._onClose(evt);
-    this.isReady = false;
+  protected _onClose(evt: CloseEvent): void {
+    super._onClose(evt)
+    this.isReady = false
   }
 
-  protected emitStatus(data: string, options: { color?: TerminalColor; showTime?: boolean } = {}) {
-    const { color, showTime } = options;
+  protected emitStatus(data: string, options: { color?: TerminalColor; showTime?: boolean } = {}): void {
+    const { color, showTime } = options
     if (color) {
-      data = `${color}${data}${TerminalColor.NO_COLOR}`;
+      data = `${color}${data}${TerminalColor.NO_COLOR}`
     }
-    let time;
+    let time
     if (showTime) {
-      time = (new Date()).toLocaleString() + " ";
+      time = (new Date()).toLocaleString() + " "
     }
-    this.onData.emit(`${showTime ? time : ""}${data}\r\n`);
+    this.onData.emit(`${showTime ? time : ""}${data}\r\n`)
   }
 
-  protected emitError(error: string) {
+  protected emitError(error: string): void {
     this.emitStatus(error, {
-      color: TerminalColor.RED
-    });
+      color: TerminalColor.RED,
+    })
   }
 }

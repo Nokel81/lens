@@ -1,19 +1,19 @@
 import "./issuer-details.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { Link } from "react-router-dom";
-import { DrawerItem, DrawerTitle } from "../../drawer";
-import { Badge } from "../../badge";
-import { KubeEventDetails } from "../../+events/kube-event-details";
-import { KubeObjectDetailsProps } from "../../kube-object";
-import { clusterIssuersApi, Issuer, issuersApi } from "../../../api/endpoints/cert-manager.api";
-import { autobind, cssNames } from "../../../utils";
-import { getDetailsUrl } from "../../../navigation";
-import { secretsApi } from "../../../api/endpoints";
-import { apiManager } from "../../../api/api-manager";
-import { KubeObjectMeta } from "../../kube-object/kube-object-meta";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { Link } from "react-router-dom"
+import { DrawerItem, DrawerTitle } from "../../drawer"
+import { Badge } from "../../badge"
+import { KubeEventDetails } from "../../+events/kube-event-details"
+import { KubeObjectDetailsProps } from "../../kube-object"
+import { clusterIssuersApi, Issuer, issuersApi } from "../../../api/endpoints/cert-manager.api"
+import { autobind, cssNames } from "../../../utils"
+import { getDetailsUrl } from "../../../navigation"
+import { secretsApi } from "../../../api/endpoints"
+import { apiManager } from "../../../api/api-manager"
+import { KubeObjectMeta } from "../../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<Issuer> {
 }
@@ -21,15 +21,15 @@ interface Props extends KubeObjectDetailsProps<Issuer> {
 @observer
 export class IssuerDetails extends React.Component<Props> {
   @autobind()
-  renderSecretLink(secretName: string) {
-    const namespace = this.props.object.getNs();
+  renderSecretLink(secretName: string): React.ReactNode {
+    const namespace = this.props.object.getNs()
     if (!namespace) {
-      return secretName;
+      return secretName
     }
     const secretDetailsUrl = getDetailsUrl(secretsApi.getUrl({
-      namespace: namespace,
+      namespace,
       name: secretName,
-    }));
+    }))
     return (
       <Link to={secretDetailsUrl}>
         {secretName}
@@ -37,14 +37,14 @@ export class IssuerDetails extends React.Component<Props> {
     )
   }
 
-  render() {
-    const { object: issuer, className } = this.props;
-    if (!issuer) return;
-    const { renderSecretLink } = this;
-    const { spec: { acme, ca, vault, venafi }, status } = issuer;
+  render(): React.ReactNode {
+    const { object: issuer, className } = this.props
+    if (!issuer) return
+    const { renderSecretLink } = this
+    const { spec: { acme, ca, vault, venafi }, status } = issuer
     return (
       <div className={cssNames("IssuerDetails", className)}>
-        <KubeObjectMeta object={issuer}/>
+        <KubeObjectMeta object={issuer} />
 
         <DrawerItem name={<Trans>Type</Trans>}>
           {issuer.getType()}
@@ -64,10 +64,10 @@ export class IssuerDetails extends React.Component<Props> {
         </DrawerItem>
 
         {acme && (() => {
-          const { email, server, skipTLSVerify, privateKeySecretRef, solvers } = acme;
+          const { email, server, skipTLSVerify, privateKeySecretRef } = acme
           return (
             <>
-              <DrawerTitle title="ACME"/>
+              <DrawerTitle title="ACME" />
               <DrawerItem name={<Trans>E-mail</Trans>}>
                 {email}
               </DrawerItem>
@@ -90,10 +90,10 @@ export class IssuerDetails extends React.Component<Props> {
         })()}
 
         {ca && (() => {
-          const { secretName } = ca;
+          const { secretName } = ca
           return (
             <>
-              <DrawerTitle title="CA"/>
+              <DrawerTitle title="CA" />
               <DrawerItem name={<Trans>Secret Name</Trans>}>
                 {renderSecretLink(secretName)}
               </DrawerItem>
@@ -102,11 +102,11 @@ export class IssuerDetails extends React.Component<Props> {
         })()}
 
         {vault && (() => {
-          const { auth, caBundle, path, server } = vault;
-          const { path: authPath, roleId, secretRef } = auth.appRole;
+          const { auth, caBundle, path, server } = vault
+          const { path: authPath, roleId, secretRef } = auth.appRole
           return (
             <>
-              <DrawerTitle title="Vault"/>
+              <DrawerTitle title="Vault" />
               <DrawerItem name={<Trans>Server</Trans>}>
                 {server}
               </DrawerItem>
@@ -114,10 +114,10 @@ export class IssuerDetails extends React.Component<Props> {
                 {path}
               </DrawerItem>
               <DrawerItem name={<Trans>CA Bundle</Trans>} labelsOnly>
-                <Badge label={caBundle}/>
+                <Badge label={caBundle} />
               </DrawerItem>
 
-              <DrawerTitle title={<Trans>Auth App Role</Trans>}/>
+              <DrawerTitle title={<Trans>Auth App Role</Trans>} />
               <DrawerItem name={<Trans>Path</Trans>}>
                 {authPath}
               </DrawerItem>
@@ -134,10 +134,10 @@ export class IssuerDetails extends React.Component<Props> {
         })()}
 
         {venafi && (() => {
-          const { zone, cloud, tpp } = venafi;
+          const { zone, cloud, tpp } = venafi
           return (
             <>
-              <DrawerTitle title="CA"/>
+              <DrawerTitle title="CA" />
               <DrawerItem name={<Trans>Zone</Trans>}>
                 {zone}
               </DrawerItem>
@@ -148,12 +148,12 @@ export class IssuerDetails extends React.Component<Props> {
               )}
               {tpp && (
                 <>
-                  <DrawerTitle title="TPP"/>
+                  <DrawerTitle title="TPP" />
                   <DrawerItem name={<Trans>URL</Trans>}>
                     {tpp.url}
                   </DrawerItem>
                   <DrawerItem name={<Trans>CA Bundle</Trans>} labelsOnly>
-                    <Badge label={tpp.caBundle}/>
+                    <Badge label={tpp.caBundle} />
                   </DrawerItem>
                   <DrawerItem name={<Trans>Credentials Ref</Trans>}>
                     {renderSecretLink(tpp.credentialsRef.name)}
@@ -164,12 +164,12 @@ export class IssuerDetails extends React.Component<Props> {
           )
         })()}
 
-        <KubeEventDetails object={issuer}/>
+        <KubeEventDetails object={issuer} />
       </div>
-    );
+    )
   }
 }
 
 apiManager.registerViews([issuersApi, clusterIssuersApi], {
-  Details: IssuerDetails
+  Details: IssuerDetails,
 })

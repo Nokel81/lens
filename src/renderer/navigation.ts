@@ -1,38 +1,38 @@
 // Navigation helpers
 
-import { ipcRenderer } from "electron";
+import { ipcRenderer } from "electron"
 import { compile } from "path-to-regexp"
-import { createBrowserHistory, createMemoryHistory, Location, LocationDescriptor } from "history";
-import { createObservableHistory } from "mobx-observable-history";
+import { createBrowserHistory, createMemoryHistory, Location, LocationDescriptor } from "history"
+import { createObservableHistory } from "mobx-observable-history"
 
-export const history = typeof window !== "undefined" ? createBrowserHistory() : createMemoryHistory();
-export const navigation = createObservableHistory(history);
+export const history = typeof window !== "undefined" ? createBrowserHistory() : createMemoryHistory()
+export const navigation = createObservableHistory(history)
 
 if (ipcRenderer) {
   // subscribe for navigation via menu.ts
   ipcRenderer.on("menu:navigate", (event, path: string) => {
-    navigate(path);
-  });
+    navigate(path)
+  })
 }
 
-export function navigate(location: LocationDescriptor) {
-  navigation.location = location as Location;
+export function navigate(location: LocationDescriptor): void {
+  navigation.location = location as Location
 }
 
-export interface IURLParams<P = {}, Q = {}> {
+export interface URLParams<P, Q> {
   params?: P;
-  query?: IQueryParams & Q;
+  query?: QueryParams & Q;
 }
 
-export function buildURL<P extends object, Q = object>(path: string | string[]) {
-  const pathBuilder = compile(path.toString());
-  return function ({ params, query }: IURLParams<P, Q> = {}) {
+export function buildURL<P extends Record<string, any>, Q = Record<string, any>>(path: string | string[]): (p?: URLParams<P, Q>) => string {
+  const pathBuilder = compile(path.toString())
+  return function ({ params, query }: URLParams<P, Q> = {}) {
     return pathBuilder(params) + (query ? getQueryString(query, false) : "")
   }
 }
 
 // common params for all pages
-export interface IQueryParams {
+export interface QueryParams {
   namespaces?: string[];  // selected context namespaces
   details?: string;      // serialized resource details
   selected?: string;     // mark resource as selected
@@ -41,8 +41,8 @@ export interface IQueryParams {
   orderBy?: string;
 }
 
-export function getQueryString(params?: Partial<IQueryParams>, merge = true) {
-  const searchParams = navigation.searchParams.copyWith(params);
+export function getQueryString(params?: Partial<QueryParams>, merge = true): string {
+  const searchParams = navigation.searchParams.copyWith(params)
   if (!merge) {
     Array.from(searchParams.keys()).forEach(key => {
       if (!(key in params)) searchParams.delete(key)
@@ -51,43 +51,43 @@ export function getQueryString(params?: Partial<IQueryParams>, merge = true) {
   return searchParams.toString({ withPrefix: true })
 }
 
-export function setQueryParams<T>(params?: T & IQueryParams, { merge = true, replace = false } = {}) {
-  const newSearch = getQueryString(params, merge);
-  navigation.merge({ search: newSearch }, replace);
+export function setQueryParams<T>(params?: T & QueryParams, { merge = true, replace = false } = {}): void {
+  const newSearch = getQueryString(params, merge)
+  navigation.merge({ search: newSearch }, replace)
 }
 
-export function getDetails() {
+export function getDetails(): string {
   return navigation.searchParams.get("details")
 }
 
-export function getSelectedDetails() {
+export function getSelectedDetails(): string {
   return navigation.searchParams.get("selected") || getDetails()
 }
 
-export function getDetailsUrl(details: string) {
+export function getDetailsUrl(details: string): string {
   return getQueryString({
-    details: details,
+    details,
     selected: getSelectedDetails(),
-  });
+  })
 }
 
-export function showDetails(path: string, resetSelected = true) {
+export function showDetails(path: string, resetSelected = true): void {
   navigation.searchParams.merge({
     details: path,
     selected: resetSelected ? null : getSelectedDetails(),
   })
 }
 
-export function hideDetails() {
+export function hideDetails(): void {
   showDetails(null)
 }
 
-export function setSearch(text: string) {
+export function setSearch(text: string): void {
   navigation.replace({
-    search: getQueryString({ search: text })
+    search: getQueryString({ search: text }),
   })
 }
 
-export function getSearch() {
-  return navigation.searchParams.get("search") || "";
+export function getSearch(): string {
+  return navigation.searchParams.get("search") || ""
 }

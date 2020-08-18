@@ -1,32 +1,36 @@
-import { observable } from "mobx";
-import { Deployment, deploymentApi, IPodMetrics, podsApi, PodStatus } from "../../api/endpoints";
-import { KubeObjectStore } from "../../kube-object.store";
-import { autobind } from "../../utils";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { apiManager } from "../../api/api-manager";
+import { observable } from "mobx"
+import { Deployment, deploymentApi, PodMetrics, podsApi, PodStatus, Pod } from "../../api/endpoints"
+import { KubeObjectStore } from "../../kube-object.store"
+import { autobind } from "../../utils"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { apiManager } from "../../api/api-manager"
+
+export interface DeploymentStatuses {
+  failed: number;
+  running: number;
+  pending: number;
+}
 
 @autobind()
 export class DeploymentStore extends KubeObjectStore<Deployment> {
   api = deploymentApi
-  @observable metrics: IPodMetrics = null;
+  @observable metrics: PodMetrics = null;
 
-  protected sortItems(items: Deployment[]) {
+  protected sortItems(items: Deployment[]): Deployment[] {
     return super.sortItems(items, [
       item => item.getReplicas(),
-    ], "desc");
+    ], "desc")
   }
 
-  loadMetrics(deployment: Deployment) {
-    const pods = this.getChildPods(deployment);
-    return podsApi.getMetrics(pods, deployment.getNs(), "").then(metrics =>
-      this.metrics = metrics
-    );
+  async loadMetrics(deployment: Deployment): Promise<void> {
+    const pods = this.getChildPods(deployment)
+    this.metrics = await podsApi.getMetrics(pods, deployment.getNs(), "")
   }
 
-  getStatuses(deployments?: Deployment[]) {
+  getStatuses(deployments: Deployment[]): DeploymentStatuses {
     const status = { failed: 0, pending: 0, running: 0 }
     deployments.forEach(deployment => {
-      const pods = this.getChildPods(deployment);
+      const pods = this.getChildPods(deployment)
       if (pods.some(pod => pod.getStatus() === PodStatus.FAILED)) {
         status.failed++
       }
@@ -40,16 +44,16 @@ export class DeploymentStore extends KubeObjectStore<Deployment> {
     return status
   }
 
-  getChildPods(deployment: Deployment) {
+  getChildPods(deployment: Deployment): Pod[] {
     return podsStore
       .getByLabel(deployment.getTemplateLabels())
       .filter(pod => pod.getNs() === deployment.getNs())
   }
 
-  reset() {
-    this.metrics = null;
+  reset(): void {
+    this.metrics = null
   }
 }
 
-export const deploymentStore = new DeploymentStore();
-apiManager.registerStore(deploymentApi, deploymentStore);
+export const deploymentStore = new DeploymentStore()
+apiManager.registerStore(deploymentApi, deploymentStore)

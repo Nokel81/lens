@@ -1,5 +1,5 @@
-import { useEffect } from "react";
+import { useEffect } from "react"
 
-export function useOnUnmount(callback: () => void) {
+export function useOnUnmount(callback: () => void): void {
   useEffect(() => callback, [])
 }

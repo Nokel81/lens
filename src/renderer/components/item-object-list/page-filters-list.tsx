@@ -1,12 +1,12 @@
 import "./page-filters-list.scss"
 import React from "react"
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { Badge } from "../badge";
-import { cssNames } from "../../utils";
-import { Filter, pageFilters } from "./page-filters.store";
-import { FilterIcon } from "./filter-icon";
-import { Icon } from "../icon";
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { Badge } from "../badge"
+import { cssNames } from "../../utils"
+import { Filter, pageFilters } from "./page-filters.store"
+import { FilterIcon } from "./filter-icon"
+import { Icon } from "../icon"
 
 interface Props {
   filters?: Filter[];
@@ -16,17 +16,17 @@ interface Props {
 export class PageFiltersList extends React.Component<Props> {
   static defaultProps: Props = {
     get filters() {
-      return pageFilters.activeFilters;
-    }
+      return pageFilters.activeFilters
+    },
   }
 
-  reset = () => pageFilters.reset()
-  remove = (filter: Filter) => pageFilters.removeFilter(filter)
+  reset = (): void => pageFilters.reset()
+  remove = (filter: Filter): void => pageFilters.removeFilter(filter)
 
-  renderContent() {
-    const { filters } = this.props;
+  renderContent(): React.ReactNode {
+    const { filters } = this.props
     if (!filters.length) {
-      return null;
+      return null
     }
     return (
       <>
@@ -38,7 +38,7 @@ export class PageFiltersList extends React.Component<Props> {
         </div>
         <div className="labels">
           {filters.map(filter => {
-            const { value, type } = filter;
+            const { value, type } = filter
             return (
               <Badge
                 key={`${type}-${value}`}
@@ -46,7 +46,7 @@ export class PageFiltersList extends React.Component<Props> {
                 className={cssNames("flex gaps filter align-center", type)}
                 label={(
                   <>
-                    <FilterIcon type={type}/>
+                    <FilterIcon type={type} />
                     <span className="value">{value}</span>
                     <Icon
                       small
@@ -63,7 +63,7 @@ export class PageFiltersList extends React.Component<Props> {
     )
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <div className="PageFiltersList">
         {this.renderContent()}

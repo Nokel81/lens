@@ -1,6 +1,6 @@
 import { ChildProcess, spawn } from "child_process"
-import { waitUntilUsed } from "tcp-port-used";
-import { broadcastIpc } from "../common/ipc";
+import { waitUntilUsed } from "tcp-port-used"
+import { broadcastIpc } from "../common/ipc"
 import type { Cluster } from "./cluster"
 import { bundledKubectl, Kubectl } from "./kubectl"
 import logger from "./logger"
@@ -28,7 +28,7 @@ export class KubeAuthProxy {
 
   public async run(): Promise<void> {
     if (this.proxyProcess) {
-      return;
+      return
     }
     const proxyBin = await this.kubectl.getPath()
     const args = [
@@ -37,17 +37,17 @@ export class KubeAuthProxy {
       "--kubeconfig", `${this.cluster.kubeConfigPath}`,
       "--context", `${this.cluster.contextName}`,
       "--accept-hosts", ".*",
-      "--reject-paths", "^[^/]"
+      "--reject-paths", "^[^/]",
     ]
     if (process.env.DEBUG_PROXY === "true") {
       args.push("-v", "9")
     }
     logger.debug(`spawning kubectl proxy with args: ${args}`)
-    this.proxyProcess = spawn(proxyBin, args, { env: this.env, })
+    this.proxyProcess = spawn(proxyBin, args, { env: this.env })
 
     this.proxyProcess.on("exit", (code) => {
       this.sendIpcLogMessage({ data: `proxy exited with code: ${code}`, error: code > 0 })
-      this.exit();
+      this.exit()
     })
 
     this.proxyProcess.stdout.on('data', (data) => {
@@ -66,7 +66,7 @@ export class KubeAuthProxy {
     return waitUntilUsed(this.port, 500, 10000)
   }
 
-  protected parseError(data: string) {
+  protected parseError(data: string): string {
     const error = data.split("http: proxy error:").slice(1).join("").trim()
     let errorMsg = error
     const jsonError = error.split("Response: ")[1]
@@ -81,23 +81,23 @@ export class KubeAuthProxy {
     return errorMsg
   }
 
-  protected async sendIpcLogMessage(res: KubeAuthProxyLog) {
+  protected async sendIpcLogMessage(res: KubeAuthProxyLog): Promise<void> {
     const channel = `kube-auth:${this.cluster.id}`
-    logger.info(`[KUBE-AUTH]: out-channel "${channel}"`, { ...res, meta: this.cluster.getMeta() });
+    logger.info(`[KUBE-AUTH]: out-channel "${channel}"`, { ...res, meta: this.cluster.getMeta() })
     broadcastIpc({
       // webContentId: null, // todo: send a message only to single cluster's window
-      channel: channel,
+      channel,
       args: [res],
-    });
+    })
   }
 
-  public exit() {
-    if (!this.proxyProcess) return;
+  public exit(): void {
+    if (!this.proxyProcess) return
     logger.debug("[KUBE-AUTH]: stopping local proxy", this.cluster.getMeta())
     this.proxyProcess.kill()
-    this.proxyProcess.removeAllListeners();
-    this.proxyProcess.stderr.removeAllListeners();
-    this.proxyProcess.stdout.removeAllListeners();
-    this.proxyProcess = null;
+    this.proxyProcess.removeAllListeners()
+    this.proxyProcess.stderr.removeAllListeners()
+    this.proxyProcess.stdout.removeAllListeners()
+    this.proxyProcess = null
   }
 }

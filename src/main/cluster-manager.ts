@@ -1,10 +1,10 @@
 import type http from "http"
-import { autorun } from "mobx";
-import { apiKubePrefix } from "../common/vars";
+import { autorun } from "mobx"
+import { apiKubePrefix } from "../common/vars"
 import { ClusterId, clusterStore } from "../common/cluster-store"
 import { Cluster } from "./cluster"
-import { clusterIpc } from "../common/cluster-ipc";
-import logger from "./logger";
+import { clusterIpc } from "../common/cluster-ipc"
+import logger from "./logger"
 
 export class ClusterManager {
   constructor(public readonly port: number) {
@@ -12,41 +12,41 @@ export class ClusterManager {
     autorun(() => {
       clusterStore.clusters.forEach(cluster => {
         if (!cluster.initialized) {
-          logger.info(`[CLUSTER-MANAGER]: init cluster`, cluster.getMeta());
-          cluster.init(port);
+          logger.info(`[CLUSTER-MANAGER]: init cluster`, cluster.getMeta())
+          cluster.init(port)
         }
-      });
-    });
+      })
+    })
 
     // auto-stop removed clusters
     autorun(() => {
-      const removedClusters = Array.from(clusterStore.removedClusters.values());
+      const removedClusters = Array.from(clusterStore.removedClusters.values())
       if (removedClusters.length > 0) {
-        const meta = removedClusters.map(cluster => cluster.getMeta());
-        logger.info(`[CLUSTER-MANAGER]: removing clusters`, meta);
-        removedClusters.forEach(cluster => cluster.disconnect());
-        clusterStore.removedClusters.clear();
+        const meta = removedClusters.map(cluster => cluster.getMeta())
+        logger.info(`[CLUSTER-MANAGER]: removing clusters`, meta)
+        removedClusters.forEach(cluster => cluster.disconnect())
+        clusterStore.removedClusters.clear()
       }
     }, {
-      delay: 250
-    });
+      delay: 250,
+    })
 
     // listen for ipc-events that must/can be handled *only* in main-process (nodeIntegration=true)
-    clusterIpc.activate.handleInMain();
-    clusterIpc.disconnect.handleInMain();
-    clusterIpc.installFeature.handleInMain();
-    clusterIpc.uninstallFeature.handleInMain();
-    clusterIpc.upgradeFeature.handleInMain();
+    clusterIpc.activate.handleInMain()
+    clusterIpc.disconnect.handleInMain()
+    clusterIpc.installFeature.handleInMain()
+    clusterIpc.uninstallFeature.handleInMain()
+    clusterIpc.upgradeFeature.handleInMain()
   }
 
-  stop() {
+  stop(): void {
     clusterStore.clusters.forEach((cluster: Cluster) => {
-      cluster.disconnect();
+      cluster.disconnect()
     })
   }
 
-  protected getCluster(id: ClusterId) {
-    return clusterStore.getById(id);
+  protected getCluster(id: ClusterId): Cluster {
+    return clusterStore.getById(id)
   }
 
   getClusterForRequest(req: http.IncomingMessage): Cluster {
@@ -67,6 +67,6 @@ export class ClusterManager {
       cluster = this.getCluster(id)
     }
 
-    return cluster;
+    return cluster
   }
 }

@@ -1,27 +1,27 @@
-import "./dock.scss";
+import "./dock.scss"
 
-import React, { Fragment } from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { autobind, cssNames, prevDefault } from "../../utils";
-import { Draggable, DraggableState } from "../draggable";
-import { Icon } from "../icon";
-import { Tabs } from "../tabs/tabs";
-import { MenuItem } from "../menu";
-import { MenuActions } from "../menu/menu-actions";
-import { dockStore, IDockTab } from "./dock.store";
-import { DockTab } from "./dock-tab";
-import { TerminalTab } from "./terminal-tab";
-import { TerminalWindow } from "./terminal-window";
-import { CreateResource } from "./create-resource";
-import { InstallChart } from "./install-chart";
-import { EditResource } from "./edit-resource";
-import { UpgradeChart } from "./upgrade-chart";
-import { createTerminalTab, isTerminalTab } from "./terminal.store";
-import { createResourceTab, isCreateResourceTab } from "./create-resource.store";
-import { isEditResourceTab } from "./edit-resource.store";
-import { isInstallChartTab } from "./install-chart.store";
-import { isUpgradeChartTab } from "./upgrade-chart.store";
+import React, { Fragment } from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { autobind, cssNames, prevDefault } from "../../utils"
+import { Draggable, DraggableState } from "../draggable"
+import { Icon } from "../icon"
+import { Tabs } from "../tabs/tabs"
+import { MenuItem } from "../menu"
+import { MenuActions } from "../menu/menu-actions"
+import { dockStore, DockTabEntry } from "./dock.store"
+import { DockTab } from "./dock-tab"
+import { TerminalTab } from "./terminal-tab"
+import { TerminalWindow } from "./terminal-window"
+import { CreateResource } from "./create-resource"
+import { InstallChart } from "./install-chart"
+import { EditResource } from "./edit-resource"
+import { UpgradeChart } from "./upgrade-chart"
+import { createTerminalTab, isTerminalTab } from "./terminal.store"
+import { createResourceTab, isCreateResourceTab } from "./create-resource.store"
+import { isEditResourceTab } from "./edit-resource.store"
+import { isInstallChartTab } from "./install-chart.store"
+import { isUpgradeChartTab } from "./upgrade-chart.store"
 
 interface Props {
   className?: string;
@@ -29,75 +29,75 @@ interface Props {
 
 @observer
 export class Dock extends React.Component<Props> {
-  onResizeStart = () => {
-    const { isOpen, open, setHeight, minHeight } = dockStore;
+  onResizeStart = (): void => {
+    const { isOpen, open, setHeight, minHeight } = dockStore
     if (!isOpen) {
-      open();
-      setHeight(minHeight);
+      open()
+      setHeight(minHeight)
     }
   }
 
-  onResize = ({ offsetY }: DraggableState) => {
-    const { isOpen, close, height, setHeight, minHeight, defaultHeight } = dockStore;
-    const newHeight = height + offsetY;
+  onResize = ({ offsetY }: DraggableState): void => {
+    const { isOpen, close, height, setHeight, minHeight, defaultHeight } = dockStore
+    const newHeight = height + offsetY
     if (height > newHeight && newHeight < minHeight) {
-      setHeight(defaultHeight);
-      close();
+      setHeight(defaultHeight)
+      close()
     }
     else if (isOpen) {
-      setHeight(newHeight);
+      setHeight(newHeight)
     }
   }
 
-  onKeydown = (evt: React.KeyboardEvent<HTMLElement>) => {
-    const { close, closeTab, selectedTab, fullSize, toggleFillSize } = dockStore;
-    if (!selectedTab) return;
-    const { code, ctrlKey, shiftKey } = evt.nativeEvent;
+  onKeydown = (evt: React.KeyboardEvent<HTMLElement>): void => {
+    const { close, closeTab, selectedTab } = dockStore
+    if (!selectedTab) return
+    const { code, ctrlKey, shiftKey } = evt.nativeEvent
     if (shiftKey && code === "Escape") {
-      close();
+      close()
     }
     if (ctrlKey && code === "KeyW") {
-      if (selectedTab.pinned) close();
-      else closeTab(selectedTab.id);
+      if (selectedTab.pinned) close()
+      else closeTab(selectedTab.id)
     }
   }
 
-  onChangeTab = (tab: IDockTab) => {
-    const { open, selectTab } = dockStore;
-    open();
-    selectTab(tab.id);
+  onChangeTab = (tab: DockTabEntry): void => {
+    const { open, selectTab } = dockStore
+    open()
+    selectTab(tab.id)
   }
 
   @autobind()
-  renderTab(tab: IDockTab) {
+  renderTab(tab: DockTabEntry): React.ReactNode {
     if (isTerminalTab(tab)) {
-      return <TerminalTab value={tab}/>
+      return <TerminalTab value={tab} />
     }
     if (isCreateResourceTab(tab) || isEditResourceTab(tab)) {
-      return <DockTab value={tab} icon="edit"/>
+      return <DockTab value={tab} icon="edit" />
     }
     if (isInstallChartTab(tab) || isUpgradeChartTab(tab)) {
-      return <DockTab value={tab} icon={<Icon svg="install"/>}/>
+      return <DockTab value={tab} icon={<Icon svg="install" />} />
     }
   }
 
-  renderTabContent() {
-    const { isOpen, height, selectedTab: tab } = dockStore;
-    if (!isOpen || !tab) return;
+  renderTabContent(): React.ReactNode {
+    const { isOpen, height, selectedTab: tab } = dockStore
+    if (!isOpen || !tab) return
     return (
       <div className="tab-content" style={{ flexBasis: height }}>
-        {isCreateResourceTab(tab) && <CreateResource tab={tab}/>}
-        {isEditResourceTab(tab) && <EditResource tab={tab}/>}
-        {isInstallChartTab(tab) && <InstallChart tab={tab}/>}
-        {isUpgradeChartTab(tab) && <UpgradeChart tab={tab}/>}
-        {isTerminalTab(tab) && <TerminalWindow tab={tab}/>}
+        {isCreateResourceTab(tab) && <CreateResource tab={tab} />}
+        {isEditResourceTab(tab) && <EditResource tab={tab} />}
+        {isInstallChartTab(tab) && <InstallChart tab={tab} />}
+        {isUpgradeChartTab(tab) && <UpgradeChart tab={tab} />}
+        {isTerminalTab(tab) && <TerminalWindow tab={tab} />}
       </div>
     )
   }
 
-  render() {
-    const { className } = this.props;
-    const { isOpen, toggle, tabs, toggleFillSize, selectedTab, hasTabs, fullSize } = dockStore;
+  render(): React.ReactNode {
+    const { className } = this.props
+    const { isOpen, toggle, tabs, toggleFillSize, selectedTab, hasTabs, fullSize } = dockStore
     return (
       <div
         className={cssNames("Dock", className, { isOpen, fullSize })}
@@ -114,18 +114,20 @@ export class Dock extends React.Component<Props> {
           <Tabs
             autoFocus={isOpen}
             className="dock-tabs"
-            value={selectedTab} onChange={this.onChangeTab}
-            children={tabs.map(tab => <Fragment key={tab.id}>{this.renderTab(tab)}</Fragment>)}
-          />
+            value={selectedTab}
+            onChange={this.onChangeTab}
+          >
+            {tabs.map(tab => <Fragment key={tab.id}>{this.renderTab(tab)}</Fragment>)}
+          </Tabs>
           <div className="toolbar flex gaps align-center box grow">
             <div className="dock-menu box grow">
               <MenuActions usePortal triggerIcon={{ material: "add", className: "new-dock-tab", tooltip: <Trans>New tab</Trans> }} closeOnScroll={false}>
                 <MenuItem className="create-terminal-tab" onClick={() => createTerminalTab()}>
-                  <Icon small svg="terminal" size={15}/>
+                  <Icon small svg="terminal" size={15} />
                   <Trans>Terminal session</Trans>
                 </MenuItem>
                 <MenuItem className="create-resource-tab" onClick={() => createResourceTab()}>
-                  <Icon small material="create"/>
+                  <Icon small material="create" />
                   <Trans>Create resource</Trans>
                 </MenuItem>
               </MenuActions>
@@ -133,7 +135,7 @@ export class Dock extends React.Component<Props> {
             {hasTabs() && (
               <>
                 <Icon
-                  material={fullSize ? "fullscreen_exit": "fullscreen"}
+                  material={fullSize ? "fullscreen_exit" : "fullscreen"}
                   tooltip={fullSize ? <Trans>Exit full size mode</Trans> : <Trans>Fit to window</Trans>}
                   onClick={toggleFillSize}
                 />

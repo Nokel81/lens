@@ -1,18 +1,18 @@
-import "./events.scss";
+import "./events.scss"
 
-import React, { Fragment } from "react";
-import { observer } from "mobx-react";
-import { MainLayout } from "../layout/main-layout";
-import { eventStore } from "./event.store";
-import { KubeObjectListLayout, KubeObjectListLayoutProps } from "../kube-object";
-import { Trans } from "@lingui/macro";
-import { KubeEvent } from "../../api/endpoints/events.api";
-import { Tooltip } from "../tooltip";
-import { Link } from "react-router-dom";
-import { cssNames, IClassName, stopPropagation } from "../../utils";
-import { Icon } from "../icon";
-import { getDetailsUrl } from "../../navigation";
-import { lookupApiLink } from "../../api/kube-api";
+import React, { Fragment } from "react"
+import { observer } from "mobx-react"
+import { MainLayout } from "../layout/main-layout"
+import { eventStore } from "./event.store"
+import { KubeObjectListLayout, KubeObjectListLayoutProps } from "../kube-object"
+import { Trans } from "@lingui/macro"
+import { KubeEvent } from "../../api/endpoints/events.api"
+import { Tooltip } from "../tooltip"
+import { Link } from "react-router-dom"
+import { cssNames, IClassName, stopPropagation } from "../../utils"
+import { Icon } from "../icon"
+import { getDetailsUrl } from "../../navigation"
+import { lookupApiLink } from "../../api/kube-api"
 
 enum sortBy {
   namespace = "namespace",
@@ -30,14 +30,14 @@ interface Props extends Partial<KubeObjectListLayoutProps> {
 
 const defaultProps: Partial<Props> = {
   compactLimit: 10,
-};
+}
 
 @observer
 export class Events extends React.Component<Props> {
-  static defaultProps = defaultProps as object;
+  static defaultProps = defaultProps as Props;
 
-  render() {
-    const { compact, compactLimit, className, ...layoutProps } = this.props;
+  render(): React.ReactNode {
+    const { compact, compactLimit, className, ...layoutProps } = this.props
     const events = (
       <KubeObjectListLayout
         {...layoutProps}
@@ -70,7 +70,7 @@ export class Events extends React.Component<Props> {
                   tooltip={<Trans>Limited to {eventStore.limit}</Trans>}
                 />
               </>
-            )
+            ),
           })
         )}
         renderTableHeader={[
@@ -83,11 +83,11 @@ export class Events extends React.Component<Props> {
           { title: <Trans>Age</Trans>, className: "age", sortBy: sortBy.age },
         ]}
         renderTableContents={(event: KubeEvent) => {
-          const { involvedObject, type, message } = event;
-          const { kind, name } = involvedObject;
-          const tooltipId = `message-${event.getId()}`;
-          const isWarning = type === "Warning";
-          const detailsUrl = getDetailsUrl(lookupApiLink(involvedObject, event));
+          const { involvedObject, type, message } = event
+          const { kind, name } = involvedObject
+          const tooltipId = `message-${event.getId()}`
+          const isWarning = type === "Warning"
+          const detailsUrl = getDetailsUrl(lookupApiLink(involvedObject, event))
           return [
             {
               className: { warning: isWarning },
@@ -98,11 +98,11 @@ export class Events extends React.Component<Props> {
                     {message}
                   </Tooltip>
                 </Fragment>
-              )
+              ),
             },
             event.getNs(),
             kind,
-            <Link to={detailsUrl} title={name} onClick={stopPropagation}>{name}</Link>,
+            <Link key={name} to={detailsUrl} title={name} onClick={stopPropagation}>{name}</Link>,
             event.getSource(),
             event.count,
             event.getAge(),
@@ -115,7 +115,7 @@ export class Events extends React.Component<Props> {
       />
     )
     if (compact) {
-      return events;
+      return events
     }
     return (
       <MainLayout>

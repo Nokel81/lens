@@ -1,55 +1,55 @@
-import "./hpa-details.scss";
+import "./hpa-details.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Link } from "react-router-dom";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { Badge } from "../badge";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { cssNames } from "../../utils";
-import { HorizontalPodAutoscaler, hpaApi, HpaMetricType, IHpaMetric } from "../../api/endpoints/hpa.api";
-import { KubeEventDetails } from "../+events/kube-event-details";
-import { Trans } from "@lingui/macro";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { getDetailsUrl } from "../../navigation";
-import { lookupApiLink } from "../../api/kube-api";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import React from "react"
+import { observer } from "mobx-react"
+import { Link } from "react-router-dom"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { Badge } from "../badge"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { cssNames } from "../../utils"
+import { HorizontalPodAutoscaler, hpaApi, HpaMetricType, HpaMetric } from "../../api/endpoints/hpa.api"
+import { KubeEventDetails } from "../+events/kube-event-details"
+import { Trans } from "@lingui/macro"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { getDetailsUrl } from "../../navigation"
+import { lookupApiLink } from "../../api/kube-api"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<HorizontalPodAutoscaler> {
 }
 
 @observer
 export class HpaDetails extends React.Component<Props> {
-  renderMetrics() {
-    const { object: hpa } = this.props;
+  renderMetrics(): React.ReactNode {
+    const { object: hpa } = this.props
 
-    const renderName = (metric: IHpaMetric) => {
+    const renderName = (metric: HpaMetric) => {
       switch (metric.type) {
-      case HpaMetricType.Resource:
-        const addition = metric.resource.targetAverageUtilization ? <Trans>(as a percentage of request)</Trans> : "";
-        return <Trans>Resource {metric.resource.name} on Pods {addition}</Trans>;
+        case HpaMetricType.Resource:
+          const addition = metric.resource.targetAverageUtilization ? <Trans>(as a percentage of request)</Trans> : ""
+          return <Trans>Resource {metric.resource.name} on Pods {addition}</Trans>
 
-      case HpaMetricType.Pods:
-        return <Trans>{metric.pods.metricName} on Pods</Trans>;
+        case HpaMetricType.Pods:
+          return <Trans>{metric.pods.metricName} on Pods</Trans>
 
-      case HpaMetricType.Object:
-        const { target } = metric.object;
-        const { kind, name } = target;
-        const objectUrl = getDetailsUrl(lookupApiLink(target, hpa));
-        return (
-          <Trans>
-            {metric.object.metricName} on{" "}
-            <Link to={objectUrl}>{kind}/{name}</Link>
-          </Trans>
-        );
-      case HpaMetricType.External:
-        return (
-          <Trans>
-            {metric.external.metricName} on{" "}
-            {JSON.stringify(metric.external.selector)}
-          </Trans>
-        );
+        case HpaMetricType.Object:
+          const { target } = metric.object
+          const { kind, name } = target
+          const objectUrl = getDetailsUrl(lookupApiLink(target, hpa))
+          return (
+            <Trans>
+              {metric.object.metricName} on{" "}
+              <Link to={objectUrl}>{kind}/{name}</Link>
+            </Trans>
+          )
+        case HpaMetricType.External:
+          return (
+            <Trans>
+              {metric.external.metricName} on{" "}
+              {JSON.stringify(metric.external.selector)}
+            </Trans>
+          )
       }
     }
 
@@ -61,8 +61,8 @@ export class HpaDetails extends React.Component<Props> {
         </TableHead>
         {
           hpa.getMetrics().map((metric, index) => {
-            const name = renderName(metric);
-            const values = hpa.getMetricValues(metric);
+            const name = renderName(metric)
+            const values = hpa.getMetricValues(metric)
             return (
               <TableRow key={index}>
                 <TableCell className="name">{name}</TableCell>
@@ -72,16 +72,16 @@ export class HpaDetails extends React.Component<Props> {
           })
         }
       </Table>
-    );
+    )
   }
 
-  render() {
-    const { object: hpa } = this.props;
-    if (!hpa) return;
-    const { scaleTargetRef } = hpa.spec;
+  render(): React.ReactNode {
+    const { object: hpa } = this.props
+    if (!hpa) return
+    const { scaleTargetRef } = hpa.spec
     return (
       <div className="HpaDetails">
-        <KubeObjectMeta object={hpa}/>
+        <KubeObjectMeta object={hpa} />
 
         <DrawerItem name={<Trans>Reference</Trans>}>
           {scaleTargetRef && (
@@ -105,7 +105,7 @@ export class HpaDetails extends React.Component<Props> {
 
         <DrawerItem name={<Trans>Status</Trans>} labelsOnly>
           {hpa.getConditions().map(({ type, tooltip, isReady }) => {
-            if (!isReady) return null;
+            if (!isReady) return null
             return (
               <Badge
                 key={type}
@@ -117,17 +117,17 @@ export class HpaDetails extends React.Component<Props> {
           })}
         </DrawerItem>
 
-        <DrawerTitle title="Metrics"/>
+        <DrawerTitle title="Metrics" />
         <div className="metrics">
           {this.renderMetrics()}
         </div>
 
-        <KubeEventDetails object={hpa}/>
+        <KubeEventDetails object={hpa} />
       </div>
-    );
+    )
   }
 }
 
 apiManager.registerViews(hpaApi, {
   Details: HpaDetails,
-});
+})

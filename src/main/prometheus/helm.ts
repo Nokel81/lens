@@ -1,6 +1,6 @@
 import { PrometheusLens } from "./lens"
 import { CoreV1Api } from "@kubernetes/client-node"
-import { PrometheusService } from "./provider-registry";
+import { PrometheusService } from "./provider-registry"
 import logger from "../logger"
 
 export class PrometheusHelm extends PrometheusLens {
@@ -19,7 +19,7 @@ export class PrometheusHelm extends PrometheusLens {
         id: this.id,
         namespace: service.metadata.namespace,
         service: service.metadata.name,
-        port: service.spec.ports[0].port
+        port: service.spec.ports[0].port,
       }
     } catch(error) {
       logger.warn(`PrometheusHelm: failed to list services: ${error.toString()}`)

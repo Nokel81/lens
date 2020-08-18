@@ -3,26 +3,26 @@
 import "../common/system-ca"
 import "../common/prometheus-providers"
 import { app, dialog } from "electron"
-import { appName, appProto, staticDir, staticProto } from "../common/vars";
+import { appName, appProto, staticDir, staticProto } from "../common/vars"
 import path from "path"
 import { initMenu } from "./menu"
 import { LensProxy } from "./lens-proxy"
-import { WindowManager } from "./window-manager";
-import { ClusterManager } from "./cluster-manager";
+import { WindowManager } from "./window-manager"
+import { ClusterManager } from "./cluster-manager"
 import AppUpdater from "./app-updater"
 import { shellSync } from "./shell-sync"
 import { getFreePort } from "./port"
 import { mangleProxyEnv } from "./proxy-env"
-import { registerFileProtocol } from "../common/register-protocol";
+import { registerFileProtocol } from "../common/register-protocol"
 import { clusterStore } from "../common/cluster-store"
-import { userStore } from "../common/user-store";
-import { workspaceStore } from "../common/workspace-store";
-import { tracker } from "../common/tracker";
+import { userStore } from "../common/user-store"
+import { workspaceStore } from "../common/workspace-store"
+import { tracker } from "../common/tracker"
 import logger from "./logger"
 
-let windowManager: WindowManager;
-let clusterManager: ClusterManager;
-let proxyServer: LensProxy;
+let windowManager: WindowManager
+let clusterManager: ClusterManager
+let proxyServer: LensProxy
 
 mangleProxyEnv()
 if (app.commandLine.getSwitchValue("proxy-server") !== "") {
@@ -30,19 +30,19 @@ if (app.commandLine.getSwitchValue("proxy-server") !== "") {
 }
 
 async function main() {
-  await shellSync();
+  await shellSync()
 
-  const workingDir = path.join(app.getPath("appData"), appName);
-  app.setName(appName);
-  app.setPath("userData", workingDir);
+  const workingDir = path.join(app.getPath("appData"), appName)
+  app.setName(appName)
+  app.setPath("userData", workingDir)
   logger.info(`🚀 Starting Lens from "${workingDir}"`)
 
-  tracker.event("app", "start");
+  tracker.event("app", "start")
   const updater = new AppUpdater()
-  updater.start();
+  updater.start()
 
-  registerFileProtocol(appProto, app.getPath("userData"));
-  registerFileProtocol(staticProto, staticDir);
+  registerFileProtocol(appProto, app.getPath("userData"))
+  registerFileProtocol(staticProto, staticDir)
 
   // find free port
   let proxyPort: number
@@ -50,7 +50,7 @@ async function main() {
     proxyPort = await getFreePort()
   } catch (error) {
     await dialog.showErrorBox("Lens Error", "Could not find a free port for the cluster proxy")
-    app.quit();
+    app.quit()
   }
 
   // preload configuration from stores
@@ -58,30 +58,30 @@ async function main() {
     userStore.load(),
     clusterStore.load(),
     workspaceStore.load(),
-  ]);
+  ])
 
   // create cluster manager
-  clusterManager = new ClusterManager(proxyPort);
+  clusterManager = new ClusterManager(proxyPort)
 
   // run proxy
   try {
-    proxyServer = LensProxy.create(proxyPort, clusterManager);
+    proxyServer = LensProxy.create(proxyPort, clusterManager)
   } catch (error) {
     logger.error(`Could not start proxy (127.0.0:${proxyPort}): ${error.message}`)
     await dialog.showErrorBox("Lens Error", `Could not start proxy (127.0.0:${proxyPort}): ${error.message || "unknown error"}`)
-    app.quit();
+    app.quit()
   }
 
   // create window manager and open app
-  windowManager = new WindowManager(proxyPort);
-  initMenu(windowManager);
+  windowManager = new WindowManager(proxyPort)
+  initMenu(windowManager)
 }
 
-app.on("ready", main);
+app.on("ready", main)
 
 app.on("will-quit", async (event) => {
-  event.preventDefault(); // To allow mixpanel sending to be executed
+  event.preventDefault() // To allow mixpanel sending to be executed
   if (proxyServer) proxyServer.close()
   if (clusterManager) clusterManager.stop()
-  app.exit();
+  app.exit()
 })

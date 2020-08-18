@@ -6,23 +6,23 @@
  *  const usersStore: UsersStore = UsersStore.getInstance();
  */
 
-type Constructor<T = {}> = new (...args: any[]) => T;
+type Constructor<T> = new (...args: any[]) => T;
 
 class Singleton {
-  private static instances = new WeakMap<object, Singleton>();
+  private static instances = new WeakMap<any, Singleton>();
 
   // todo: improve types inferring
   static getInstance<T>(...args: ConstructorParameters<Constructor<T>>): T {
     if (!Singleton.instances.has(this)) {
-      Singleton.instances.set(this, Reflect.construct(this, args));
+      Singleton.instances.set(this, Reflect.construct(this, args))
     }
-    return Singleton.instances.get(this) as T;
+    return Singleton.instances.get(this) as T
   }
 
-  static resetInstance() {
-    Singleton.instances.delete(this);
+  static resetInstance(): void {
+    Singleton.instances.delete(this)
   }
 }
 
 export { Singleton }
-export default Singleton;
+export default Singleton

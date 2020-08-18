@@ -1,8 +1,8 @@
-import { autobind } from "../../utils";
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { autobind } from "../../utils"
+import { KubeObject } from "../kube-object"
+import { KubeApi } from "../kube-api"
 
-export interface IRoleBindingSubject {
+export interface RoleBindingSubject {
   kind: string;
   name: string;
   namespace?: string;
@@ -13,15 +13,15 @@ export interface IRoleBindingSubject {
 export class RoleBinding extends KubeObject {
   static kind = "RoleBinding"
 
-  subjects?: IRoleBindingSubject[]
+  subjects?: RoleBindingSubject[]
   roleRef: {
     kind: string;
     name: string;
     apiGroup?: string;
   }
 
-  getSubjects() {
-    return this.subjects || [];
+  getSubjects(): RoleBindingSubject[] {
+    return this.subjects || []
   }
 
   getSubjectNames(): string {
@@ -34,4 +34,4 @@ export const roleBindingApi = new KubeApi({
   apiBase: "/apis/rbac.authorization.k8s.io/v1/rolebindings",
   isNamespaced: true,
   objectConstructor: RoleBinding,
-});
+})

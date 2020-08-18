@@ -1,9 +1,16 @@
-import { KubeObjectStore } from "../../kube-object.store";
-import { autobind } from "../../utils";
-import { Job, jobApi } from "../../api/endpoints/job.api";
-import { CronJob, Pod, PodStatus } from "../../api/endpoints";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { apiManager } from "../../api/api-manager";
+import { KubeObjectStore } from "../../kube-object.store"
+import { autobind } from "../../utils"
+import { Job, jobApi } from "../../api/endpoints/job.api"
+import { CronJob, Pod, PodStatus } from "../../api/endpoints"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { apiManager } from "../../api/api-manager"
+
+export interface JobStatuses {
+  failed: number;
+  pending: number;
+  running: number;
+  succeeded: number;
+}
 
 @autobind()
 export class JobStore extends KubeObjectStore<Job> {
@@ -13,14 +20,14 @@ export class JobStore extends KubeObjectStore<Job> {
     return podsStore.getPodsByOwner(job)
   }
 
-  getJobsByOwner(cronJob: CronJob) {
+  getJobsByOwner(cronJob: CronJob): Job[] {
     return this.items.filter(job =>
       job.getNs() == cronJob.getNs() &&
-      job.getOwnerRefs().find(ref => ref.name === cronJob.getName() && ref.kind === cronJob.kind)
+      job.getOwnerRefs().find(ref => ref.name === cronJob.getName() && ref.kind === cronJob.kind),
     )
   }
 
-  getStatuses(jobs?: Job[]) {
+  getStatuses(jobs?: Job[]): JobStatuses {
     const status = { failed: 0, pending: 0, running: 0, succeeded: 0 }
     jobs.forEach(job => {
       const pods = this.getChildPods(job)
@@ -41,5 +48,5 @@ export class JobStore extends KubeObjectStore<Job> {
   }
 }
 
-export const jobStore = new JobStore();
-apiManager.registerStore(jobApi, jobStore);
+export const jobStore = new JobStore()
+apiManager.registerStore(jobApi, jobStore)

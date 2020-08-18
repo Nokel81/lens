@@ -1,6 +1,6 @@
 import "./sub-header.scss"
-import React from "react";
-import { cssNames } from "../../utils";
+import React from "react"
+import { cssNames } from "../../utils"
 
 export interface SubHeaderProps {
   className?: string;
@@ -9,9 +9,9 @@ export interface SubHeaderProps {
 }
 
 export class SubHeader extends React.Component<SubHeaderProps> {
-  render() {
-    const { withLine, compact, children } = this.props;
-    let { className } = this.props;
+  render(): React.ReactNode {
+    const { withLine, compact, children } = this.props
+    let { className } = this.props
     className = cssNames("SubHeader", {
       withLine,
       compact,

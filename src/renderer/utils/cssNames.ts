@@ -6,17 +6,17 @@ export type IClassNameMap = {
 };
 
 export function cssNames(...args: IClassName[]): string {
-  const map: IClassNameMap = {};
+  const map: IClassNameMap = {}
   args.forEach(className => {
     if (typeof className === "string" || Array.isArray(className)) {
-      [].concat(className).forEach(name => map[name] = true);
+      [].concat(className).forEach(name => map[name] = true)
     }
     else {
-      Object.assign(map, className);
+      Object.assign(map, className)
     }
-  });
+  })
   return Object.entries(map)
-    .filter(([className, isActive]) => !!isActive)
+    .filter(([_className, isActive]) => !!isActive)
     .map(([className]) => className.trim())
-    .join(' ');
+    .join(' ')
 }

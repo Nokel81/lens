@@ -1,7 +1,7 @@
 import { Feature, FeatureStatus } from "../main/feature"
 import {KubeConfig, AppsV1Api, RbacAuthorizationV1Api} from "@kubernetes/client-node"
 import semver from "semver"
-import { Cluster } from "../main/cluster";
+import { Cluster } from "../main/cluster"
 import * as k8s from "@kubernetes/client-node"
 
 export interface MetricsConfiguration {
@@ -55,12 +55,12 @@ export class MetricsFeature extends Feature {
   async install(cluster: Cluster): Promise<void> {
     // Check if there are storageclasses
     const storageClient = cluster.getProxyKubeconfig().makeApiClient(k8s.StorageV1Api)
-    const scs = await storageClient.listStorageClass();
+    const scs = await storageClient.listStorageClass()
 
     this.config.persistence.enabled = scs.body.items.some(sc => (
       sc.metadata?.annotations?.['storageclass.kubernetes.io/is-default-class'] === 'true' ||
       sc.metadata?.annotations?.['storageclass.beta.kubernetes.io/is-default-class'] === 'true'
-    ));
+    ))
 
     return super.install(cluster)
   }
@@ -76,25 +76,25 @@ export class MetricsFeature extends Feature {
       installed: false,
       latestVersion: this.latestVersion,
       canUpgrade: false, // Dunno yet
-    };
+    }
     
     try {
-      const prometheus = (await client.readNamespacedStatefulSet('prometheus', 'lens-metrics')).body;
-      status.installed = true;
-      status.currentVersion = prometheus.spec.template.spec.containers[0].image.split(":")[1];
-      status.canUpgrade = semver.lt(status.currentVersion, this.latestVersion, true);
+      const prometheus = (await client.readNamespacedStatefulSet('prometheus', 'lens-metrics')).body
+      status.installed = true
+      status.currentVersion = prometheus.spec.template.spec.containers[0].image.split(":")[1]
+      status.canUpgrade = semver.lt(status.currentVersion, this.latestVersion, true)
     } catch {
       // ignore error
     }
  
-    return status;
+    return status
   }
 
   async uninstall(cluster: Cluster): Promise<void> {
     const rbacClient = cluster.getProxyKubeconfig().makeApiClient(RbacAuthorizationV1Api)
    
     await this.deleteNamespace(cluster.getProxyKubeconfig(), "lens-metrics")
-    await rbacClient.deleteClusterRole("lens-prometheus");
-    await rbacClient.deleteClusterRoleBinding("lens-prometheus");
+    await rbacClient.deleteClusterRole("lens-prometheus")
+    await rbacClient.deleteClusterRoleBinding("lens-prometheus")
   }
 }

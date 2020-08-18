@@ -1,15 +1,15 @@
 import "./endpoints.scss"
 
 import React from "react"
-import { observer } from "mobx-react";
+import { observer } from "mobx-react"
 import { RouteComponentProps } from "react-router-dom"
 import { EndpointRouteParams } from "./endpoints.route"
 import { Endpoint, endpointApi } from "../../api/endpoints/endpoint.api"
-import { endpointStore } from "./endpoints.store";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { Trans } from "@lingui/macro";
-import { apiManager } from "../../api/api-manager";
+import { endpointStore } from "./endpoints.store"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { Trans } from "@lingui/macro"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -22,7 +22,7 @@ interface Props extends RouteComponentProps<EndpointRouteParams> {
 
 @observer
 export class Endpoints extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="Endpoints" store={endpointStore}
@@ -32,7 +32,7 @@ export class Endpoints extends React.Component<Props> {
           [sortBy.age]: (endpoint: Endpoint) => endpoint.metadata.creationTimestamp,
         }}
         searchFilters={[
-          (endpoint: Endpoint) => endpoint.getSearchFields()
+          (endpoint: Endpoint) => endpoint.getSearchFields(),
         ]}
         renderHeaderTitle={<Trans>Endpoints</Trans>}
         renderTableHeader={[
@@ -48,25 +48,25 @@ export class Endpoints extends React.Component<Props> {
           endpoint.getAge(),
         ]}
         renderItemMenu={(item: Endpoint) => {
-          return <EndpointMenu object={item}/>
+          return <EndpointMenu object={item} />
         }}
         tableProps={{
           customRowHeights: (item: Endpoint, lineHeight, paddings) => {
-            const lines = item.getEndpointSubsets().length || 1;
-            return lines * lineHeight + paddings;
-          }
+            const lines = item.getEndpointSubsets().length || 1
+            return lines * lineHeight + paddings
+          },
         }}
       />
     )
   }
 }
 
-export function EndpointMenu(props: KubeObjectMenuProps<Endpoint>) {
+export function EndpointMenu(props: KubeObjectMenuProps<Endpoint>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 
 apiManager.registerViews(endpointApi, {
-  Menu: EndpointMenu
+  Menu: EndpointMenu,
 })

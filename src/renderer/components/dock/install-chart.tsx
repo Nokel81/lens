@@ -1,29 +1,30 @@
-import "./install-chart.scss";
+import "./install-chart.scss"
 
-import React, { Component } from "react";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { t, Trans } from "@lingui/macro";
-import { dockStore, IDockTab } from "./dock.store";
-import { InfoPanel } from "./info-panel";
-import { Badge } from "../badge";
-import { NamespaceSelect } from "../+namespaces/namespace-select";
-import { autobind, prevDefault } from "../../utils";
-import { IChartInstallData, installChartStore } from "./install-chart.store";
-import { Spinner } from "../spinner";
-import { Icon } from "../icon";
-import { Button } from "../button";
-import { releaseURL } from "../+apps-releases";
-import { releaseStore } from "../+apps-releases/release.store";
-import { LogsDialog } from "../dialog/logs-dialog";
-import { Select, SelectOption } from "../select";
-import { Input } from "../input";
-import { EditorPanel } from "./editor-panel";
-import { navigate } from "../../navigation";
-import { _i18n } from "../../i18n";
+import React, { Component } from "react"
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { t, Trans } from "@lingui/macro"
+import { dockStore, DockTabEntry } from "./dock.store"
+import { InfoPanel } from "./info-panel"
+import { Badge } from "../badge"
+import { NamespaceSelect } from "../+namespaces/namespace-select"
+import { autobind, prevDefault } from "../../utils"
+import { ChartInstallData, installChartStore } from "./install-chart.store"
+import { Spinner } from "../spinner"
+import { Icon } from "../icon"
+import { Button } from "../button"
+import { releaseURL } from "../+apps-releases"
+import { releaseStore } from "../+apps-releases/release.store"
+import { LogsDialog } from "../dialog/logs-dialog"
+import { Select, SelectOption } from "../select"
+import { Input } from "../input"
+import { EditorPanel } from "./editor-panel"
+import { navigate } from "../../navigation"
+import { _i18n } from "../../i18n"
+import { IReleaseUpdateDetails } from "../../api/endpoints/helm-releases.api"
 
 interface Props {
-  tab: IDockTab;
+  tab: DockTabEntry;
 }
 
 @observer
@@ -31,91 +32,91 @@ export class InstallChart extends Component<Props> {
   @observable error = "";
   @observable showNotes = false;
 
-  get values() {
-    return this.chartData.values;
+  get values(): string | undefined {
+    return this.chartData.values
   }
 
-  get chartData() {
-    return installChartStore.getData(this.tabId);
+  get chartData(): ChartInstallData {
+    return installChartStore.getData(this.tabId)
   }
 
-  get tabId() {
-    return this.props.tab.id;
+  get tabId(): string {
+    return this.props.tab.id
   }
 
-  get versions() {
-    return installChartStore.versions.getData(this.tabId);
+  get versions(): string[] {
+    return installChartStore.versions.getData(this.tabId)
   }
 
-  get releaseDetails() {
-    return installChartStore.details.getData(this.tabId);
+  get releaseDetails(): IReleaseUpdateDetails {
+    return installChartStore.details.getData(this.tabId)
   }
 
   @autobind()
-  viewRelease() {
-    const { release } = this.releaseDetails;
+  viewRelease(): void {
+    const { release } = this.releaseDetails
     navigate(releaseURL({
       params: {
         name: release.name,
-        namespace: release.namespace
-      }
-    }));
-    dockStore.closeTab(this.tabId);
+        namespace: release.namespace,
+      },
+    }))
+    dockStore.closeTab(this.tabId)
   }
 
   @autobind()
-  save(data: Partial<IChartInstallData>) {
-    const chart = { ...this.chartData, ...data };
-    installChartStore.setData(this.tabId, chart);
+  save(data: Partial<ChartInstallData>): void {
+    const chart = { ...this.chartData, ...data }
+    installChartStore.setData(this.tabId, chart)
   }
 
   @autobind()
-  onVersionChange(option: SelectOption) {
-    const version = option.value;
-    this.save({ version, values: "" });
-    installChartStore.loadValues(this.tabId);
+  onVersionChange(option: SelectOption): void {
+    const version = option.value
+    this.save({ version, values: "" })
+    installChartStore.loadValues(this.tabId)
   }
 
   @autobind()
-  onValuesChange(values: string, error?: string) {
-    this.error = error;
-    this.save({ values });
+  onValuesChange(values: string, error?: string): void {
+    this.error = error
+    this.save({ values })
   }
 
   @autobind()
-  onNamespaceChange(opt: SelectOption) {
-    this.save({ namespace: opt.value });
+  onNamespaceChange(opt: SelectOption): void {
+    this.save({ namespace: opt.value })
   }
 
   @autobind()
-  onReleaseNameChange(name: string) {
-    this.save({ releaseName: name });
+  onReleaseNameChange(name: string): void {
+    this.save({ releaseName: name })
   }
 
-  install = async () => {
-    const { repo, name, version, namespace, values, releaseName } = this.chartData;
+  install = async (): Promise<React.ReactNode> => {
+    const { repo, name, version, namespace, values, releaseName } = this.chartData
     const details = await releaseStore.create({
       name: releaseName || undefined,
       chart: name,
       repo, namespace, version, values,
-    });
-    installChartStore.details.setData(this.tabId, details);
+    })
+    installChartStore.details.setData(this.tabId, details)
     return (
       <p><Trans>Chart Release <b>{details.release.name}</b> successfully created.</Trans></p>
-    );
+    )
   }
 
-  render() {
-    const { tabId, chartData, values, versions, install } = this;
+  render(): React.ReactNode {
+    const { tabId, chartData, values, versions, install } = this
     if (!chartData || chartData.values === undefined || !versions) {
-      return <Spinner center/>;
+      return <Spinner center />
     }
 
     if (this.releaseDetails) {
       return (
         <div className="InstallChartDone flex column gaps align-center justify-center">
           <p>
-            <Icon material="check" big sticker/>
+            <Icon material="check" big sticker />
           </p>
           <p><Trans>Installation complete!</Trans></p>
           <div className="flex gaps align-center">
@@ -140,11 +141,11 @@ export class InstallChart extends Component<Props> {
       )
     }
 
-    const { repo, name, version, namespace, releaseName } = chartData;
+    const { repo, name, version, namespace, releaseName } = chartData
     const panelControls = (
       <div className="install-controls flex gaps align-center">
         <span><Trans>Chart</Trans></span>
-        <Badge label={`${repo}/${name}`} title={_i18n._(t`Repo/Name`)}/>
+        <Badge label={`${repo}/${name}`} title={_i18n._(t`Repo/Name`)} />
         <span><Trans>Version</Trans></span>
         <Select
           className="chart-version"
@@ -170,7 +171,7 @@ export class InstallChart extends Component<Props> {
           onChange={this.onReleaseNameChange}
         />
       </div>
-    );
+    )
 
     return (
       <div className="InstallChart flex column">
@@ -189,6 +190,6 @@ export class InstallChart extends Component<Props> {
           showSubmitClose={false}
         />
       </div>
-    );
+    )
   }
 }

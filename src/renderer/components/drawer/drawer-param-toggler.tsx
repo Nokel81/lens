@@ -1,9 +1,9 @@
-import "./drawer-param-toggler.scss";
-import React from "react";
-import { t } from "@lingui/macro";
-import { Icon } from "../icon";
-import { cssNames } from "../../utils";
-import { _i18n } from "../../i18n";
+import "./drawer-param-toggler.scss"
+import React from "react"
+import { t } from "@lingui/macro"
+import { Icon } from "../icon"
+import { cssNames } from "../../utils"
+import { _i18n } from "../../i18n"
 
 interface Props {
   label: string | number;
@@ -15,11 +15,12 @@ interface State {
 export class DrawerParamToggler extends React.Component<Props, State> {
   public state: State = {}
 
-  toggle = () => {
+  toggle = (): void => {
+    // eslint-disable-next-line react/no-set-state
     this.setState({ open: !this.state.open })
   }
 
-  render() {
+  render(): React.ReactNode {
     const { label, children } = this.props
     const { open } = this.state
     const icon = `arrow_drop_${open ? "up" : "down"}`
@@ -30,7 +31,7 @@ export class DrawerParamToggler extends React.Component<Props, State> {
           <div className="param-label">{label}</div>
           <div className="param-link" onClick={this.toggle}>
             <span className="param-link-text">{link}</span>
-            <Icon material={icon}/>
+            <Icon material={icon} />
           </div>
         </div>
         <div className={cssNames("param-content", { open })}>{children}</div>

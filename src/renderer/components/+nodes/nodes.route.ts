@@ -1,11 +1,11 @@
 import { RouteProps } from "react-router"
-import { buildURL } from "../../navigation";
+import { buildURL } from "../../navigation"
 
 export const nodesRoute: RouteProps = {
-  path: "/nodes"
+  path: "/nodes",
 }
 
-export interface INodesRouteParams {
+export interface NodesRouteParams {
 }
 
-export const nodesURL = buildURL<INodesRouteParams>(nodesRoute.path)
+export const nodesURL = buildURL<NodesRouteParams>(nodesRoute.path)

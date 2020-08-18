@@ -1,13 +1,13 @@
 import React from "react"
-import { observer } from "mobx-react";
-import { computed } from "mobx";
-import { t, Trans } from "@lingui/macro";
-import { GroupSelectOption, Select, SelectOption, SelectProps } from "../select";
-import { FilterType, pageFilters } from "./page-filters.store";
-import { namespaceStore } from "../+namespaces/namespace.store";
-import { Icon } from "../icon";
-import { _i18n } from "../../i18n";
-import { FilterIcon } from "./filter-icon";
+import { observer } from "mobx-react"
+import { computed } from "mobx"
+import { t, Trans } from "@lingui/macro"
+import { GroupSelectOption, Select, SelectOption, SelectProps } from "../select"
+import { FilterType, pageFilters } from "./page-filters.store"
+import { namespaceStore } from "../+namespaces/namespace.store"
+import { Icon } from "../icon"
+import { _i18n } from "../../i18n"
+import { FilterIcon } from "./filter-icon"
 
 export interface SelectOptionFilter extends SelectOption {
   type: FilterType;
@@ -28,64 +28,64 @@ export class PageFiltersSelect extends React.Component<Props> {
     disableFilters: {},
   }
 
-  @computed get groupedOptions() {
-    const options: GroupSelectOption<SelectOptionFilter>[] = [];
-    const { disableFilters } = this.props;
+  @computed get groupedOptions(): GroupSelectOption<SelectOptionFilter>[] {
+    const options: GroupSelectOption<SelectOptionFilter>[] = []
+    const { disableFilters } = this.props
     if (!disableFilters[FilterType.NAMESPACE]) {
-      const selectedValues = pageFilters.getValues(FilterType.NAMESPACE);
+      const selectedValues = pageFilters.getValues(FilterType.NAMESPACE)
       options.push({
         label: <Trans>Namespace</Trans>,
         options: namespaceStore.items.map(ns => {
-          const name = ns.getName();
+          const name = ns.getName()
           return {
             type: FilterType.NAMESPACE,
             value: name,
-            icon: <Icon small material="layers"/>,
+            icon: <Icon small material="layers" />,
             selected: selectedValues.includes(name),
           }
-        })
+        }),
       })
     }
-    return options;
+    return options
   }
 
   @computed get options(): SelectOptionFilter[] {
     return this.groupedOptions.reduce((options, optGroup) => {
-      options.push(...optGroup.options);
-      return options;
+      options.push(...optGroup.options)
+      return options
     }, [])
   }
 
   private formatLabel = (option: SelectOptionFilter) => {
-    const { label, value, type, selected } = option;
+    const { label, value, type, selected } = option
     return (
       <div className="flex gaps">
-        <FilterIcon type={type}/>
+        <FilterIcon type={type} />
         <span>{label || String(value)}</span>
-        {selected && <Icon small material="check" className="box right"/>}
+        {selected && <Icon small material="check" className="box right" />}
       </div>
-    );
+    )
   }
 
   private onSelect = (option: SelectOptionFilter) => {
-    const { type, value, selected } = option;
-    const { addFilter, removeFilter } = pageFilters;
-    const filter = { type, value };
+    const { type, value, selected } = option
+    const { addFilter, removeFilter } = pageFilters
+    const filter = { type, value }
     if (!selected) {
-      addFilter(filter);
+      addFilter(filter)
     }
     else {
-      removeFilter(filter);
+      removeFilter(filter)
     }
   }
 
-  render() {
-    const { groupedOptions, formatLabel, onSelect, options } = this;
+  render(): React.ReactNode {
+    const { groupedOptions, formatLabel, onSelect, options } = this
     if (!options.length && this.props.allowEmpty) {
-      return null;
+      return null
     }
-    const { allowEmpty, disableFilters, ...selectProps } = this.props;
-    const selectedOptions = options.filter(opt => opt.selected);
+    const { allowEmpty, disableFilters, ...selectProps } = this.props
+    const selectedOptions = options.filter(opt => opt.selected)
     return (
       <Select
         {...selectProps}

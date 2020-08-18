@@ -1,15 +1,15 @@
 import "./issuers.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../../kube-object/kube-object-menu";
-import { KubeObjectListLayout, KubeObjectListLayoutProps } from "../../kube-object";
-import { clusterIssuersApi, Issuer, issuersApi } from "../../../api/endpoints/cert-manager.api";
-import { cssNames } from "../../../utils";
-import { Badge } from "../../badge";
-import { Spinner } from "../../spinner";
-import { apiManager } from "../../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../../kube-object/kube-object-menu"
+import { KubeObjectListLayout, KubeObjectListLayoutProps } from "../../kube-object"
+import { clusterIssuersApi, Issuer, issuersApi } from "../../../api/endpoints/cert-manager.api"
+import { cssNames } from "../../../utils"
+import { Badge } from "../../badge"
+import { Spinner } from "../../spinner"
+import { apiManager } from "../../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -21,8 +21,8 @@ enum sortBy {
 
 @observer
 export class ClusterIssuers extends React.Component<KubeObjectListLayoutProps> {
-  render() {
-    const store = apiManager.getStore(clusterIssuersApi);
+  render(): React.ReactNode {
+    const store = apiManager.getStore(clusterIssuersApi)
     return (
       <Issuers
         {...this.props}
@@ -36,10 +36,10 @@ export class ClusterIssuers extends React.Component<KubeObjectListLayoutProps> {
 
 @observer
 export class Issuers extends React.Component<KubeObjectListLayoutProps> {
-  render() {
-    const { store = apiManager.getStore(issuersApi), ...layoutProps } = this.props;
+  render(): React.ReactNode {
+    const { store = apiManager.getStore(issuersApi), ...layoutProps } = this.props
     if (!store) {
-      return <Spinner center/>
+      return <Spinner center />
     }
     return (
       <KubeObjectListLayout
@@ -69,7 +69,7 @@ export class Issuers extends React.Component<KubeObjectListLayoutProps> {
         renderTableContents={(issuer: Issuer) => [
           issuer.getName(),
           issuer.getNs(),
-          issuer.getLabels().map(label => <Badge key={label} label={label} title={label}/>),
+          issuer.getLabels().map(label => <Badge key={label} label={label} title={label} />),
           issuer.getType(),
           issuer.getAge(),
           issuer.getConditions().map(({ type, tooltip, isReady }) => {
@@ -81,19 +81,19 @@ export class Issuers extends React.Component<KubeObjectListLayoutProps> {
                 className={cssNames({ [type.toLowerCase()]: isReady })}
               />
             )
-          })
+          }),
         ]}
         renderItemMenu={(item: Issuer) => {
-          return <IssuerMenu object={item}/>
+          return <IssuerMenu object={item} />
         }}
       />
-    );
+    )
   }
 }
 
-export function IssuerMenu(props: KubeObjectMenuProps<Issuer>) {
+export function IssuerMenu(props: KubeObjectMenuProps<Issuer>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

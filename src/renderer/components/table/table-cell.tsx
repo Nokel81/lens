@@ -1,10 +1,10 @@
-import "./table-cell.scss";
-import type { SortBy, SortParams } from "./table";
+import "./table-cell.scss"
+import type { SortBy, SortParams } from "./table"
 
-import React, { ReactNode } from "react";
-import { autobind, cssNames } from "../../utils";
-import { Icon } from "../icon";
-import { Checkbox } from "../checkbox";
+import React, { ReactNode } from "react"
+import { autobind, cssNames } from "../../utils"
+import { Icon } from "../icon"
+import { Checkbox } from "../checkbox"
 
 export type TableCellElem = React.ReactElement<TableCellProps>;
 
@@ -21,25 +21,25 @@ export interface TableCellProps extends React.DOMAttributes<HTMLDivElement> {
 
 export class TableCell extends React.Component<TableCellProps> {
   @autobind()
-  onClick(evt: React.MouseEvent<HTMLDivElement>) {
+  onClick(evt: React.MouseEvent<HTMLDivElement>): void {
     if (this.props.onClick) {
-      this.props.onClick(evt);
+      this.props.onClick(evt)
     }
     if (this.isSortable) {
-      this.props._sort(this.props.sortBy);
+      this.props._sort(this.props.sortBy)
     }
   }
 
-  get isSortable() {
-    const { _sorting, sortBy } = this.props;
-    return _sorting && sortBy !== undefined;
+  get isSortable(): boolean {
+    const { _sorting, sortBy } = this.props
+    return _sorting && sortBy !== undefined
   }
 
-  renderSortIcon() {
-    const { sortBy, _sorting } = this.props;
-    if (!this.isSortable) return;
-    const sortActive = _sorting.sortBy === sortBy;
-    const sortIconName = (!sortActive || _sorting.orderBy === "desc") ? "arrow_drop_down" : "arrow_drop_up";
+  renderSortIcon(): React.ReactNode {
+    const { sortBy, _sorting } = this.props
+    if (!this.isSortable) return
+    const sortActive = _sorting.sortBy === sortBy
+    const sortIconName = (!sortActive || _sorting.orderBy === "desc") ? "arrow_drop_down" : "arrow_drop_up"
     return (
       <Icon
         className={cssNames("sortIcon", { enabled: sortActive })}
@@ -48,22 +48,22 @@ export class TableCell extends React.Component<TableCellProps> {
     )
   }
 
-  renderCheckbox() {
-    const { checkbox, isChecked } = this.props;
-    const showCheckbox = isChecked !== undefined;
+  renderCheckbox(): React.ReactNode {
+    const { checkbox, isChecked } = this.props
+    const showCheckbox = isChecked !== undefined
     if (checkbox && showCheckbox) {
-      return <Checkbox value={isChecked}/>
+      return <Checkbox value={isChecked} />
     }
   }
 
-  render() {
-    const { className, checkbox, isChecked, sortBy, _sort, _sorting, _nowrap, children, title, ...cellProps } = this.props;
+  render(): React.ReactNode {
+    const { className, checkbox, isChecked, sortBy, _sort, _sorting, _nowrap, children, title, ...cellProps } = this.props
     const classNames = cssNames("TableCell", className, {
-      checkbox: checkbox,
+      checkbox,
       nowrap: _nowrap,
       sorting: this.isSortable,
-    });
-    const content = title || children;
+    })
+    const content = title || children
     return (
       <div {...cellProps} className={classNames} onClick={this.onClick}>
         {this.renderCheckbox()}

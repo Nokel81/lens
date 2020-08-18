@@ -1,11 +1,11 @@
-import { KubeObject } from "../kube-object";
-import { autobind, cpuUnitsToNumber, unitsToBytes } from "../../utils";
-import { IMetrics, metricsApi } from "./metrics.api";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { autobind, cpuUnitsToNumber, unitsToBytes } from "../../utils"
+import { Metrics, metricsApi } from "./metrics.api"
+import { KubeApi } from "../kube-api"
 
 export class NodesApi extends KubeApi<Node> {
-  getMetrics(): Promise<INodeMetrics> {
-    const opts = { category: "nodes"}
+  getMetrics(): Promise<NodeMetrics> {
+    const opts = { category: "nodes" }
 
     return metricsApi.getMetrics({
       memoryUsage: opts,
@@ -13,12 +13,12 @@ export class NodesApi extends KubeApi<Node> {
       cpuUsage: opts,
       cpuCapacity: opts,
       fsSize: opts,
-      fsUsage: opts
-    });
+      fsUsage: opts,
+    })
   }
 }
 
-export interface INodeMetrics<T = IMetrics> {
+export interface NodeMetrics<T = Metrics> {
   [metric: string]: T;
   memoryUsage: T;
   memoryCapacity: T;
@@ -28,6 +28,21 @@ export interface INodeMetrics<T = IMetrics> {
   fsSize: T;
 }
 
+interface NodeTaints {
+  key: string
+  value: string
+  effect: string
+}
+
+interface NodeCondition {
+  type: string
+  status?: string
+  lastHeartbeatTime?: string
+  lastTransitionTime?: string
+  reason?: string
+  message?: string
+}
+
 @autobind()
 export class Node extends KubeObject {
   static kind = "Node"
@@ -35,11 +50,7 @@ export class Node extends KubeObject {
   spec: {
     podCIDR: string;
     externalID: string;
-    taints?: {
-      key: string;
-      value: string;
-      effect: string;
-    }[];
+    taints?: NodeTaints[];
     unschedulable?: boolean;
   }
   status: {
@@ -53,14 +64,7 @@ export class Node extends KubeObject {
       memory: string;
       pods: string;
     };
-    conditions: {
-      type: string;
-      status?: string;
-      lastHeartbeatTime?: string;
-      lastTransitionTime?: string;
-      reason?: string;
-      message?: string;
-    }[];
+    conditions: NodeCondition[];
     addresses: {
       type: string;
       address: string;
@@ -83,7 +87,7 @@ export class Node extends KubeObject {
     }[];
   }
 
-  getNodeConditionText() {
+  getNodeConditionText(): string {
     const { conditions } = this.status
     if (!conditions) return ""
     return conditions.reduce((types, current) => {
@@ -92,13 +96,13 @@ export class Node extends KubeObject {
     }, "")
   }
 
-  getTaints() {
-    return this.spec.taints || [];
+  getTaints(): NodeTaints[] {
+    return this.spec.taints || []
   }
 
-  getRoleLabels() {
+  getRoleLabels(): string {
     const roleLabels = Object.keys(this.metadata.labels).filter(key =>
-      key.includes("node-role.kubernetes.io")
+      key.includes("node-role.kubernetes.io"),
     ).map(key => key.match(/([^/]+$)/)[0]) // all after last slash
 
     if (this.metadata.labels["kubernetes.io/role"] != undefined) {
@@ -108,37 +112,37 @@ export class Node extends KubeObject {
     return roleLabels.join(", ")
   }
 
-  getCpuCapacity() {
+  getCpuCapacity(): number {
     if (!this.status.capacity || !this.status.capacity.cpu) return 0
     return cpuUnitsToNumber(this.status.capacity.cpu)
   }
 
-  getMemoryCapacity() {
+  getMemoryCapacity(): number {
     if (!this.status.capacity || !this.status.capacity.memory) return 0
     return unitsToBytes(this.status.capacity.memory)
   }
 
-  getConditions() {
-    const conditions = this.status.conditions || [];
+  getConditions(): NodeCondition[] {
+    const conditions = this.status.conditions || []
     if (this.isUnschedulable()) {
-      return [{ type: "SchedulingDisabled", status: "True" }, ...conditions];
+      return [{ type: "SchedulingDisabled", status: "True" }, ...conditions]
     }
-    return conditions;
+    return conditions
   }
 
-  getActiveConditions() {
-    return this.getConditions().filter(c => c.status === "True");
+  getActiveConditions(): NodeCondition[] {
+    return this.getConditions().filter(c => c.status === "True")
   }
 
-  getWarningConditions() {
-    const goodConditions = ["Ready", "HostUpgrades", "SchedulingDisabled"];
+  getWarningConditions(): NodeCondition[] {
+    const goodConditions = ["Ready", "HostUpgrades", "SchedulingDisabled"]
     return this.getActiveConditions().filter(condition => {
-      return !goodConditions.includes(condition.type);
-    });
+      return !goodConditions.includes(condition.type)
+    })
   }
 
-  getKubeletVersion() {
-    return this.status.nodeInfo.kubeletVersion;
+  getKubeletVersion(): string {
+    return this.status.nodeInfo.kubeletVersion
   }
 
   getOperatingSystem(): string {
@@ -150,7 +154,7 @@ export class Node extends KubeObject {
     return "linux"
   }
 
-  isUnschedulable() {
+  isUnschedulable(): boolean {
     return this.spec.unschedulable
   }
 }
@@ -160,4 +164,4 @@ export const nodesApi = new NodesApi({
   apiBase: "/api/v1/nodes",
   isNamespaced: false,
   objectConstructor: Node,
-});
+})

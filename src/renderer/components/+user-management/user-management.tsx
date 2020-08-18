@@ -1,25 +1,25 @@
 import "./user-management.scss"
-import React from "react";
-import { observer } from "mobx-react";
-import { Redirect, Route, Switch } from "react-router";
-import { RouteComponentProps } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { MainLayout, TabRoute } from "../layout/main-layout";
-import { Roles } from "../+user-management-roles";
-import { RoleBindings } from "../+user-management-roles-bindings";
-import { ServiceAccounts } from "../+user-management-service-accounts";
-import { roleBindingsRoute, roleBindingsURL, rolesRoute, rolesURL, serviceAccountsRoute, serviceAccountsURL, usersManagementURL } from "./user-management.routes";
-import { namespaceStore } from "../+namespaces/namespace.store";
-import { PodSecurityPolicies, podSecurityPoliciesRoute, podSecurityPoliciesURL } from "../+pod-security-policies";
-import { isAllowedResource } from "../../../common/rbac";
+import React from "react"
+import { observer } from "mobx-react"
+import { Redirect, Route, Switch } from "react-router"
+import { RouteComponentProps } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { MainLayout, TabRoute } from "../layout/main-layout"
+import { Roles } from "../+user-management-roles"
+import { RoleBindings } from "../+user-management-roles-bindings"
+import { ServiceAccounts } from "../+user-management-service-accounts"
+import { roleBindingsRoute, roleBindingsURL, rolesRoute, rolesURL, serviceAccountsRoute, serviceAccountsURL, usersManagementURL } from "./user-management.routes"
+import { namespaceStore } from "../+namespaces/namespace.store"
+import { PodSecurityPolicies, podSecurityPoliciesRoute, podSecurityPoliciesURL } from "../+pod-security-policies"
+import { isAllowedResource } from "../../../common/rbac"
 
-interface Props extends RouteComponentProps<{}> {
+interface Props extends RouteComponentProps {
 }
 
 @observer
 export class UserManagement extends React.Component<Props> {
-  static get tabRoutes() {
-    const tabRoutes: TabRoute[] = [];
+  static get tabRoutes(): TabRoute[] {
+    const tabRoutes: TabRoute[] = []
     const query = namespaceStore.getContextParams()
     tabRoutes.push(
       {
@@ -49,16 +49,16 @@ export class UserManagement extends React.Component<Props> {
         path: podSecurityPoliciesRoute.path,
       })
     }
-    return tabRoutes;
+    return tabRoutes
   }
 
-  render() {
-    const tabRoutes = UserManagement.tabRoutes;
+  render(): React.ReactNode {
+    const tabRoutes = UserManagement.tabRoutes
     return (
       <MainLayout className="UserManagement" tabs={tabRoutes}>
         <Switch>
-          {tabRoutes.map((route, index) => <Route key={index} {...route}/>)}
-          <Redirect to={usersManagementURL({ query: namespaceStore.getContextParams() })}/>
+          {tabRoutes.map((route, index) => <Route key={index} {...route} />)}
+          <Redirect to={usersManagementURL({ query: namespaceStore.getContextParams() })} />
         </Switch>
       </MainLayout>
     )

@@ -1,12 +1,20 @@
-import { Cluster } from "../cluster";
-import logger from "../logger";
-import { repoManager } from "./helm-repo-manager";
-import { HelmChartManager } from "./helm-chart-manager";
-import { releaseManager } from "./helm-release-manager";
+import { Cluster } from "../cluster"
+import logger from "../logger"
+import { repoManager } from "./helm-repo-manager"
+import { HelmChartManager } from "./helm-chart-manager"
+import { releaseManager } from "./helm-release-manager"
+
+interface ChartData {
+  chart: string;
+  values: Record<string, any>;
+  name: string;
+  namespace: string;
+  version: string
+}
 
 class HelmService {
-  public async installChart(cluster: Cluster, data: { chart: string; values: {}; name: string; namespace: string; version: string }) {
-    return await releaseManager.installChart(data.chart, data.values, data.name, data.namespace, data.version, cluster.getProxyKubeconfigPath())
+  public async installChart(cluster: Cluster, data: ChartData) {
+    return releaseManager.installChart(data.chart, data.values, data.name, data.namespace, data.version, cluster.getProxyKubeconfigPath())
   }
 
   public async listCharts() {
@@ -29,7 +37,7 @@ class HelmService {
   public async getChart(repoName: string, chartName: string, version = "") {
     const result = {
       readme: "",
-      versions: {}
+      versions: {},
     }
     const repo = await repoManager.repository(repoName)
     const chartManager = new HelmChartManager(repo)
@@ -70,7 +78,7 @@ class HelmService {
     return await releaseManager.deleteRelease(releaseName, namespace, cluster.getProxyKubeconfigPath())
   }
 
-  public async updateRelease(cluster: Cluster, releaseName: string, namespace: string, data: { chart: string; values: {}; version: string }) {
+  public async updateRelease(cluster: Cluster, releaseName: string, namespace: string, data: { chart: string; values: Record<string, any>; version: string }) {
     logger.debug("Upgrade release")
     return await releaseManager.upgradeRelease(releaseName, data.chart, data.values, namespace, data.version, cluster)
   }

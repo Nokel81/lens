@@ -1,26 +1,26 @@
 import "./pods.scss"
 
-import React, { Fragment } from "react";
-import { observer } from "mobx-react";
-import { Link } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { podsStore } from "./pods.store";
-import { RouteComponentProps } from "react-router";
-import { volumeClaimStore } from "../+storage-volume-claims/volume-claim.store";
-import { IPodsRouteParams } from "../+workloads";
-import { eventStore } from "../+events/event.store";
-import { KubeObjectListLayout } from "../kube-object";
-import { Pod, podsApi } from "../../api/endpoints";
-import { PodMenu } from "./pod-menu";
-import { StatusBrick } from "../status-brick";
-import { cssNames, stopPropagation } from "../../utils";
-import { KubeEventIcon } from "../+events/kube-event-icon";
-import { getDetailsUrl } from "../../navigation";
-import toPairs from "lodash/toPairs";
-import startCase from "lodash/startCase";
-import kebabCase from "lodash/kebabCase";
-import { lookupApiLink } from "../../api/kube-api";
-import { apiManager } from "../../api/api-manager";
+import React, { Fragment } from "react"
+import { observer } from "mobx-react"
+import { Link } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { podsStore } from "./pods.store"
+import { RouteComponentProps } from "react-router"
+import { volumeClaimStore } from "../+storage-volume-claims/volume-claim.store"
+import { PodsRouteParams } from "../+workloads"
+import { eventStore } from "../+events/event.store"
+import { KubeObjectListLayout } from "../kube-object"
+import { Pod, podsApi } from "../../api/endpoints"
+import { PodMenu } from "./pod-menu"
+import { StatusBrick } from "../status-brick"
+import { cssNames, stopPropagation } from "../../utils"
+import { KubeEventIcon } from "../+events/kube-event-icon"
+import { getDetailsUrl } from "../../navigation"
+import toPairs from "lodash/toPairs"
+import startCase from "lodash/startCase"
+import kebabCase from "lodash/kebabCase"
+import { lookupApiLink } from "../../api/kube-api"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -33,21 +33,21 @@ enum sortBy {
   status = "status",
 }
 
-interface Props extends RouteComponentProps<IPodsRouteParams> {
+interface Props extends RouteComponentProps<PodsRouteParams> {
 }
 
 @observer
 export class Pods extends React.Component<Props> {
-  renderContainersStatus(pod: Pod) {
+  renderContainersStatus(pod: Pod): React.ReactNode[] {
     return pod.getContainerStatuses().map(containerStatus => {
-      const { name, state, ready } = containerStatus;
+      const { name, state, ready } = containerStatus
       return (
         <Fragment key={name}>
           <StatusBrick
             className={cssNames(state, { ready })}
             tooltip={{
               formatters: {
-                tableView: true
+                tableView: true,
               },
               children: Object.keys(state).map(status => (
                 <Fragment key={status}>
@@ -61,15 +61,15 @@ export class Pods extends React.Component<Props> {
                     </div>
                   ))}
                 </Fragment>
-              ))
+              )),
             }}
           />
         </Fragment>
       )
-    });
+    })
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="Pods" store={podsStore}
@@ -102,13 +102,13 @@ export class Pods extends React.Component<Props> {
         ]}
         renderTableContents={(pod: Pod) => [
           pod.getName(),
-          pod.hasIssues() && <KubeEventIcon object={pod}/>,
+          pod.hasIssues() && <KubeEventIcon object={pod} />,
           pod.getNs(),
           this.renderContainersStatus(pod),
           pod.getRestartsCount(),
           pod.getOwnerRefs().map(ref => {
-            const { kind, name } = ref;
-            const detailsLink = getDetailsUrl(lookupApiLink(ref, pod));
+            const { kind, name } = ref
+            const detailsLink = getDetailsUrl(lookupApiLink(ref, pod))
             return (
               <Link key={name} to={detailsLink} className="owner" onClick={stopPropagation}>
                 {kind}
@@ -117,10 +117,10 @@ export class Pods extends React.Component<Props> {
           }),
           pod.getQosClass(),
           pod.getAge(),
-          { title: pod.getStatusMessage(), className: kebabCase(pod.getStatusMessage()) }
+          { title: pod.getStatusMessage(), className: kebabCase(pod.getStatusMessage()) },
         ]}
         renderItemMenu={(item: Pod) => {
-          return <PodMenu object={item}/>
+          return <PodMenu object={item} />
         }}
       />
     )

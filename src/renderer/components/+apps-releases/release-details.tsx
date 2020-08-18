@@ -1,32 +1,32 @@
-import "./release-details.scss";
+import "./release-details.scss"
 
-import React, { Component } from "react";
-import groupBy from "lodash/groupBy";
-import isEqual from "lodash/isEqual";
-import { observable, reaction } from "mobx";
-import { Link } from "react-router-dom";
-import { t, Trans } from "@lingui/macro";
-import kebabCase from "lodash/kebabCase";
-import { HelmRelease, helmReleasesApi, IReleaseDetails } from "../../api/endpoints/helm-releases.api";
-import { HelmReleaseMenu } from "./release-menu";
-import { Drawer, DrawerItem, DrawerTitle } from "../drawer";
-import { Badge } from "../badge";
-import { cssNames, stopPropagation } from "../../utils";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { Spinner } from "../spinner";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { AceEditor } from "../ace-editor";
-import { Button } from "../button";
-import { releaseStore } from "./release.store";
-import { Notifications } from "../notifications";
-import { createUpgradeChartTab } from "../dock/upgrade-chart.store";
-import { getDetailsUrl } from "../../navigation";
-import { _i18n } from "../../i18n";
-import { themeStore } from "../../theme.store";
-import { apiManager } from "../../api/api-manager";
-import { SubTitle } from "../layout/sub-title";
-import { secretsStore } from "../+config-secrets/secrets.store";
-import { Secret } from "../../api/endpoints";
+import React, { Component } from "react"
+import groupBy from "lodash/groupBy"
+import isEqual from "lodash/isEqual"
+import { observable, reaction } from "mobx"
+import { Link } from "react-router-dom"
+import { t, Trans } from "@lingui/macro"
+import kebabCase from "lodash/kebabCase"
+import { HelmRelease, helmReleasesApi, HelmReleaseDetails } from "../../api/endpoints/helm-releases.api"
+import { HelmReleaseMenu } from "./release-menu"
+import { Drawer, DrawerItem, DrawerTitle } from "../drawer"
+import { Badge } from "../badge"
+import { cssNames, stopPropagation } from "../../utils"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { Spinner } from "../spinner"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { AceEditor } from "../ace-editor"
+import { Button } from "../button"
+import { releaseStore } from "./release.store"
+import { Notifications } from "../notifications"
+import { createUpgradeChartTab } from "../dock/upgrade-chart.store"
+import { getDetailsUrl } from "../../navigation"
+import { _i18n } from "../../i18n"
+import { themeStore } from "../../theme.store"
+import { apiManager } from "../../api/api-manager"
+import { SubTitle } from "../layout/sub-title"
+import { secretsStore } from "../+config-secrets/secrets.store"
+import { Secret } from "../../api/endpoints"
 
 interface Props {
   release: HelmRelease;
@@ -35,78 +35,78 @@ interface Props {
 
 @observer
 export class ReleaseDetails extends Component<Props> {
-  @observable details: IReleaseDetails;
+  @observable details: HelmReleaseDetails;
   @observable values = "";
   @observable saving = false;
   @observable releaseSecret: Secret;
 
   @disposeOnUnmount
   releaseSelector = reaction(() => this.props.release, release => {
-    if (!release) return;
-    this.loadDetails();
-    this.loadValues();
-    this.releaseSecret = null;
-  }
+    if (!release) return
+    this.loadDetails()
+    this.loadValues()
+    this.releaseSecret = null
+  },
   );
 
   @disposeOnUnmount
   secretWatcher = reaction(() => secretsStore.items.toJS(), () => {
-    if (!this.props.release) return;
-    const { getReleaseSecret } = releaseStore;
-    const { release } = this.props;
-    const secret = getReleaseSecret(release);
+    if (!this.props.release) return
+    const { getReleaseSecret } = releaseStore
+    const { release } = this.props
+    const secret = getReleaseSecret(release)
     if (this.releaseSecret) {
-      if (isEqual(this.releaseSecret.getLabels(), secret.getLabels())) return;
-      this.loadDetails();
+      if (isEqual(this.releaseSecret.getLabels(), secret.getLabels())) return
+      this.loadDetails()
     }
-    this.releaseSecret = secret;
+    this.releaseSecret = secret
   });
 
-  async loadDetails() {
-    const { release } = this.props;
-    this.details = null;
-    this.details = await helmReleasesApi.get(release.getName(), release.getNs());
+  async loadDetails(): Promise<void> {
+    const { release } = this.props
+    this.details = null
+    this.details = await helmReleasesApi.get(release.getName(), release.getNs())
   }
 
-  async loadValues() {
-    const { release } = this.props;
-    this.values = "";
-    this.values = await helmReleasesApi.getValues(release.getName(), release.getNs());
+  async loadValues(): Promise<void> {
+    const { release } = this.props
+    this.values = ""
+    this.values = await helmReleasesApi.getValues(release.getName(), release.getNs())
   }
 
-  updateValues = async () => {
-    const { release } = this.props;
-    const name = release.getName();
+  updateValues = async (): void => {
+    const { release } = this.props
+    const name = release.getName()
     const namespace = release.getNs()
     const data = {
       chart: release.getChart(),
       repo: await release.getRepo(),
       version: release.getVersion(),
-      values: this.values
-    };
-    this.saving = true;
-    try {
-      await releaseStore.update(name, namespace, data);
-      Notifications.ok(
-        <p>Release <b>{name}</b> successfully updated!</p>
-      );
-    } catch (err) {
-      Notifications.error(err);
+      values: this.values,
     }
-    this.saving = false;
+    this.saving = true
+    try {
+      await releaseStore.update(name, namespace, data)
+      Notifications.ok(
+        <p>Release <b>{name}</b> successfully updated!</p>,
+      )
+    } catch (err) {
+      Notifications.error(err)
+    }
+    this.saving = false
   }
 
-  upgradeVersion = () => {
-    const { release, hideDetails } = this.props;
-    createUpgradeChartTab(release);
-    hideDetails();
+  upgradeVersion = (): void => {
+    const { release, hideDetails } = this.props
+    createUpgradeChartTab(release)
+    hideDetails()
   }
 
-  renderValues() {
-    const { values, saving } = this;
+  renderValues(): React.ReactNode {
+    const { values, saving } = this
     return (
       <div className="values">
-        <DrawerTitle title={_i18n._(t`Values`)}/>
+        <DrawerTitle title={_i18n._(t`Values`)} />
         <div className="flex column gaps">
           <AceEditor
             mode="yaml"
@@ -124,24 +124,24 @@ export class ReleaseDetails extends Component<Props> {
     )
   }
 
-  renderNotes() {
-    if (!this.details.info?.notes) return null;
-    const { notes } = this.details.info;
+  renderNotes(): React.ReactNode {
+    if (!this.details.info?.notes) return null
+    const { notes } = this.details.info
     return (
       <div className="notes">
         {notes}
       </div>
-    );
+    )
   }
 
-  renderResources() {
-    const { resources } = this.details;
-    if (!resources) return null;
-    const groups = groupBy(resources, item => item.kind);
+  renderResources(): React.ReactNode {
+    const { resources } = this.details
+    if (!resources) return null
+    const groups = groupBy(resources, item => item.kind)
     const tables = Object.entries(groups).map(([kind, items]) => {
       return (
         <React.Fragment key={kind}>
-          <SubTitle title={kind}/>
+          <SubTitle title={kind} />
           <Table scrollable={false}>
             <TableHead sticky={false}>
               <TableCell className="name">Name</TableCell>
@@ -149,13 +149,13 @@ export class ReleaseDetails extends Component<Props> {
               <TableCell className="age">Age</TableCell>
             </TableHead>
             {items.map(item => {
-              const name = item.getName();
-              const namespace = item.getNs();
-              const api = apiManager.getApi(item.metadata.selfLink);
+              const name = item.getName()
+              const namespace = item.getNs()
+              const api = apiManager.getApi(item.metadata.selfLink)
               const detailsUrl = api ? getDetailsUrl(api.getUrl({
                 name,
                 namespace,
-              })) : "";
+              })) : ""
               return (
                 <TableRow key={item.getId()}>
                   <TableCell className="name">
@@ -164,25 +164,25 @@ export class ReleaseDetails extends Component<Props> {
                   {namespace && <TableCell className="namespace">{namespace}</TableCell>}
                   <TableCell className="age">{item.getAge()}</TableCell>
                 </TableRow>
-              );
+              )
             })}
           </Table>
         </React.Fragment>
-      );
-    });
+      )
+    })
     return (
       <div className="resources">
         {tables}
       </div>
-    );
+    )
   }
 
-  renderContent() {
-    const { release } = this.props;
-    const { details } = this;
-    if (!release) return null;
+  renderContent(): React.ReactNode {
+    const { release } = this.props
+    const { details } = this
+    if (!release) return null
     if (!details) {
-      return <Spinner center/>;
+      return <Spinner center />
     }
     return (
       <div>
@@ -217,18 +217,18 @@ export class ReleaseDetails extends Component<Props> {
           />
         </DrawerItem>
         {this.renderValues()}
-        <DrawerTitle title={_i18n._(t`Notes`)}/>
+        <DrawerTitle title={_i18n._(t`Notes`)} />
         {this.renderNotes()}
-        <DrawerTitle title={_i18n._(t`Resources`)}/>
+        <DrawerTitle title={_i18n._(t`Resources`)} />
         {this.renderResources()}
       </div>
     )
   }
 
-  render() {
+  render(): React.ReactNode {
     const { release, hideDetails } = this.props
     const title = release ? <Trans>Release: {release.getName()}</Trans> : ""
-    const toolbar = <HelmReleaseMenu release={release} toolbar hideDetails={hideDetails}/>
+    const toolbar = <HelmReleaseMenu release={release} toolbar hideDetails={hideDetails} />
     return (
       <Drawer
         className={cssNames("ReleaseDetails", themeStore.activeTheme.type)}

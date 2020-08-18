@@ -1,14 +1,19 @@
-import { KubeObjectStore } from "../../kube-object.store";
-import { autobind } from "../../utils";
-import { CronJob, cronJobApi } from "../../api/endpoints/cron-job.api";
-import { jobStore } from "../+workloads-jobs/job.store";
-import { apiManager } from "../../api/api-manager";
+import { KubeObjectStore } from "../../kube-object.store"
+import { autobind } from "../../utils"
+import { CronJob, cronJobApi } from "../../api/endpoints/cron-job.api"
+import { jobStore } from "../+workloads-jobs/job.store"
+import { apiManager } from "../../api/api-manager"
+
+export interface CronJobStatuses {
+  failed: number;
+  running: number;
+}
 
 @autobind()
 export class CronJobStore extends KubeObjectStore<CronJob> {
   api = cronJobApi
 
-  getStatuses(cronJobs?: CronJob[]) {
+  getStatuses(cronJobs?: CronJob[]): CronJobStatuses {
     const status = { failed: 0, running: 0 }
     cronJobs.forEach(cronJob => {
       if (cronJob.spec.suspend) {
@@ -21,13 +26,13 @@ export class CronJobStore extends KubeObjectStore<CronJob> {
     return status
   }
 
-  getActiveJobsNum(cronJob: CronJob) {
+  getActiveJobsNum(cronJob: CronJob): number {
     // Active jobs are jobs without any condition 'Complete' nor 'Failed'
-    const jobs = jobStore.getJobsByOwner(cronJob);
-    if (!jobs.length) return 0;
-    return jobs.filter(job => !job.getCondition()).length;
+    const jobs = jobStore.getJobsByOwner(cronJob)
+    if (!jobs.length) return 0
+    return jobs.filter(job => !job.getCondition()).length
   }
 }
 
-export const cronJobStore = new CronJobStore();
-apiManager.registerStore(cronJobApi, cronJobStore);
+export const cronJobStore = new CronJobStore()
+apiManager.registerStore(cronJobApi, cronJobStore)

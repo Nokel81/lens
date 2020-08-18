@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 
 // Helper for preventing default event action and performing custom callback
 // 1)
@@ -12,14 +12,14 @@ import React from "react";
 //  <Icon onClick={prevDefault(() => console.log('stay on the page and open dialog'))}/>
 // </a>
 
-export function prevDefault<E extends React.SyntheticEvent | Event>(callback: (evt: E) => any) {
-  return function (evt: E) {
-    evt.preventDefault();
-    evt.stopPropagation();
-    return callback(evt);
+export function prevDefault<E extends React.SyntheticEvent | Event, T>(callback: (evt: E) => T) {
+  return function (evt: E): T {
+    evt.preventDefault()
+    evt.stopPropagation()
+    return callback(evt)
   }
 }
 
-export function stopPropagation(evt: Event | React.SyntheticEvent) {
-  evt.stopPropagation();
+export function stopPropagation(evt: Event | React.SyntheticEvent): void {
+  evt.stopPropagation()
 }

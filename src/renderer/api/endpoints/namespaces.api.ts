@@ -1,6 +1,6 @@
-import { KubeApi } from "../kube-api";
-import { KubeObject } from "../kube-object";
-import { autobind } from "../../utils";
+import { KubeApi } from "../kube-api"
+import { KubeObject } from "../kube-object"
+import { autobind } from "../../utils"
 
 export enum NamespaceStatus {
   ACTIVE = "Active",
@@ -15,8 +15,8 @@ export class Namespace extends KubeObject {
     phase: string;
   }
 
-  getStatus() {
-    return this.status ? this.status.phase : "-";
+  getStatus(): string {
+    return this.status ? this.status.phase : "-"
   }
 }
 
@@ -25,4 +25,4 @@ export const namespacesApi = new KubeApi({
   apiBase: "/api/v1/namespaces",
   isNamespaced: false,
   objectConstructor: Namespace,
-});
+})

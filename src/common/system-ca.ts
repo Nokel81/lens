@@ -1,4 +1,4 @@
-import { isMac, isWindows } from "./vars";
+import { isMac, isWindows } from "./vars"
 import winca from "win-ca"
 import macca from "mac-ca"
 import logger from "../main/logger"

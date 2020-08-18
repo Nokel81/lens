@@ -1,11 +1,11 @@
 import { RouteProps } from "react-router"
-import { buildURL } from "../../navigation";
+import { buildURL } from "../../navigation"
 
 export const volumesRoute: RouteProps = {
-  path: "/persistent-volumes"
+  path: "/persistent-volumes",
 }
 
-export interface IVolumesRouteParams {
+export interface VolumesRouteParams {
 }
 
-export const volumesURL = buildURL<IVolumesRouteParams>(volumesRoute.path);
+export const volumesURL = buildURL<VolumesRouteParams>(volumesRoute.path)

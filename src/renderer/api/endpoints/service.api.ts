@@ -1,30 +1,30 @@
-import { autobind } from "../../utils";
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { autobind } from "../../utils"
+import { KubeObject } from "../kube-object"
+import { KubeApi } from "../kube-api"
 
-export interface IServicePort {
+export interface ServicePort {
   name?: string;
   protocol: string;
   port: number;
   targetPort: number;
 }
 
-export class ServicePort implements IServicePort {
+export class ServicePort implements ServicePort {
   name?: string;
   protocol: string;
   port: number;
   targetPort: number;
   nodePort?: number;
 
-  constructor(data: IServicePort) {
+  constructor(data: ServicePort) {
     Object.assign(this, data)
   }
 
-  toString() {
+  toString(): string {
     if (this.nodePort) {
-      return `${this.port}:${this.nodePort}/${this.protocol}`;
+      return `${this.port}:${this.nodePort}/${this.protocol}`
     } else {
-      return `${this.port}${this.port === this.targetPort ? "" : ":" + this.targetPort}/${this.protocol}`;
+      return `${this.port}${this.port === this.targetPort ? "" : ":" + this.targetPort}/${this.protocol}`
     }
   }
 }
@@ -53,42 +53,42 @@ export class Service extends KubeObject {
     };
   }
 
-  getClusterIp() {
-    return this.spec.clusterIP;
+  getClusterIp(): string {
+    return this.spec.clusterIP
   }
 
-  getExternalIps() {
-    const lb = this.getLoadBalancer();
+  getExternalIps(): string[] {
+    const lb = this.getLoadBalancer()
     if (lb && lb.ingress) {
       return lb.ingress.map(val => val.ip || val.hostname)
     }
-    return this.spec.externalIPs || [];
+    return this.spec.externalIPs || []
   }
 
-  getType() {
-    return this.spec.type || "-";
+  getType(): string {
+    return this.spec.type || "-"
   }
 
   getSelector(): string[] {
-    if (!this.spec.selector) return [];
-    return Object.entries(this.spec.selector).map(val => val.join("="));
+    if (!this.spec.selector) return []
+    return Object.entries(this.spec.selector).map(val => val.join("="))
   }
 
   getPorts(): ServicePort[] {
-    const ports = this.spec.ports || [];
-    return ports.map(p => new ServicePort(p));
+    const ports = this.spec.ports || []
+    return ports.map(p => new ServicePort(p))
   }
 
-  getLoadBalancer() {
-    return this.status.loadBalancer;
+  getLoadBalancer(): { ingress?: { ip?: string; hostname?: string; }[]; } {
+    return this.status.loadBalancer
   }
 
-  isActive() {
-    return this.getType() !== "LoadBalancer" || this.getExternalIps().length > 0;
+  isActive(): boolean {
+    return this.getType() !== "LoadBalancer" || this.getExternalIps().length > 0
   }
 
-  getStatus() {
-    return this.isActive() ? "Active" : "Pending";
+  getStatus(): "Active" | "Pending" {
+    return this.isActive() ? "Active" : "Pending"
   }
 }
 
@@ -97,4 +97,4 @@ export const serviceApi = new KubeApi({
   apiBase: "/api/v1/services",
   isNamespaced: true,
   objectConstructor: Service,
-});
+})

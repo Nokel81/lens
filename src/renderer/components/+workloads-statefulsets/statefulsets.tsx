@@ -1,19 +1,19 @@
-import "./statefulsets.scss";
+import "./statefulsets.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { RouteComponentProps } from "react-router";
-import { Trans } from "@lingui/macro";
-import { StatefulSet, statefulSetApi } from "../../api/endpoints";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { statefulSetStore } from "./statefulset.store";
-import { nodesStore } from "../+nodes/nodes.store";
-import { eventStore } from "../+events/event.store";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { IStatefulSetsRouteParams } from "../+workloads";
-import { KubeEventIcon } from "../+events/kube-event-icon";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { RouteComponentProps } from "react-router"
+import { Trans } from "@lingui/macro"
+import { StatefulSet, statefulSetApi } from "../../api/endpoints"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { statefulSetStore } from "./statefulset.store"
+import { nodesStore } from "../+nodes/nodes.store"
+import { eventStore } from "../+events/event.store"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { StatefulSetsRouteParams } from "../+workloads"
+import { KubeEventIcon } from "../+events/kube-event-icon"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -22,16 +22,16 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<IStatefulSetsRouteParams> {
+interface Props extends RouteComponentProps<StatefulSetsRouteParams> {
 }
 
 @observer
 export class StatefulSets extends React.Component<Props> {
-  getPodsLength(statefulSet: StatefulSet) {
-    return statefulSetStore.getChildPods(statefulSet).length;
+  getPodsLength(statefulSet: StatefulSet): number {
+    return statefulSetStore.getChildPods(statefulSet).length
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="StatefulSets" store={statefulSetStore}
@@ -57,20 +57,20 @@ export class StatefulSets extends React.Component<Props> {
           statefulSet.getName(),
           statefulSet.getNs(),
           this.getPodsLength(statefulSet),
-          <KubeEventIcon object={statefulSet}/>,
+          <KubeEventIcon key="kube-event-icon" object={statefulSet} />,
           statefulSet.getAge(),
         ]}
         renderItemMenu={(item: StatefulSet) => {
-          return <StatefulSetMenu object={item}/>
+          return <StatefulSetMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function StatefulSetMenu(props: KubeObjectMenuProps<StatefulSet>) {
+export function StatefulSetMenu(props: KubeObjectMenuProps<StatefulSet>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

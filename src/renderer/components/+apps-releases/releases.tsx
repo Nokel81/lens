@@ -1,19 +1,19 @@
-import "./releases.scss";
+import "./releases.scss"
 
-import React, { Component } from "react";
-import kebabCase from "lodash/kebabCase";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { RouteComponentProps } from "react-router";
-import { releaseStore } from "./release.store";
-import { IReleaseRouteParams, releaseURL } from "./release.route";
-import { HelmRelease } from "../../api/endpoints/helm-releases.api";
-import { ReleaseDetails } from "./release-details";
-import { ReleaseRollbackDialog } from "./release-rollback-dialog";
-import { navigation } from "../../navigation";
-import { ItemListLayout } from "../item-object-list/item-list-layout";
-import { HelmReleaseMenu } from "./release-menu";
-import { secretsStore } from "../+config-secrets/secrets.store";
+import React, { Component } from "react"
+import kebabCase from "lodash/kebabCase"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { RouteComponentProps } from "react-router"
+import { releaseStore } from "./release.store"
+import { ReleaseRouteParams, releaseURL } from "./release.route"
+import { HelmRelease } from "../../api/endpoints/helm-releases.api"
+import { ReleaseDetails } from "./release-details"
+import { ReleaseRollbackDialog } from "./release-rollback-dialog"
+import { navigation } from "../../navigation"
+import { ItemListLayout } from "../item-object-list/item-list-layout"
+import { HelmReleaseMenu } from "./release-menu"
+import { secretsStore } from "../+config-secrets/secrets.store"
 
 enum sortBy {
   name = "name",
@@ -24,29 +24,29 @@ enum sortBy {
   updated = "update"
 }
 
-interface Props extends RouteComponentProps<IReleaseRouteParams> {
+interface Props extends RouteComponentProps<ReleaseRouteParams> {
 }
 
 @observer
 export class HelmReleases extends Component<Props> {
 
-  componentDidMount() {
+  componentDidMount(): void {
     // Watch for secrets associated with releases and react to their changes
-    releaseStore.watch();
+    releaseStore.watch()
   }
 
-  componentWillUnmount() {
-    releaseStore.unwatch();
+  componentWillUnmount(): void {
+    releaseStore.unwatch()
   }
 
-  get selectedRelease() {
-    const { match: { params: { name, namespace } } } = this.props;
+  get selectedRelease(): HelmRelease {
+    const { match: { params: { name, namespace } } } = this.props
     return releaseStore.items.find(release => {
-      return release.getName() == name && release.getNs() == namespace;
-    });
+      return release.getName() == name && release.getNs() == namespace
+    })
   }
 
-  showDetails = (item: HelmRelease) => {
+  showDetails = (item: HelmRelease): void => {
     if (!item) {
       navigation.merge(releaseURL())
     }
@@ -54,29 +54,29 @@ export class HelmReleases extends Component<Props> {
       navigation.merge(releaseURL({
         params: {
           name: item.getName(),
-          namespace: item.getNs()
-        }
+          namespace: item.getNs(),
+        },
       }))
     }
   }
 
-  hideDetails = () => {
-    this.showDetails(null);
+  hideDetails = (): void => {
+    this.showDetails(null)
   }
 
-  renderRemoveDialogMessage(selectedItems: HelmRelease[]) {
-    const releaseNames = selectedItems.map(item => item.getName()).join(", ");
+  renderRemoveDialogMessage(selectedItems: HelmRelease[]): React.ReactNode {
+    const releaseNames = selectedItems.map(item => item.getName()).join(", ")
     return (
       <div>
         <Trans>Remove <b>{releaseNames}</b>?</Trans>
         <p className="warning">
-          <Trans>Note: StatefulSet Volumes won't be deleted automatically</Trans>
+          <Trans>Note: StatefulSet Volumes won&apos;t be deleted automatically</Trans>
         </p>
       </div>
     )
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <>
         <ItemListLayout
@@ -110,7 +110,7 @@ export class HelmReleases extends Component<Props> {
             { title: <Trans>Updated</Trans>, className: "updated", sortBy: sortBy.updated },
           ]}
           renderTableContents={(release: HelmRelease) => {
-            const version = release.getVersion();
+            const version = release.getVersion()
             return [
               release.getName(),
               release.getNs(),
@@ -133,7 +133,7 @@ export class HelmReleases extends Component<Props> {
             )
           }}
           customizeRemoveDialog={(selectedItems: HelmRelease[]) => ({
-            message: this.renderRemoveDialogMessage(selectedItems)
+            message: this.renderRemoveDialogMessage(selectedItems),
           })}
           detailsItem={this.selectedRelease}
           onDetails={this.showDetails}
@@ -142,8 +142,8 @@ export class HelmReleases extends Component<Props> {
           release={this.selectedRelease}
           hideDetails={this.hideDetails}
         />
-        <ReleaseRollbackDialog/>
+        <ReleaseRollbackDialog />
       </>
-    );
+    )
   }
 }

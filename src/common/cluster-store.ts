@@ -1,15 +1,14 @@
-import type { WorkspaceId } from "./workspace-store";
-import path from "path";
-import filenamify from "filenamify";
-import { app, ipcRenderer, remote } from "electron";
-import { copyFile, ensureDir, unlink } from "fs-extra";
-import { action, computed, observable, toJS } from "mobx";
-import { appProto, noClustersHost } from "./vars";
-import { BaseStore } from "./base-store";
-import { Cluster, ClusterState } from "../main/cluster";
+import type { WorkspaceId } from "./workspace-store"
+import path from "path"
+import { app, ipcRenderer, remote } from "electron"
+import fse from "fs-extra"
+import { action, computed, observable, toJS } from "mobx"
+import { noClustersHost } from "./vars"
+import { BaseStore } from "./base-store"
+import { Cluster, ClusterState } from "../main/cluster"
 import migrations from "../migrations/cluster-store"
-import logger from "../main/logger";
-import { tracker } from "./tracker";
+import logger from "../main/logger"
+import { tracker } from "./tracker"
 
 export interface ClusterIconUpload {
   clusterId: string;
@@ -52,22 +51,22 @@ export interface ClusterPreferences {
 }
 
 export class ClusterStore extends BaseStore<ClusterStoreModel> {
-  static get iconsDir() {
+  static get iconsDir(): string {
     // TODO: remove remote cheat
-    return path.join((app || remote.app).getPath("userData"), "icons");
+    return path.join((app || remote.app).getPath("userData"), "icons")
   }
 
   private constructor() {
     super({
       configName: "lens-cluster-store",
       accessPropertiesByDotNotation: false, // To make dots safe in cluster context names
-      migrations: migrations,
-    });
+      migrations,
+    })
     if (ipcRenderer) {
       ipcRenderer.on("cluster:state", (event, clusterState: ClusterState) => {
         this.applyWithoutSync(() => {
-          logger.debug(`[CLUSTER-STORE]: received state update for cluster=${clusterState.id}`, clusterState);
-          const cluster = this.getById(clusterState.id);
+          logger.debug(`[CLUSTER-STORE]: received state update for cluster=${clusterState.id}`, clusterState)
+          const cluster = this.getById(clusterState.id)
           if (cluster) cluster.updateModel(clusterState)
         })
       })
@@ -79,27 +78,27 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
   @observable clusters = observable.map<ClusterId, Cluster>();
 
   @computed get activeCluster(): Cluster | null {
-    return this.getById(this.activeClusterId);
+    return this.getById(this.activeClusterId)
   }
 
   @computed get clustersList(): Cluster[] {
-    return Array.from(this.clusters.values());
+    return Array.from(this.clusters.values())
   }
 
-  setActive(id: ClusterId) {
-    this.activeClusterId = id;
+  setActive(id: ClusterId): void {
+    this.activeClusterId = id
   }
 
-  hasClusters() {
-    return this.clusters.size > 0;
+  hasClusters(): boolean {
+    return this.clusters.size > 0
   }
 
-  hasContext(name: string) {
-    return this.clustersList.some(cluster => cluster.contextName === name);
+  hasContext(name: string): boolean {
+    return this.clustersList.some(cluster => cluster.contextName === name)
   }
 
   getById(id: ClusterId): Cluster {
-    return this.clusters.get(id);
+    return this.clusters.get(id)
   }
 
   getByWorkspaceId(workspaceId: string): Cluster[] {
@@ -108,64 +107,64 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
   @action
   async addCluster(model: ClusterModel, activate = true): Promise<Cluster> {
-    tracker.event("cluster", "add");
-    const cluster = new Cluster(model);
-    this.clusters.set(model.id, cluster);
-    if (activate) this.activeClusterId = model.id;
-    return cluster;
+    tracker.event("cluster", "add")
+    const cluster = new Cluster(model)
+    this.clusters.set(model.id, cluster)
+    if (activate) this.activeClusterId = model.id
+    return cluster
   }
 
   @action
-  async removeById(clusterId: ClusterId) {
-    tracker.event("cluster", "remove");
-    const cluster = this.getById(clusterId);
+  async removeById(clusterId: ClusterId): Promise<void> {
+    tracker.event("cluster", "remove")
+    const cluster = this.getById(clusterId)
     if (cluster) {
-      this.clusters.delete(clusterId);
+      this.clusters.delete(clusterId)
       if (this.activeClusterId === clusterId) {
-        this.activeClusterId = null;
+        this.activeClusterId = null
       }
-      unlink(cluster.kubeConfigPath).catch(() => null);
+      await fse.unlink(cluster.kubeConfigPath).catch(() => null)
     }
   }
 
   @action
-  removeByWorkspaceId(workspaceId: string) {
+  removeByWorkspaceId(workspaceId: string): void {
     this.getByWorkspaceId(workspaceId).forEach(cluster => {
       this.removeById(cluster.id)
     })
   }
 
   @action
-  protected fromStore({ activeCluster, clusters = [] }: ClusterStoreModel = {}) {
-    const currentClusters = this.clusters.toJS();
-    const newClusters = new Map<ClusterId, Cluster>();
-    const removedClusters = new Map<ClusterId, Cluster>();
+  protected fromStore({ activeCluster, clusters = [] }: ClusterStoreModel = {}): void {
+    const currentClusters = this.clusters.toJS()
+    const newClusters = new Map<ClusterId, Cluster>()
+    const removedClusters = new Map<ClusterId, Cluster>()
 
     // update new clusters
     clusters.forEach(clusterModel => {
-      let cluster = currentClusters.get(clusterModel.id);
+      let cluster = currentClusters.get(clusterModel.id)
       if (cluster) {
-        cluster.updateModel(clusterModel);
+        cluster.updateModel(clusterModel)
       } else {
-        cluster = new Cluster(clusterModel);
+        cluster = new Cluster(clusterModel)
       }
-      newClusters.set(clusterModel.id, cluster);
-    });
+      newClusters.set(clusterModel.id, cluster)
+    })
 
     // update removed clusters
     currentClusters.forEach(cluster => {
       if (!newClusters.has(cluster.id)) {
-        removedClusters.set(cluster.id, cluster);
+        removedClusters.set(cluster.id, cluster)
       }
-    });
+    })
 
-    this.activeClusterId = newClusters.has(activeCluster) ? activeCluster : null;
-    this.clusters.replace(newClusters);
-    this.removedClusters.replace(removedClusters);
+    this.activeClusterId = newClusters.has(activeCluster) ? activeCluster : null
+    this.clusters.replace(newClusters)
+    this.removedClusters.replace(removedClusters)
 
     // "auto-select" first cluster if available
     if (!this.activeClusterId && newClusters.size) {
-      this.activeClusterId = Array.from(newClusters.values())[0].id;
+      this.activeClusterId = Array.from(newClusters.values())[0].id
     }
   }
 
@@ -174,21 +173,21 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
       activeCluster: this.activeClusterId,
       clusters: this.clustersList.map(cluster => cluster.toJSON()),
     }, {
-      recurseEverything: true
+      recurseEverything: true,
     })
   }
 }
 
-export const clusterStore = ClusterStore.getInstance<ClusterStore>();
+export const clusterStore = ClusterStore.getInstance<ClusterStore>()
 
-export function isNoClustersView() {
+export function isNoClustersView(): boolean {
   return location.hostname === noClustersHost
 }
 
-export function getHostedClusterId() {
-  return location.hostname.split(".")[0];
+export function getHostedClusterId(): string {
+  return location.hostname.split(".")[0]
 }
 
 export function getHostedCluster(): Cluster {
-  return clusterStore.getById(getHostedClusterId());
+  return clusterStore.getById(getHostedClusterId())
 }

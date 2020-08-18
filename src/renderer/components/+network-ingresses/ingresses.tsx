@@ -1,15 +1,15 @@
 import "./ingresses.scss"
 
 import React from "react"
-import { observer } from "mobx-react";
+import { observer } from "mobx-react"
 import { RouteComponentProps } from "react-router-dom"
 import { IngressRouteParams } from "./ingresses.route"
 import { Ingress, ingressApi } from "../../api/endpoints/ingress.api"
-import { ingressStore } from "./ingress.store";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { Trans } from "@lingui/macro";
-import { apiManager } from "../../api/api-manager";
+import { ingressStore } from "./ingress.store"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { Trans } from "@lingui/macro"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -22,7 +22,7 @@ interface Props extends RouteComponentProps<IngressRouteParams> {
 
 @observer
 export class Ingresses extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="Ingresses" store={ingressStore}
@@ -49,25 +49,25 @@ export class Ingresses extends React.Component<Props> {
           ingress.getAge(),
         ]}
         renderItemMenu={(item: Ingress) => {
-          return <IngressMenu object={item}/>
+          return <IngressMenu object={item} />
         }}
         tableProps={{
           customRowHeights: (item: Ingress, lineHeight, paddings) => {
-            const lines = item.getRoutes().length || 1;
-            return lines * lineHeight + paddings;
-          }
+            const lines = item.getRoutes().length || 1
+            return lines * lineHeight + paddings
+          },
         }}
       />
     )
   }
 }
 
-export function IngressMenu(props: KubeObjectMenuProps<Ingress>) {
+export function IngressMenu(props: KubeObjectMenuProps<Ingress>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 
 apiManager.registerViews(ingressApi, {
-  Menu: IngressMenu
+  Menu: IngressMenu,
 })

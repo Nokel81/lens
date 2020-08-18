@@ -43,11 +43,11 @@ class PortForward {
       "port-forward",
       "-n", this.namespace,
       `${this.kind}/${this.name}`,
-      `${this.localPort}:${this.port}`
+      `${this.localPort}:${this.port}`,
     ]
 
     this.process = spawn(kubectlBin, args, {
-      env: process.env
+      env: process.env,
     })
     PortForward.portForwards.push(this)
     this.process.on("exit", () => {
@@ -78,22 +78,22 @@ class PortForwardRoute extends LensApi {
 
     let portForward = PortForward.getPortforward({
       clusterId: cluster.id, kind: resourceType, name: resourceName,
-      namespace: namespace, port: port
+      namespace, port,
     })
     if (!portForward) {
       logger.info(`Creating a new port-forward ${namespace}/${resourceType}/${resourceName}:${port}`)
       portForward = new PortForward({
         clusterId: cluster.id,
         kind: resourceType,
-        namespace: namespace,
+        namespace,
         name: resourceName,
-        port: port,
-        kubeConfig: cluster.getProxyKubeconfigPath()
+        port,
+        kubeConfig: cluster.getProxyKubeconfigPath(),
       })
       const started = await portForward.start()
       if (!started) {
         this.respondJson(response, {
-          message: "Failed to open port-forward"
+          message: "Failed to open port-forward",
         }, 400)
         return
       }

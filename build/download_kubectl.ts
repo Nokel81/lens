@@ -13,11 +13,11 @@ class KubectlDownloader {
   protected dirname: string
 
   constructor(clusterVersion: string, platform: string, arch: string, target: string) {
-    this.kubectlVersion = clusterVersion;
+    this.kubectlVersion = clusterVersion
     const binaryName = platform === "windows" ? "kubectl.exe" : "kubectl"
-    this.url = `https://storage.googleapis.com/kubernetes-release/release/v${this.kubectlVersion}/bin/${platform}/${arch}/${binaryName}`;
-    this.dirname = path.dirname(target);
-    this.path = target;
+    this.url = `https://storage.googleapis.com/kubernetes-release/release/v${this.kubectlVersion}/bin/${platform}/${arch}/${binaryName}`
+    this.dirname = path.dirname(target)
+    this.path = target
   }
 
   protected async urlEtag() {
@@ -38,7 +38,7 @@ class KubectlDownloader {
     if (exists) {
       const hash = md5File.sync(this.path)
       const etag = await this.urlEtag()
-      if(hash == etag) {
+      if (hash == etag) {
         console.log("Kubectl md5sum matches the remote etag")
         return true
       }
@@ -51,8 +51,8 @@ class KubectlDownloader {
   }
 
   public async downloadKubectl() {
-    const exists = await this.checkBinary();
-    if(exists) {
+    const exists = await this.checkBinary()
+    if (exists) {
       console.log("Already exists and is valid")
       return
     }
@@ -68,19 +68,19 @@ class KubectlDownloader {
 
     stream.on("complete", () => {
       console.log("kubectl binary download finished")
-      file.end(() => {})
+      file.end(() => { })
     })
 
     stream.on("error", (error) => {
       console.log(error)
-      fs.unlink(this.path, () => {})
-      throw(error)
+      fs.unlink(this.path, () => { })
+      throw (error)
     })
     return new Promise((resolve, reject) => {
       file.on("close", () => {
         console.log("kubectl binary download closed")
         fs.chmod(this.path, 0o755, (err) => {
-          if (err) reject(err);
+          if (err) reject(err)
         })
         resolve()
       })
@@ -89,7 +89,7 @@ class KubectlDownloader {
   }
 }
 
-const downloadVersion = packageInfo.config.bundledKubectlVersion;
+const downloadVersion = packageInfo.config.bundledKubectlVersion
 const baseDir = path.join(process.env.INIT_CWD, 'binaries', 'client')
 const downloads = [
   { platform: 'linux', arch: 'amd64', target: path.join(baseDir, 'linux', 'x64', 'kubectl') },
@@ -100,8 +100,8 @@ const downloads = [
 
 downloads.forEach((dlOpts) => {
   console.log(dlOpts)
-  const downloader = new KubectlDownloader(downloadVersion, dlOpts.platform, dlOpts.arch, dlOpts.target);
-  console.log("Downloading: " + JSON.stringify(dlOpts));
+  const downloader = new KubectlDownloader(downloadVersion, dlOpts.platform, dlOpts.arch, dlOpts.target)
+  console.log("Downloading: " + JSON.stringify(dlOpts))
   downloader.downloadKubectl().then(() => downloader.checkBinary().then(() => console.log("Download complete")))
 })
 

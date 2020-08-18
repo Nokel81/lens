@@ -1,8 +1,8 @@
-import moment from "moment";
-import { KubeObject } from "../kube-object";
-import { formatDuration } from "../../utils/formatDuration";
-import { autobind } from "../../utils";
-import { KubeApi } from "../kube-api";
+import moment from "moment"
+import { KubeObject } from "../kube-object"
+import { formatDuration } from "../../utils/formatDuration"
+import { autobind } from "../../utils"
+import { KubeApi } from "../kube-api"
 
 @autobind()
 export class KubeEvent extends KubeObject {
@@ -31,21 +31,21 @@ export class KubeEvent extends KubeObject {
   reportingComponent: string
   reportingInstance: string
 
-  isWarning() {
-    return this.type === "Warning";
+  isWarning(): boolean {
+    return this.type === "Warning"
   }
 
-  getSource() {
+  getSource(): string {
     const { component, host } = this.source
     return `${component} ${host || ""}`
   }
 
-  getFirstSeenTime() {
+  getFirstSeenTime(): string {
     const diff = moment().diff(this.firstTimestamp)
     return formatDuration(diff, true)
   }
 
-  getLastSeenTime() {
+  getLastSeenTime(): string {
     const diff = moment().diff(this.lastTimestamp)
     return formatDuration(diff, true)
   }

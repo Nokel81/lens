@@ -1,2 +1,2 @@
-export * from "./releases";
-export * from "./release.route";
+export * from "./releases"
+export * from "./release.route"

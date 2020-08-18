@@ -1,16 +1,16 @@
 import "./add-role-dialog.scss"
 
-import React from "react";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { t, Trans } from "@lingui/macro";
-import { _i18n } from "../../i18n";
-import { Dialog, DialogProps } from "../dialog";
-import { Wizard, WizardStep } from "../wizard";
-import { Notifications } from "../notifications";
-import { rolesStore } from "./roles.store";
-import { Input } from "../input";
-import { showDetails } from "../../navigation";
+import React from "react"
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { t, Trans } from "@lingui/macro"
+import { _i18n } from "../../i18n"
+import { Dialog, DialogProps } from "../dialog"
+import { Wizard, WizardStep } from "../wizard"
+import { Notifications } from "../notifications"
+import { rolesStore } from "./roles.store"
+import { Input } from "../input"
+import { showDetails } from "../../navigation"
 
 interface Props extends Partial<DialogProps> {
 }
@@ -21,36 +21,36 @@ export class AddRoleDialog extends React.Component<Props> {
 
   @observable roleName = "";
 
-  static open() {
-    AddRoleDialog.isOpen = true;
+  static open(): void {
+    AddRoleDialog.isOpen = true
   }
 
-  static close() {
-    AddRoleDialog.isOpen = false;
+  static close(): void {
+    AddRoleDialog.isOpen = false
   }
 
-  close = () => {
-    AddRoleDialog.close();
+  close = (): void => {
+    AddRoleDialog.close()
   }
 
-  reset = () => {
+  reset = (): void => {
     this.roleName = ""
   }
 
-  createRole = async () => {
+  createRole = async (): Promise<void> => {
     try {
-      const role = await rolesStore.create({ name: this.roleName });
-      showDetails(role.selfLink);
-      this.reset();
-      this.close();
+      const role = await rolesStore.create({ name: this.roleName })
+      showDetails(role.selfLink)
+      this.reset()
+      this.close()
     } catch (err) {
-      Notifications.error(err.toString());
+      Notifications.error(err.toString())
     }
   }
 
-  render() {
-    const { ...dialogProps } = this.props;
-    const header = <h5><Trans>Create Role</Trans></h5>;
+  render(): React.ReactNode {
+    const { ...dialogProps } = this.props
+    const header = <h5><Trans>Create Role</Trans></h5>
     return (
       <Dialog
         {...dialogProps}

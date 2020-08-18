@@ -1,19 +1,19 @@
-import "./pie-chart.scss";
-import React from "react";
-import { observer } from "mobx-react";
-import ChartJS, { ChartOptions } from "chart.js";
-import { Chart, ChartProps } from "./chart";
-import { cssNames } from "../../utils";
-import { themeStore } from "../../theme.store";
+import "./pie-chart.scss"
+import React from "react"
+import { observer } from "mobx-react"
+import ChartJS, { ChartOptions } from "chart.js"
+import { Chart, ChartProps } from "./chart"
+import { cssNames } from "../../utils"
+import { themeStore } from "../../theme.store"
 
 interface Props extends ChartProps {
 }
 
 @observer
 export class PieChart extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     const { data, className, options, ...chartProps } = this.props
-    const { contentColor } = themeStore.activeTheme.colors;
+    const { contentColor } = themeStore.activeTheme.colors
     const cutouts = [88, 76, 63]
     const opts: ChartOptions = this.props.showChart === false ? {} : {
       maintainAspectRatio: false,
@@ -25,26 +25,26 @@ export class PieChart extends React.Component<Props> {
             const dataset: any = data["datasets"][tooltipItem.datasetIndex]
             const metaData = Object.values<{ total: number }>(dataset["_meta"])[0]
             const percent = Math.round((dataset["data"][tooltipItem["index"]] / metaData.total) * 100)
-            if (isNaN(percent)) return "N/A";
-            return percent + "%";
+            if (isNaN(percent)) return "N/A"
+            return percent + "%"
           },
         },
         filter: ({ datasetIndex, index }, { datasets }) => {
-          const { data } = datasets[datasetIndex];
-          if (datasets.length === 1) return true;
-          return index !== data.length - 1;
+          const { data } = datasets[datasetIndex]
+          if (datasets.length === 1) return true
+          return index !== data.length - 1
         },
         position: "cursor",
       },
       elements: {
         arc: {
           borderWidth: 1,
-          borderColor: contentColor
+          borderColor: contentColor,
         },
       },
       cutoutPercentage: cutouts[data.datasets.length - 1] || 50,
       responsive: true,
-      ...options
+      ...options,
     }
     return (
       <Chart
@@ -58,5 +58,5 @@ export class PieChart extends React.Component<Props> {
 }
 
 ChartJS.Tooltip.positioners.cursor = function (elements: any, position: { x: number; y: number }) {
-  return position;
-};
+  return position
+}

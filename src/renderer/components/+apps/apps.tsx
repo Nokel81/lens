@@ -1,16 +1,16 @@
-import React from "react";
-import { observer } from "mobx-react";
-import { Redirect, Route, Switch } from "react-router";
-import { Trans } from "@lingui/macro";
-import { MainLayout, TabRoute } from "../layout/main-layout";
-import { HelmCharts, helmChartsRoute, helmChartsURL } from "../+apps-helm-charts";
-import { HelmReleases, releaseRoute, releaseURL } from "../+apps-releases";
-import { namespaceStore } from "../+namespaces/namespace.store";
+import React from "react"
+import { observer } from "mobx-react"
+import { Redirect, Route, Switch } from "react-router"
+import { Trans } from "@lingui/macro"
+import { MainLayout, TabRoute } from "../layout/main-layout"
+import { HelmCharts, helmChartsRoute, helmChartsURL } from "../+apps-helm-charts"
+import { HelmReleases, releaseRoute, releaseURL } from "../+apps-releases"
+import { namespaceStore } from "../+namespaces/namespace.store"
 
 @observer
 export class Apps extends React.Component {
   static get tabRoutes(): TabRoute[] {
-    const query = namespaceStore.getContextParams();
+    const query = namespaceStore.getContextParams()
     return [
       {
         title: <Trans>Charts</Trans>,
@@ -27,13 +27,13 @@ export class Apps extends React.Component {
     ]
   }
 
-  render() {
-    const tabRoutes = Apps.tabRoutes;
+  render(): React.ReactNode {
+    const tabRoutes = Apps.tabRoutes
     return (
       <MainLayout className="Apps" tabs={tabRoutes}>
         <Switch>
-          {tabRoutes.map((route, index) => <Route key={index} {...route}/>)}
-          <Redirect to={tabRoutes[0].url}/>
+          {tabRoutes.map((route, index) => <Route key={index} {...route} />)}
+          <Redirect to={tabRoutes[0].url} />
         </Switch>
       </MainLayout>
     )

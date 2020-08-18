@@ -1,17 +1,17 @@
 import "./namespaces.scss"
 
-import React from "react";
-import { Trans } from "@lingui/macro";
-import { Namespace, namespacesApi, NamespaceStatus } from "../../api/endpoints";
-import { AddNamespaceDialog } from "./add-namespace-dialog";
-import { MainLayout } from "../layout/main-layout";
-import { Badge } from "../badge";
-import { RouteComponentProps } from "react-router";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { INamespacesRouteParams } from "./namespaces.route";
-import { namespaceStore } from "./namespace.store";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { Trans } from "@lingui/macro"
+import { Namespace, namespacesApi, NamespaceStatus } from "../../api/endpoints"
+import { AddNamespaceDialog } from "./add-namespace-dialog"
+import { MainLayout } from "../layout/main-layout"
+import { Badge } from "../badge"
+import { RouteComponentProps } from "react-router"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { NamespacesRouteParams } from "./namespaces.route"
+import { namespaceStore } from "./namespace.store"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -20,11 +20,11 @@ enum sortBy {
   status = "status",
 }
 
-interface Props extends RouteComponentProps<INamespacesRouteParams> {
+interface Props extends RouteComponentProps<NamespacesRouteParams> {
 }
 
 export class Namespaces extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <MainLayout>
         <KubeObjectListLayout
@@ -38,7 +38,7 @@ export class Namespaces extends React.Component<Props> {
           }}
           searchFilters={[
             (item: Namespace) => item.getSearchFields(),
-            (item: Namespace) => item.getStatus()
+            (item: Namespace) => item.getStatus(),
           ]}
           renderHeaderTitle={<Trans>Namespaces</Trans>}
           renderTableHeader={[
@@ -49,12 +49,12 @@ export class Namespaces extends React.Component<Props> {
           ]}
           renderTableContents={(item: Namespace) => [
             item.getName(),
-            item.getLabels().map(label => <Badge key={label} label={label}/>),
+            item.getLabels().map(label => <Badge key={label} label={label} />),
             item.getAge(),
             { title: item.getStatus(), className: item.getStatus().toLowerCase() },
           ]}
           renderItemMenu={(item: Namespace) => {
-            return <NamespaceMenu object={item}/>
+            return <NamespaceMenu object={item} />
           }}
           addRemoveButtons={{
             addTooltip: <Trans>Add Namespace</Trans>,
@@ -64,18 +64,18 @@ export class Namespaces extends React.Component<Props> {
             disabled: item.getStatus() === NamespaceStatus.TERMINATING,
           })}
         />
-        <AddNamespaceDialog/>
+        <AddNamespaceDialog />
       </MainLayout>
     )
   }
 }
 
-export function NamespaceMenu(props: KubeObjectMenuProps<Namespace>) {
+export function NamespaceMenu(props: KubeObjectMenuProps<Namespace>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 
 apiManager.registerViews(namespacesApi, {
   Menu: NamespaceMenu,
-});
+})

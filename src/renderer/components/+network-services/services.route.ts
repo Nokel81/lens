@@ -1,11 +1,11 @@
 import { RouteProps } from "react-router"
-import { buildURL } from "../../navigation";
+import { buildURL } from "../../navigation"
 
 export const servicesRoute: RouteProps = {
-  path: "/services"
+  path: "/services",
 }
 
-export interface IServicesRouteParams {
+export interface ServicesRouteParams {
 }
 
-export const servicesURL = buildURL<IServicesRouteParams>(servicesRoute.path);
+export const servicesURL = buildURL<ServicesRouteParams>(servicesRoute.path)

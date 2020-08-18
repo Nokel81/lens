@@ -1,5 +1,5 @@
-import { Feature, FeatureStatus } from "../main/feature"
-import {KubeConfig, RbacAuthorizationV1Api} from "@kubernetes/client-node"
+import { Feature, FeatureStatus } from "../main/feature"
+import { KubeConfig, RbacAuthorizationV1Api } from "@kubernetes/client-node"
 import { Cluster } from "../main/cluster"
 
 export class UserModeFeature extends Feature {
@@ -11,8 +11,8 @@ export class UserModeFeature extends Feature {
     return super.install(cluster)
   }
 
-  async upgrade(cluster: Cluster): Promise<void> {
-    return;
+  async upgrade(_cluster: Cluster): Promise<void> {
+    return
   }
 
   async featureStatus(kc: KubeConfig): Promise<FeatureStatus> {
@@ -22,23 +22,23 @@ export class UserModeFeature extends Feature {
       installed: false,
       latestVersion: this.latestVersion,
       canUpgrade: false, // Dunno yet
-    };
-    
+    }
+
     try {
       await client.readClusterRoleBinding("lens-user")
-      status.installed = true;
-      status.currentVersion = this.latestVersion;
-      status.canUpgrade = false;
+      status.installed = true
+      status.currentVersion = this.latestVersion
+      status.canUpgrade = false
     } catch {
       // ignore error
     }
 
-    return status;
+    return status
   }
 
   async uninstall(cluster: Cluster): Promise<void> {
     const rbacClient = cluster.getProxyKubeconfig().makeApiClient(RbacAuthorizationV1Api)
-    await rbacClient.deleteClusterRole("lens-user");
-    await rbacClient.deleteClusterRoleBinding("lens-user");
+    await rbacClient.deleteClusterRole("lens-user")
+    await rbacClient.deleteClusterRoleBinding("lens-user")
   }
 }

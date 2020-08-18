@@ -1,11 +1,11 @@
-import { RouteProps } from "react-router";
-import { buildURL } from "../../navigation";
+import { RouteProps } from "react-router"
+import { buildURL } from "../../navigation"
 
 export const configMapsRoute: RouteProps = {
-  path: "/configmaps"
+  path: "/configmaps",
 }
 
-export interface IConfigMapsRouteParams {
+export interface ConfigMapsRouteParams {
 }
 
-export const configMapsURL = buildURL<IConfigMapsRouteParams>(configMapsRoute.path);
+export const configMapsURL = buildURL<ConfigMapsRouteParams>(configMapsRoute.path)

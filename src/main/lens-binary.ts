@@ -4,7 +4,7 @@ import request from "request"
 import logger from "./logger"
 import { ensureDir, pathExists } from "fs-extra"
 import * as tar from "tar"
-import { isWindows } from "../common/vars";
+import { isWindows } from "../common/vars"
 
 export type LensBinaryOpts = {
   version: string;
@@ -15,7 +15,6 @@ export type LensBinaryOpts = {
 }
 
 export class LensBinary {
-
   public binaryVersion: string
   protected directory: string
   protected url: string
@@ -59,11 +58,11 @@ export class LensBinary {
     }
   }
 
-  protected binaryDir() {
+  protected binaryDir(): void {
     throw new Error("binaryDir not implemented")
   }
 
-  public async binaryPath() {
+  public async binaryPath(): Promise<string> {
     await this.ensureBinary()
     return this.getBinaryPath()
   }
@@ -72,23 +71,23 @@ export class LensBinary {
     return null
   }
 
-  protected getUrl() {
+  protected getUrl(): string {
     return ""
   }
 
-  protected getBinaryPath() {
+  protected getBinaryPath(): string {
     return ""
   }
 
-  protected getOriginalBinaryPath() {
+  protected getOriginalBinaryPath(): string {
     return ""
   }
 
-  public getBinaryDir() {
+  public getBinaryDir(): any {
     return path.dirname(this.getBinaryPath())
   }
 
-  public async binDir() {
+  public async binDir(): Promise<string> {
     try {
       await this.ensureBinary()
       return this.dirname
@@ -98,36 +97,32 @@ export class LensBinary {
     }
   }
 
-  protected async checkBinary() {
+  protected async checkBinary(): Promise<boolean> {
     const exists = await pathExists(this.getBinaryPath())
     return exists
   }
 
-  public async ensureBinary() {
+  public async ensureBinary(): Promise<void> {
     const isValid = await this.checkBinary()
     if (!isValid) {
       await this.downloadBinary().catch((error) => {
         logger.error(error)
-      });
+      })
       if (this.tarPath) await this.untarBinary()
       if (this.originalBinaryName != this.binaryName) await this.renameBinary()
       logger.info(`${this.originalBinaryName} has been downloaded to ${this.getBinaryPath()}`)
     }
   }
 
-  protected async untarBinary() {
-    return new Promise<void>((resolve, reject) => {
-      logger.debug(`Extracting ${this.originalBinaryName} binary`)
-      tar.x({
-        file: this.tarPath,
-        cwd: this.dirname
-      }).then((_ => {
-        resolve()
-      }))
+  protected async untarBinary(): Promise<void> {
+    logger.debug(`Extracting ${this.originalBinaryName} binary`)
+    await tar.x({
+      file: this.tarPath,
+      cwd: this.dirname,
     })
   }
 
-  protected async renameBinary() {
+  protected async renameBinary(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       logger.debug(`Renaming ${this.originalBinaryName} binary to ${this.binaryName}`)
       fs.rename(this.getOriginalBinaryPath(), this.getBinaryPath(), (err) => {
@@ -141,7 +136,7 @@ export class LensBinary {
     })
   }
 
-  protected async downloadBinary() {
+  protected async downloadBinary(): Promise<unknown> {
     const binaryPath = this.tarPath || this.getBinaryPath()
     await ensureDir(this.getBinaryDir(), 0o755)
 
@@ -152,7 +147,7 @@ export class LensBinary {
     const requestOpts: request.UriOptions & request.CoreOptions = {
       uri: url,
       gzip: true,
-      ...this.requestOpts
+      ...this.requestOpts,
     }
 
     const stream = request(requestOpts)
@@ -167,13 +162,13 @@ export class LensBinary {
       fs.unlink(binaryPath, () => {
         // do nothing
       })
-      throw(error)
+      throw (error)
     })
     return new Promise((resolve, reject) => {
       file.on("close", () => {
         logger.debug(`${this.originalBinaryName} binary download closed`)
         if (!this.tarPath) fs.chmod(binaryPath, 0o755, (err) => {
-          if (err) reject(err);
+          if (err) reject(err)
         })
         resolve()
       })

@@ -1,7 +1,7 @@
-import "./draggable.scss";
-import React from "react";
-import { cssNames, IClassName, noop } from "../../utils";
-import throttle from "lodash/throttle";
+import "./draggable.scss"
+import React from "react"
+import { cssNames, IClassName, noop } from "../../utils"
+import throttle from "lodash/throttle"
 
 export interface DraggableEventHandler {
   (state: DraggableState): void;
@@ -32,7 +32,7 @@ const initState: DraggableState = {
   changed: false,
   offsetX: 0,
   offsetY: 0,
-};
+}
 
 export class Draggable extends React.PureComponent<Props, DraggableState> {
   public state = initState;
@@ -48,72 +48,75 @@ export class Draggable extends React.PureComponent<Props, DraggableState> {
   };
 
   constructor(props: Props) {
-    super(props);
-    document.addEventListener("mousemove", this.onDrag);
-    document.addEventListener("mouseup", this.onDragEnd);
+    super(props)
+    document.addEventListener("mousemove", this.onDrag)
+    document.addEventListener("mouseup", this.onDragEnd)
   }
 
-  componentWillUnmount() {
-    document.removeEventListener("mousemove", this.onDrag);
-    document.removeEventListener("mouseup", this.onDragEnd);
+  componentWillUnmount(): void {
+    document.removeEventListener("mousemove", this.onDrag)
+    document.removeEventListener("mouseup", this.onDragEnd)
   }
 
-  onDragInit = (evt: React.MouseEvent<any>) => {
-    document.body.classList.add(Draggable.IS_DRAGGING);
-    const { pageX, pageY } = evt;
+  onDragInit = (evt: React.MouseEvent<any>): void => {
+    document.body.classList.add(Draggable.IS_DRAGGING)
+    const { pageX, pageY } = evt
+    // eslint-disable-next-line react/no-set-state
     this.setState({
       inited: true,
       initX: pageX,
       initY: pageY,
-      pageX: pageX,
-      pageY: pageY,
+      pageX,
+      pageY,
     })
   }
 
   onDrag = throttle((evt: MouseEvent) => {
-    const { vertical, horizontal, onEnter, onStart } = this.props;
-    const { inited, pageX, pageY } = this.state;
-    const offsetX = pageX - evt.pageX;
-    const offsetY = pageY - evt.pageY;
-    let changed = false;
-    if (horizontal && offsetX !== 0) changed = true;
-    if (vertical && offsetY !== 0) changed = true;
+    const { vertical, horizontal, onEnter, onStart } = this.props
+    const { inited, pageX, pageY } = this.state
+    const offsetX = pageX - evt.pageX
+    const offsetY = pageY - evt.pageY
+    let changed = false
+    if (horizontal && offsetX !== 0) changed = true
+    if (vertical && offsetY !== 0) changed = true
     if (inited && changed) {
-      const start = !this.state.changed;
+      const start = !this.state.changed
       const state = Object.assign({}, this.state, {
         changed: true,
         pageX: evt.pageX,
         pageY: evt.pageY,
-        offsetX: offsetX,
-        offsetY: offsetY,
-      });
-      if (start) onStart(state);
-      this.setState(state, () => onEnter(state));
+        offsetX,
+        offsetY,
+      })
+      if (start) onStart(state)
+      // eslint-disable-next-line react/no-set-state
+      this.setState(state, () => onEnter(state))
     }
   }, 100)
 
-  onDragEnd = (evt: MouseEvent) => {
-    const { pageX, pageY } = evt;
-    const { inited, changed, initX, initY } = this.state;
+  onDragEnd = (evt: MouseEvent): void => {
+    const { pageX, pageY } = evt
+    const { inited, changed, initX, initY } = this.state
     if (inited) {
-      document.body.classList.remove(Draggable.IS_DRAGGING);
+      document.body.classList.remove(Draggable.IS_DRAGGING)
+      // eslint-disable-next-line react/no-set-state
       this.setState(initState, () => {
-        if (!changed) return;
+        if (!changed) return
         const state = Object.assign({}, this.state, {
           offsetX: initX - pageX,
           offsetY: initY - pageY,
-        });
-        this.props.onEnd(state);
-      });
+        })
+        this.props.onEnd(state)
+      })
     }
   }
 
-  render() {
-    const { className, children } = this.props;
+  render(): React.ReactNode {
+    const { className, children } = this.props
     return (
       <div className={cssNames("Draggable", className)} onMouseDown={this.onDragInit}>
         {children}
       </div>
-    );
+    )
   }
 }

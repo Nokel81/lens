@@ -1,19 +1,19 @@
-import "./pod-container-env.scss";
+import "./pod-container-env.scss"
 
-import React, { useEffect, useState } from "react";
-import flatten from "lodash/flatten";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { IPodContainer, Secret } from "../../api/endpoints";
-import { DrawerItem } from "../drawer";
-import { autorun } from "mobx";
-import { secretsStore } from "../+config-secrets/secrets.store";
-import { configMapsStore } from "../+config-maps/config-maps.store";
-import { Icon } from "../icon";
-import { base64, cssNames } from "../../utils";
+import React, { useEffect, useState } from "react"
+import flatten from "lodash/flatten"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { PodContainer, Secret } from "../../api/endpoints"
+import { DrawerItem } from "../drawer"
+import { autorun } from "mobx"
+import { secretsStore } from "../+config-secrets/secrets.store"
+import { configMapsStore } from "../+config-maps/config-maps.store"
+import { Icon } from "../icon"
+import { base64, cssNames } from "../../utils"
 
 interface Props {
-  container: IPodContainer;
+  container: PodContainer;
   namespace: string;
 }
 
@@ -36,7 +36,7 @@ export const ContainerEnvironment = observer((props: Props) => {
           }
         })
       }),
-    []
+    [],
   )
 
   const renderEnv = () => {
@@ -115,7 +115,7 @@ const SecretKey = (props: SecretKeyProps) => {
 
   const showKey = async () => {
     setLoading(true)
-    const secret = await secretsStore.load({ name, namespace });
+    const secret = await secretsStore.load({ name, namespace })
     setLoading(false)
     setSecret(secret)
   }
@@ -126,7 +126,7 @@ const SecretKey = (props: SecretKeyProps) => {
 
   return (
     <>
-        secretKeyRef({name}.{key})&nbsp;
+      secretKeyRef({name}.{key})&nbsp;
       <Icon
         className={cssNames("secret-button", { loading })}
         material="visibility"

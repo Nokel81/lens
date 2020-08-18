@@ -1,26 +1,26 @@
 import "./cluster-issues.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { computed } from "mobx";
-import { Trans } from "@lingui/macro";
-import { Icon } from "../icon";
-import { SubHeader } from "../layout/sub-header";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { nodesStore } from "../+nodes/nodes.store";
-import { eventStore } from "../+events/event.store";
-import { autobind, cssNames, prevDefault } from "../../utils";
-import { getSelectedDetails, showDetails } from "../../navigation";
-import { ItemObject } from "../../item.store";
-import { Spinner } from "../spinner";
-import { themeStore } from "../../theme.store";
-import { lookupApiLink } from "../../api/kube-api";
+import React from "react"
+import { observer } from "mobx-react"
+import { computed } from "mobx"
+import { Trans } from "@lingui/macro"
+import { Icon } from "../icon"
+import { SubHeader } from "../layout/sub-header"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { nodesStore } from "../+nodes/nodes.store"
+import { eventStore } from "../+events/event.store"
+import { autobind, cssNames, prevDefault } from "../../utils"
+import { getSelectedDetails, showDetails } from "../../navigation"
+import { ItemObject } from "../../item.store"
+import { Spinner } from "../spinner"
+import { themeStore } from "../../theme.store"
+import { lookupApiLink } from "../../api/kube-api"
 
 interface Props {
   className?: string;
 }
 
-interface IWarning extends ItemObject {
+interface Warning extends ItemObject {
   kind: string;
   message: string;
   selfLink: string;
@@ -34,12 +34,12 @@ enum sortBy {
 @observer
 export class ClusterIssues extends React.Component<Props> {
   private sortCallbacks = {
-    [sortBy.type]: (warning: IWarning) => warning.kind,
-    [sortBy.object]: (warning: IWarning) => warning.getName(),
+    [sortBy.type]: (warning: Warning) => warning.kind,
+    [sortBy.object]: (warning: Warning) => warning.getName(),
   };
 
-  @computed get warnings() {
-    const warnings: IWarning[] = [];
+  @computed get warnings(): Warning[] {
+    const warnings: Warning[] = []
 
     // Node bad conditions
     nodesStore.items.forEach(node => {
@@ -53,30 +53,30 @@ export class ClusterIssues extends React.Component<Props> {
           message,
         })
       })
-    });
+    })
 
     // Warning events for Workloads
-    const events = eventStore.getWarnings();
+    const events = eventStore.getWarnings()
     events.forEach(error => {
-      const { message, involvedObject } = error;
-      const { uid, name, kind } = involvedObject;
+      const { message, involvedObject } = error
+      const { uid, name, kind } = involvedObject
       warnings.push({
         getId: () => uid,
         getName: () => name,
         message,
         kind,
         selfLink: lookupApiLink(involvedObject, error),
-      });
+      })
     })
 
-    return warnings;
+    return warnings
   }
 
   @autobind()
-  getTableRow(uid: string) {
-    const { warnings } = this;
-    const warning = warnings.find(warn => warn.getId() == uid);
-    const { getId, getName, message, kind, selfLink } = warning;
+  getTableRow(uid: string): JSX.Element {
+    const { warnings } = this
+    const warning = warnings.find(warn => warn.getId() == uid)
+    const { getId, getName, message, kind, selfLink } = warning
     return (
       <TableRow
         key={getId()}
@@ -94,29 +94,29 @@ export class ClusterIssues extends React.Component<Props> {
           {kind}
         </TableCell>
       </TableRow>
-    );
+    )
   }
 
-  renderContent() {
-    const { warnings } = this;
+  renderContent(): React.ReactNode {
+    const { warnings } = this
     if (!eventStore.isLoaded) {
       return (
-        <Spinner center/>
-      );
+        <Spinner center />
+      )
     }
     if (!warnings.length) {
       return (
         <div className="no-issues flex column box grow gaps align-center justify-center">
-          <div><Icon material="check" big sticker/></div>
+          <div><Icon material="check" big sticker /></div>
           <div className="ok-title"><Trans>No issues found</Trans></div>
           <span><Trans>Everything is fine in the Cluster</Trans></span>
         </div>
-      );
+      )
     }
     return (
       <>
         <SubHeader>
-          <Icon material="error_outline"/>{" "}
+          <Icon material="error_outline" />{" "}
           <Trans>Warnings: {warnings.length}</Trans>
         </SubHeader>
         <Table
@@ -136,14 +136,14 @@ export class ClusterIssues extends React.Component<Props> {
           </TableHead>
         </Table>
       </>
-    );
+    )
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <div className={cssNames("ClusterIssues flex column", this.props.className)}>
         {this.renderContent()}
       </div>
-    );
+    )
   }
 }

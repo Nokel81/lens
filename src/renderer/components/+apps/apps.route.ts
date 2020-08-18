@@ -1,8 +1,8 @@
-import { RouteProps } from "react-router";
-import { buildURL } from "../../navigation";
+import { RouteProps } from "react-router"
+import { buildURL } from "../../navigation"
 
 export const appsRoute: RouteProps = {
   path: "/apps",
-};
+}
 
-export const appsURL = buildURL(appsRoute.path);
+export const appsURL = buildURL(appsRoute.path)

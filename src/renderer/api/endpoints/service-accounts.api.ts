@@ -1,24 +1,28 @@
-import { autobind } from "../../utils";
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { autobind } from "../../utils"
+import { KubeObject } from "../kube-object"
+import { KubeApi } from "../kube-api"
+
+export interface ServiceAccountSecret {
+  name: string;
+}
+
+export interface ServiceAccountImagePullSecret {
+  name: string;
+}
 
 @autobind()
 export class ServiceAccount extends KubeObject {
   static kind = "ServiceAccount";
 
-  secrets?: {
-    name: string;
-  }[]
-  imagePullSecrets?: {
-    name: string;
-  }[]
+  secrets?: ServiceAccountSecret[]
+  imagePullSecrets?: ServiceAccountImagePullSecret[]
 
-  getSecrets() {
-    return this.secrets || [];
+  getSecrets(): ServiceAccountSecret[] {
+    return this.secrets || []
   }
 
-  getImagePullSecrets() {
-    return this.imagePullSecrets || [];
+  getImagePullSecrets(): ServiceAccountImagePullSecret[] {
+    return this.imagePullSecrets || []
   }
 }
 
@@ -27,4 +31,4 @@ export const serviceAccountsApi = new KubeApi<ServiceAccount>({
   apiBase: "/api/v1/serviceaccounts",
   isNamespaced: true,
   objectConstructor: ServiceAccount,
-});
+})

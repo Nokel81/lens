@@ -1,23 +1,23 @@
-import "./nodes.scss";
-import React from "react";
-import { observer } from "mobx-react";
-import { RouteComponentProps } from "react-router";
-import { t, Trans } from "@lingui/macro";
-import { cssNames, interval } from "../../utils";
-import { MainLayout } from "../layout/main-layout";
-import { nodesStore } from "./nodes.store";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { KubeObjectListLayout } from "../kube-object";
-import { INodesRouteParams } from "./nodes.route";
-import { Node, nodesApi } from "../../api/endpoints/nodes.api";
-import { NodeMenu } from "./node-menu";
-import { LineProgress } from "../line-progress";
-import { _i18n } from "../../i18n";
-import { bytesToUnits } from "../../utils/convertMemory";
-import { Tooltip, TooltipPosition } from "../tooltip";
-import kebabCase from "lodash/kebabCase";
-import upperFirst from "lodash/upperFirst";
-import { apiManager } from "../../api/api-manager";
+import "./nodes.scss"
+import React from "react"
+import { observer } from "mobx-react"
+import { RouteComponentProps } from "react-router"
+import { t, Trans } from "@lingui/macro"
+import { cssNames, interval } from "../../utils"
+import { MainLayout } from "../layout/main-layout"
+import { nodesStore } from "./nodes.store"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { KubeObjectListLayout } from "../kube-object"
+import { NodesRouteParams } from "./nodes.route"
+import { Node, nodesApi } from "../../api/endpoints/nodes.api"
+import { NodeMenu } from "./node-menu"
+import { LineProgress } from "../line-progress"
+import { _i18n } from "../../i18n"
+import { bytesToUnits } from "../../utils/convertMemory"
+import { Tooltip, TooltipPosition } from "../tooltip"
+import kebabCase from "lodash/kebabCase"
+import upperFirst from "lodash/upperFirst"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -32,77 +32,77 @@ enum sortBy {
   status = "status",
 }
 
-interface Props extends RouteComponentProps<INodesRouteParams> {
+interface Props extends RouteComponentProps<NodesRouteParams> {
 }
 
 @observer
 export class Nodes extends React.Component<Props> {
   private metricsWatcher = interval(30, () => nodesStore.loadUsageMetrics());
 
-  componentDidMount() {
-    this.metricsWatcher.start(true);
+  componentDidMount(): void {
+    this.metricsWatcher.start(true)
   }
 
-  componentWillUnmount() {
-    this.metricsWatcher.stop();
+  componentWillUnmount(): void {
+    this.metricsWatcher.stop()
   }
 
-  renderCpuUsage(node: Node) {
-    const metrics = nodesStore.getLastMetricValues(node, ["cpuUsage", "cpuCapacity"]);
-    if (!metrics || !metrics[1]) return <LineProgress value={0}/>;
-    const usage = metrics[0];
-    const cores = metrics[1];
+  renderCpuUsage(node: Node): React.ReactNode {
+    const metrics = nodesStore.getLastMetricValues(node, ["cpuUsage", "cpuCapacity"])
+    if (!metrics || !metrics[1]) return <LineProgress value={0} />
+    const usage = metrics[0]
+    const cores = metrics[1]
     return (
       <LineProgress
         max={cores}
         value={usage}
         tooltip={{
           position: TooltipPosition.BOTTOM,
-          children: _i18n._(t`CPU:`) + ` ${Math.ceil(usage * 100) / cores}\%, ` + _i18n._(t`cores:`) + ` ${cores}`
+          children: _i18n._(t`CPU:`) + ` ${Math.ceil(usage * 100) / cores}\%, ` + _i18n._(t`cores:`) + ` ${cores}`,
         }}
       />
     )
   }
 
-  renderMemoryUsage(node: Node) {
-    const metrics = nodesStore.getLastMetricValues(node, ["memoryUsage", "memoryCapacity"]);
-    if (!metrics || !metrics[1]) return <LineProgress value={0}/>;
-    const usage = metrics[0];
-    const capacity = metrics[1];
+  renderMemoryUsage(node: Node): React.ReactNode {
+    const metrics = nodesStore.getLastMetricValues(node, ["memoryUsage", "memoryCapacity"])
+    if (!metrics || !metrics[1]) return <LineProgress value={0} />
+    const usage = metrics[0]
+    const capacity = metrics[1]
     return (
       <LineProgress
         max={capacity}
         value={usage}
         tooltip={{
           position: TooltipPosition.BOTTOM,
-          children: _i18n._(t`Memory:`) + ` ${Math.ceil(usage * 100 / capacity)}%, ${bytesToUnits(usage, 3)}`
+          children: _i18n._(t`Memory:`) + ` ${Math.ceil(usage * 100 / capacity)}%, ${bytesToUnits(usage, 3)}`,
         }}
       />
     )
   }
 
   renderDiskUsage(node: Node): any {
-    const metrics = nodesStore.getLastMetricValues(node, ["fsUsage", "fsSize"]);
-    if (!metrics || !metrics[1]) return <LineProgress value={0}/>;
-    const usage = metrics[0];
-    const capacity = metrics[1];
+    const metrics = nodesStore.getLastMetricValues(node, ["fsUsage", "fsSize"])
+    if (!metrics || !metrics[1]) return <LineProgress value={0} />
+    const usage = metrics[0]
+    const capacity = metrics[1]
     return (
       <LineProgress
         max={capacity}
         value={usage}
         tooltip={{
           position: TooltipPosition.BOTTOM,
-          children: _i18n._(t`Disk:`) + ` ${Math.ceil(usage * 100 / capacity)}%, ${bytesToUnits(usage, 3)}`
+          children: _i18n._(t`Disk:`) + ` ${Math.ceil(usage * 100 / capacity)}%, ${bytesToUnits(usage, 3)}`,
         }}
       />
     )
   }
 
-  renderConditions(node: Node) {
+  renderConditions(node: Node): React.ReactNode {
     if (!node.status.conditions) {
       return null
     }
-    const conditions = node.getActiveConditions();
+    const conditions = node.getActiveConditions()
     return conditions.map(condition => {
       const { type } = condition
       const tooltipId = `node-${node.getName()}-condition-${type}`
@@ -114,14 +114,14 @@ export class Nodes extends React.Component<Props> {
               <div key={key} className="flex gaps align-center">
                 <div className="name">{upperFirst(key)}</div>
                 <div className="value">{value}</div>
-              </div>
+              </div>,
             )}
           </Tooltip>
         </div>)
     })
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <MainLayout>
         <KubeObjectListLayout
@@ -160,7 +160,7 @@ export class Nodes extends React.Component<Props> {
             { title: <Trans>Conditions</Trans>, className: "conditions", sortBy: sortBy.conditions },
           ]}
           renderTableContents={(node: Node) => {
-            const tooltipId = `node-taints-${node.getId()}`;
+            const tooltipId = `node-taints-${node.getId()}`
             return [
               node.getName(),
               this.renderCpuUsage(node),
@@ -179,7 +179,7 @@ export class Nodes extends React.Component<Props> {
             ]
           }}
           renderItemMenu={(item: Node) => {
-            return <NodeMenu object={item}/>
+            return <NodeMenu object={item} />
           }}
         />
       </MainLayout>
@@ -189,4 +189,4 @@ export class Nodes extends React.Component<Props> {
 
 apiManager.registerViews(nodesApi, {
   Menu: NodeMenu,
-});
+})

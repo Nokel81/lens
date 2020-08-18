@@ -1,13 +1,13 @@
-import net from "net";
-import http from "http";
-import httpProxy from "http-proxy";
-import url from "url";
+import net from "net"
+import http from "http"
+import httpProxy from "http-proxy"
+import url from "url"
 import * as WebSocket from "ws"
-import { openShell } from "./node-shell-session";
+import { openShell } from "./node-shell-session"
 import { Router } from "./router"
 import { ClusterManager } from "./cluster-manager"
-import { ContextHandler } from "./context-handler";
-import { apiKubePrefix, noClustersHost } from "../common/vars";
+import { ContextHandler } from "./context-handler"
+import { apiKubePrefix, noClustersHost } from "../common/vars"
 import logger from "./logger"
 
 export class LensProxy {
@@ -16,67 +16,67 @@ export class LensProxy {
   protected closed = false
   protected retryCounters = new Map<string, number>()
 
-  static create(port: number, clusterManager: ClusterManager) {
-    return new LensProxy(port, clusterManager).listen();
+  static create(port: number, clusterManager: ClusterManager): LensProxy {
+    return new LensProxy(port, clusterManager).listen()
   }
 
   private constructor(protected port: number, protected clusterManager: ClusterManager) {
-    this.router = new Router();
+    this.router = new Router()
   }
 
   listen(port = this.port): this {
-    this.proxyServer = this.buildCustomProxy().listen(port);
-    logger.info(`LensProxy server has started http://localhost:${port}`);
-    return this;
+    this.proxyServer = this.buildCustomProxy().listen(port)
+    logger.info(`LensProxy server has started http://localhost:${port}`)
+    return this
   }
 
-  close() {
-    logger.info("Closing proxy server");
+  close(): void {
+    logger.info("Closing proxy server")
     this.proxyServer.close()
     this.closed = true
   }
 
   protected buildCustomProxy(): http.Server {
-    const proxy = this.createProxy();
+    const proxy = this.createProxy()
     const customProxy = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
-      this.handleRequest(proxy, req, res);
-    });
+      this.handleRequest(proxy, req, res)
+    })
     customProxy.on("upgrade", (req: http.IncomingMessage, socket: net.Socket, head: Buffer) => {
       this.handleWsUpgrade(req, socket, head)
-    });
+    })
     customProxy.on("error", (err) => {
       logger.error("proxy error", err)
-    });
-    return customProxy;
+    })
+    return customProxy
   }
 
   protected createProxy(): httpProxy {
-    const proxy = httpProxy.createProxyServer();
+    const proxy = httpProxy.createProxyServer()
     proxy.on("proxyRes", (proxyRes, req, res) => {
       if (req.method !== "GET") {
-        return;
+        return
       }
       if (proxyRes.statusCode === 502) {
         const cluster = this.clusterManager.getClusterForRequest(req)
-        const proxyError = cluster?.contextHandler.proxyLastError;
+        const proxyError = cluster?.contextHandler.proxyLastError
         if (proxyError) {
-          return res.writeHead(502).end(proxyError);
+          return res.writeHead(502).end(proxyError)
         }
       }
-      const reqId = this.getRequestId(req);
+      const reqId = this.getRequestId(req)
       if (this.retryCounters.has(reqId)) {
-        logger.debug(`Resetting proxy retry cache for url: ${reqId}`);
+        logger.debug(`Resetting proxy retry cache for url: ${reqId}`)
         this.retryCounters.delete(reqId)
       }
     })
     proxy.on("error", (error, req, res, target) => {
       if (this.closed) {
-        return;
+        return
       }
       if (target) {
-        logger.debug("Failed proxy to target: " + JSON.stringify(target, null, 2));
+        logger.debug("Failed proxy to target: " + JSON.stringify(target, null, 2))
         if (req.method === "GET" && (!res.statusCode || res.statusCode >= 500)) {
-          const reqId = this.getRequestId(req);
+          const reqId = this.getRequestId(req)
           const retryCount = this.retryCounters.get(reqId) || 0
           const timeoutMs = retryCount * 250
           if (retryCount < 20) {
@@ -91,16 +91,16 @@ export class LensProxy {
       res.writeHead(500).end("Oops, something went wrong.")
     })
 
-    return proxy;
+    return proxy
   }
 
   protected createWsListener(): WebSocket.Server {
     const ws = new WebSocket.Server({ noServer: true })
     return ws.on("connection", ((socket: WebSocket, req: http.IncomingMessage) => {
-      const cluster = this.clusterManager.getClusterForRequest(req);
-      const nodeParam = url.parse(req.url, true).query["node"]?.toString();
-      openShell(socket, cluster, nodeParam);
-    }));
+      const cluster = this.clusterManager.getClusterForRequest(req)
+      const nodeParam = url.parse(req.url, true).query["node"]?.toString()
+      openShell(socket, cluster, nodeParam)
+    }))
   }
 
   protected async getProxyTarget(req: http.IncomingMessage, contextHandler: ContextHandler): Promise<httpProxy.ServerOptions> {
@@ -112,37 +112,37 @@ export class LensProxy {
     }
   }
 
-  protected getRequestId(req: http.IncomingMessage) {
-    return req.headers.host + req.url;
+  protected getRequestId(req: http.IncomingMessage): any {
+    return req.headers.host + req.url
   }
 
-  protected async handleRequest(proxy: httpProxy, req: http.IncomingMessage, res: http.ServerResponse) {
+  protected async handleRequest(proxy: httpProxy, req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     if (req.headers.host.split(":")[0] === noClustersHost) {
-      this.router.handleStaticFile(req.url, res);
-      return;
+      this.router.handleStaticFile(req.url, res)
+      return
     }
     const cluster = this.clusterManager.getClusterForRequest(req)
     if (!cluster) {
-      const reqId = this.getRequestId(req);
+      const reqId = this.getRequestId(req)
       logger.error("Got request to unknown cluster", { reqId })
       res.statusCode = 503
       res.end()
       return
     }
     const contextHandler = cluster.contextHandler
-    await contextHandler.ensureServer();
+    await contextHandler.ensureServer()
     const proxyTarget = await this.getProxyTarget(req, contextHandler)
     if (proxyTarget) {
       proxy.web(req, res, proxyTarget)
     } else {
-      this.router.route(cluster, req, res);
+      this.router.route(cluster, req, res)
     }
   }
 
-  protected async handleWsUpgrade(req: http.IncomingMessage, socket: net.Socket, head: Buffer) {
-    const wsServer = this.createWsListener();
+  protected async handleWsUpgrade(req: http.IncomingMessage, socket: net.Socket, head: Buffer): Promise<void> {
+    const wsServer = this.createWsListener()
     wsServer.handleUpgrade(req, socket, head, (con) => {
-      wsServer.emit("connection", con, req);
-    });
+      wsServer.emit("connection", con, req)
+    })
   }
 }

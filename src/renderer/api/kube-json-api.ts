@@ -1,4 +1,4 @@
-import { JsonApi, JsonApiData, JsonApiError } from "./json-api";
+import { JsonApi, JsonApiData, JsonApiError } from "./json-api"
 
 export interface KubeJsonApiDataList<T = KubeJsonApiData> {
   kind: string;
@@ -44,10 +44,10 @@ export interface KubeJsonApiError extends JsonApiError {
 
 export class KubeJsonApi extends JsonApi<KubeJsonApiData> {
   protected parseError(error: KubeJsonApiError | any, res: Response): string[] {
-    const { status, reason, message } = error;
+    const { status, reason, message } = error
     if (status && reason) {
-      return [message || `${status}: ${reason}`];
+      return [message || `${status}: ${reason}`]
     }
-    return super.parseError(error, res);
+    return super.parseError(error, res)
   }
 }

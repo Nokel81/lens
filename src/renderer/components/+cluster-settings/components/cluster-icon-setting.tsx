@@ -1,12 +1,12 @@
-import React from "react";
-import { Cluster } from "../../../../main/cluster";
-import { FilePicker, OverSizeLimitStyle } from "../../file-picker";
-import { autobind } from "../../../utils";
-import { Button } from "../../button";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { SubTitle } from "../../layout/sub-title";
-import { ClusterIcon } from "../../cluster-icon";
+import React from "react"
+import { Cluster } from "../../../../main/cluster"
+import { FilePicker, OverSizeLimitStyle } from "../../file-picker"
+import { autobind } from "../../../utils"
+import { Button } from "../../button"
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { SubTitle } from "../../layout/sub-title"
+import { ClusterIcon } from "../../cluster-icon"
 
 enum GeneralInputStatus {
   CLEAN = "clean",
@@ -23,16 +23,16 @@ export class ClusterIconSetting extends React.Component<Props> {
   @observable errorText?: string;
 
   @autobind()
-  async onIconPick([file]: File[]) {
-    const { cluster } = this.props;
+  async onIconPick([file]: File[]): Promise<void> {
+    const { cluster } = this.props
     try {
       if (file) {
-        const buf = Buffer.from(await file.arrayBuffer());
-        cluster.preferences.icon = `data:image/jpeg;base64, ${buf.toString('base64')}`;
+        const buf = Buffer.from(await file.arrayBuffer())
+        cluster.preferences.icon = `data:image/jpeg;base64, ${buf.toString('base64')}`
       } else {
         // this has to be done as a seperate branch (and not always) because `cluster`
         // is observable and triggers an update loop.
-        cluster.preferences.icon = undefined;
+        cluster.preferences.icon = undefined
       }
     } catch (e) {
       this.errorText = e.toString()
@@ -40,13 +40,13 @@ export class ClusterIconSetting extends React.Component<Props> {
     }
   }
 
-  getClearButton() {
+  getClearButton(): React.ReactNode {
     if (this.props.cluster.preferences.icon) {
       return <Button tooltip="Revert back to default icon" accent onClick={() => this.onIconPick([])}>Clear</Button>
     }
   }
 
-  render() {
+  render(): React.ReactNode {
     const label = (
       <>
         <ClusterIcon
@@ -56,7 +56,7 @@ export class ClusterIconSetting extends React.Component<Props> {
         />
         {"Browse for new icon..."}
       </>
-    );
+    )
     return (
       <>
         <SubTitle title="Cluster Icon" />
@@ -71,6 +71,6 @@ export class ClusterIconSetting extends React.Component<Props> {
           {this.getClearButton()}
         </div>
       </>
-    );
+    )
   }
 }

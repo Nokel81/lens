@@ -1,34 +1,34 @@
-import "./crd-details.scss";
+import "./crd-details.scss"
 
-import React from "react";
-import { Trans } from "@lingui/macro";
-import { Link } from "react-router-dom";
-import { observer } from "mobx-react";
-import { apiManager } from "../../api/api-manager";
-import { crdApi, CustomResourceDefinition } from "../../api/endpoints/crd.api";
-import { cssNames } from "../../utils";
-import { AceEditor } from "../ace-editor";
-import { Badge } from "../badge";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { Input } from "../input";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import React from "react"
+import { Trans } from "@lingui/macro"
+import { Link } from "react-router-dom"
+import { observer } from "mobx-react"
+import { apiManager } from "../../api/api-manager"
+import { crdApi, CustomResourceDefinition } from "../../api/endpoints/crd.api"
+import { cssNames } from "../../utils"
+import { AceEditor } from "../ace-editor"
+import { Badge } from "../badge"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { Input } from "../input"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<CustomResourceDefinition> {
 }
 
 @observer
 export class CRDDetails extends React.Component<Props> {
-  render() {
-    const { object: crd } = this.props;
-    if (!crd) return null;
-    const { plural, singular, kind, listKind } = crd.getNames();
-    const printerColumns = crd.getPrinterColumns();
-    const validation = crd.getValidation();
+  render(): React.ReactNode {
+    const { object: crd } = this.props
+    if (!crd) return null
+    const { plural, singular, kind, listKind } = crd.getNames()
+    const printerColumns = crd.getPrinterColumns()
+    const validation = crd.getValidation()
     return (
       <div className="CRDDetails">
-        <KubeObjectMeta object={crd}/>
+        <KubeObjectMeta object={crd} />
 
         <DrawerItem name={<Trans>Group</Trans>}>
           {crd.getGroup()}
@@ -72,11 +72,11 @@ export class CRDDetails extends React.Component<Props> {
                     </>
                   )}
                 />
-              );
+              )
             })
           }
         </DrawerItem>
-        <DrawerTitle title={<Trans>Names</Trans>}/>
+        <DrawerTitle title={<Trans>Names</Trans>} />
         <Table selectable className="names box grow">
           <TableHead>
             <TableCell><Trans>plural</Trans></TableCell>
@@ -92,41 +92,41 @@ export class CRDDetails extends React.Component<Props> {
           </TableRow>
         </Table>
         {printerColumns.length > 0 &&
-        <>
-          <DrawerTitle title={<Trans>Additional Printer Columns</Trans>}/>
-          <Table selectable className="printer-columns box grow">
-            <TableHead>
-              <TableCell className="name"><Trans>Name</Trans></TableCell>
-              <TableCell className="type"><Trans>Type</Trans></TableCell>
-              <TableCell className="json-path"><Trans>JSON Path</Trans></TableCell>
-            </TableHead>
-            {
-              printerColumns.map((column, index) => {
-                const { name, type, JSONPath } = column;
-                return (
-                  <TableRow key={index}>
-                    <TableCell className="name">{name}</TableCell>
-                    <TableCell className="type">{type}</TableCell>
-                    <TableCell className="json-path">
-                      <Badge label={JSONPath}/>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            }
-          </Table>
-        </>
+          <>
+            <DrawerTitle title={<Trans>Additional Printer Columns</Trans>} />
+            <Table selectable className="printer-columns box grow">
+              <TableHead>
+                <TableCell className="name"><Trans>Name</Trans></TableCell>
+                <TableCell className="type"><Trans>Type</Trans></TableCell>
+                <TableCell className="json-path"><Trans>JSON Path</Trans></TableCell>
+              </TableHead>
+              {
+                printerColumns.map((column, index) => {
+                  const { name, type, JSONPath } = column
+                  return (
+                    <TableRow key={index}>
+                      <TableCell className="name">{name}</TableCell>
+                      <TableCell className="type">{type}</TableCell>
+                      <TableCell className="json-path">
+                        <Badge label={JSONPath} />
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              }
+            </Table>
+          </>
         }
         {validation &&
-        <>
-          <DrawerTitle title={<Trans>Validation</Trans>}/>
-          <AceEditor
-            mode="json"
-            className="validation"
-            value={validation}
-            readOnly
-          />
-        </>
+          <>
+            <DrawerTitle title={<Trans>Validation</Trans>} />
+            <AceEditor
+              mode="json"
+              className="validation"
+              value={validation}
+              readOnly
+            />
+          </>
         }
       </div>
     )
@@ -134,5 +134,5 @@ export class CRDDetails extends React.Component<Props> {
 }
 
 apiManager.registerViews(crdApi, {
-  Details: CRDDetails
+  Details: CRDDetails,
 })

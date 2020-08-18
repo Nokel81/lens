@@ -1,26 +1,26 @@
-import { autobind } from "../../utils";
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { autobind } from "../../utils"
+import { KubeObject } from "../kube-object"
+import { KubeApi } from "../kube-api"
 
-export interface IEndpointPort {
+export interface EndpointPort {
   name?: string;
   protocol: string;
   port: number;
 }
 
-export interface IEndpointAddress {
+export interface EndpointAddress {
   hostname: string;
   ip: string;
   nodeName: string;
 }
 
-export interface IEndpointSubset {
-  addresses: IEndpointAddress[];
-  notReadyAddresses: IEndpointAddress[];
-  ports: IEndpointPort[];
+export interface EndpointSubset {
+  addresses: EndpointAddress[];
+  notReadyAddresses: EndpointAddress[];
+  ports: EndpointPort[];
 }
 
-interface ITargetRef {
+interface TargetRef {
   kind: string;
   namespace: string;
   name: string;
@@ -29,7 +29,7 @@ interface ITargetRef {
   apiVersion: string;
 }
 
-export class EndpointAddress implements IEndpointAddress {
+export class EndpointAddress implements EndpointAddress {
   hostname: string;
   ip: string;
   nodeName: string;
@@ -41,48 +41,48 @@ export class EndpointAddress implements IEndpointAddress {
     resourceVersion: string;
   };
 
-  constructor(data: IEndpointAddress) {
+  constructor(data: EndpointAddress) {
     Object.assign(this, data)
   }
 
-  getId() {
+  getId(): string {
     return this.ip
   }
 
-  getName() {
+  getName(): string {
     return this.hostname
   }
 
-  getTargetRef(): ITargetRef {
+  getTargetRef(): TargetRef {
     if (this.targetRef) {
-      return Object.assign(this.targetRef, {apiVersion: "v1"})
+      return Object.assign(this.targetRef, { apiVersion: "v1" })
     } else {
       return null
     }
   }
 }
 
-export class EndpointSubset implements IEndpointSubset {
-  addresses: IEndpointAddress[];
-  notReadyAddresses: IEndpointAddress[];
-  ports: IEndpointPort[];
+export class EndpointSubset implements EndpointSubset {
+  addresses: EndpointAddress[];
+  notReadyAddresses: EndpointAddress[];
+  ports: EndpointPort[];
 
-  constructor(data: IEndpointSubset) {
+  constructor(data: EndpointSubset) {
     Object.assign(this, data)
   }
 
   getAddresses(): EndpointAddress[] {
-    const addresses = this.addresses || [];
-    return addresses.map(a => new EndpointAddress(a));
+    const addresses = this.addresses || []
+    return addresses.map(a => new EndpointAddress(a))
   }
 
   getNotReadyAddresses(): EndpointAddress[] {
-    const notReadyAddresses = this.notReadyAddresses || [];
-    return notReadyAddresses.map(a => new EndpointAddress(a));
+    const notReadyAddresses = this.notReadyAddresses || []
+    return notReadyAddresses.map(a => new EndpointAddress(a))
   }
 
   toString(): string {
-    if(!this.addresses) {
+    if (!this.addresses) {
       return ""
     }
     return this.addresses.map(address => {
@@ -100,15 +100,15 @@ export class EndpointSubset implements IEndpointSubset {
 export class Endpoint extends KubeObject {
   static kind = "Endpoint"
 
-  subsets: IEndpointSubset[]
+  subsets: EndpointSubset[]
 
   getEndpointSubsets(): EndpointSubset[] {
-    const subsets = this.subsets || [];
-    return subsets.map(s => new EndpointSubset(s));
+    const subsets = this.subsets || []
+    return subsets.map(s => new EndpointSubset(s))
   }
 
   toString(): string {
-    if(this.subsets) {
+    if (this.subsets) {
       return this.getEndpointSubsets().map(es => es.toString()).join(", ")
     } else {
       return "<none>"
@@ -122,4 +122,4 @@ export const endpointApi = new KubeApi({
   apiBase: "/api/v1/endpoints",
   isNamespaced: true,
   objectConstructor: Endpoint,
-});
+})

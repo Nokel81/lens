@@ -1,17 +1,17 @@
 import "./workspaces.scss"
-import React, { Fragment } from "react";
-import { observer } from "mobx-react";
-import { computed, observable, toJS } from "mobx";
-import { t, Trans } from "@lingui/macro";
-import { WizardLayout } from "../layout/wizard-layout";
-import { Workspace, WorkspaceId, workspaceStore } from "../../../common/workspace-store";
+import React, { Fragment } from "react"
+import { observer } from "mobx-react"
+import { computed, observable, toJS } from "mobx"
+import { t, Trans } from "@lingui/macro"
+import { WizardLayout } from "../layout/wizard-layout"
+import { Workspace, WorkspaceId, workspaceStore } from "../../../common/workspace-store"
 import { v4 as uuid } from "uuid"
-import { _i18n } from "../../i18n";
-import { ConfirmDialog } from "../confirm-dialog";
-import { Icon } from "../icon";
-import { Input } from "../input";
-import { cssNames, prevDefault } from "../../utils";
-import { Button } from "../button";
+import { _i18n } from "../../i18n"
+import { ConfirmDialog } from "../confirm-dialog"
+import { Icon } from "../icon"
+import { Input } from "../input"
+import { cssNames, prevDefault } from "../../utils"
+import { Button } from "../button"
 
 @observer
 export class Workspaces extends React.Component {
@@ -21,11 +21,11 @@ export class Workspaces extends React.Component {
     const allWorkspaces = new Map([
       ...workspaceStore.workspaces,
       ...this.editingWorkspaces,
-    ]);
-    return Array.from(allWorkspaces.values());
+    ])
+    return Array.from(allWorkspaces.values())
   }
 
-  renderInfo() {
+  renderInfo(): React.ReactNode {
     return (
       <Fragment>
         <h2><Trans>What is a Workspace?</Trans></h2>
@@ -39,16 +39,16 @@ export class Workspaces extends React.Component {
     )
   }
 
-  saveWorkspace = (id: WorkspaceId) => {
-    const draft = toJS(this.editingWorkspaces.get(id));
+  saveWorkspace = (id: WorkspaceId): void => {
+    const draft = toJS(this.editingWorkspaces.get(id))
     if (draft) {
-      this.clearEditing(id);
-      workspaceStore.saveWorkspace(draft);
+      this.clearEditing(id)
+      workspaceStore.saveWorkspace(draft)
     }
   }
 
-  addWorkspace = () => {
-    const workspaceId = uuid();
+  addWorkspace = (): void => {
+    const workspaceId = uuid()
     this.editingWorkspaces.set(workspaceId, {
       id: workspaceId,
       name: "",
@@ -56,17 +56,17 @@ export class Workspaces extends React.Component {
     })
   }
 
-  editWorkspace = (id: WorkspaceId) => {
-    const workspace = workspaceStore.getById(id);
-    this.editingWorkspaces.set(id, toJS(workspace));
+  editWorkspace = (id: WorkspaceId): void => {
+    const workspace = workspaceStore.getById(id)
+    this.editingWorkspaces.set(id, toJS(workspace))
   }
 
-  clearEditing = (id: WorkspaceId) => {
-    this.editingWorkspaces.delete(id);
+  clearEditing = (id: WorkspaceId): void => {
+    this.editingWorkspaces.delete(id)
   }
 
-  removeWorkspace = (id: WorkspaceId) => {
-    const workspace = workspaceStore.getById(id);
+  removeWorkspace = (id: WorkspaceId): void => {
+    const workspace = workspaceStore.getById(id)
     ConfirmDialog.open({
       okButtonProps: {
         label: _i18n._(t`Remove Workspace`),
@@ -74,8 +74,8 @@ export class Workspaces extends React.Component {
         accent: true,
       },
       ok: () => {
-        this.clearEditing(id);
-        workspaceStore.removeWorkspace(id);
+        this.clearEditing(id)
+        workspaceStore.removeWorkspace(id)
       },
       message: (
         <div className="confirm flex column gaps">
@@ -90,7 +90,7 @@ export class Workspaces extends React.Component {
     })
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <WizardLayout className="Workspaces" infoPanel={this.renderInfo()}>
         <h2>
@@ -98,15 +98,15 @@ export class Workspaces extends React.Component {
         </h2>
         <div className="items flex column gaps">
           {this.workspaces.map(({ id: workspaceId, name, description }) => {
-            const isActive = workspaceStore.currentWorkspaceId === workspaceId;
-            const isDefault = workspaceStore.isDefault(workspaceId);
-            const isEditing = this.editingWorkspaces.has(workspaceId);
-            const editingWorkspace = this.editingWorkspaces.get(workspaceId);
+            const isActive = workspaceStore.currentWorkspaceId === workspaceId
+            const isDefault = workspaceStore.isDefault(workspaceId)
+            const isEditing = this.editingWorkspaces.has(workspaceId)
+            const editingWorkspace = this.editingWorkspaces.get(workspaceId)
             const className = cssNames("workspace flex gaps align-center", {
               active: isActive,
               editing: isEditing,
               default: isDefault,
-            });
+            })
             return (
               <div key={workspaceId} className={className}>
                 {!isEditing && (
@@ -169,6 +169,6 @@ export class Workspaces extends React.Component {
           onClick={this.addWorkspace}
         />
       </WizardLayout>
-    );
+    )
   }
 }

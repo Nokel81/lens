@@ -1,14 +1,14 @@
-import "./overview-workload-status.scss";
+import "./overview-workload-status.scss"
 
-import React from "react";
-import capitalize from "lodash/capitalize";
-import { findDOMNode } from 'react-dom';
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { PieChart } from "../chart";
-import { cssVar } from "../../utils";
-import { ChartData } from "chart.js";
-import { themeStore } from "../../theme.store";
+import React from "react"
+import capitalize from "lodash/capitalize"
+import { findDOMNode } from 'react-dom'
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { PieChart } from "../chart"
+import { cssVar } from "../../utils"
+import { ChartData } from "chart.js"
+import { themeStore } from "../../theme.store"
 
 interface Props {
   status: {
@@ -20,15 +20,16 @@ interface Props {
 export class OverviewWorkloadStatus extends React.Component<Props> {
   @observable elem: HTMLElement
 
-  componentDidMount() {
+  componentDidMount(): void {
+    // eslint-disable-next-line react/no-find-dom-node
     this.elem = findDOMNode(this) as HTMLElement
   }
 
-  getStatusColor(status: string) {
-    return cssVar(this.elem).get(`--workload-status-${status.toLowerCase()}`).toString();
+  getStatusColor(status: string): string {
+    return cssVar(this.elem).get(`--workload-status-${status.toLowerCase()}`).toString()
   }
 
-  renderChart() {
+  renderChart(): React.ReactNode {
     if (!this.elem) return null
     const { status } = this.props
     const statuses = Object.entries(status)
@@ -37,10 +38,10 @@ export class OverviewWorkloadStatus extends React.Component<Props> {
       datasets: [{
         data: [1],
         backgroundColor: [themeStore.activeTheme.colors.pieChartDefaultColor],
-        label: "Empty"
-      }]
+        label: "Empty",
+      }],
     }
-    if (statuses.some(([key, val]) => val > 0)) {
+    if (statuses.some(([_key, val]) => val > 0)) {
       const dataset: any = {
         data: [],
         backgroundColor: [],
@@ -63,11 +64,11 @@ export class OverviewWorkloadStatus extends React.Component<Props> {
       },
     }
     return (
-      <PieChart data={chartData} options={options}/>
+      <PieChart data={chartData} options={options} />
     )
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <div className="OverviewWorkloadStatus">
         <div className="flex column align-center box grow">

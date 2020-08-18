@@ -12,7 +12,7 @@ class MetricsRoute extends LensApi {
 
   public async routeMetrics(request: LensApiRequest) {
     const { response, cluster, payload } = request
-    const { contextHandler, kubeProxyUrl } = cluster;
+    const { contextHandler, kubeProxyUrl } = cluster
     const headers: Record<string, string> = {
       "Host": url.parse(cluster.webContentUrl).host,
       "Content-type": "application/json",
@@ -33,41 +33,41 @@ class MetricsRoute extends LensApi {
       return
     }
     // prometheus metrics loader
-    const attempts: { [query: string]: number } = {};
-    const maxAttempts = 5;
+    const attempts: { [query: string]: number } = {}
+    const maxAttempts = 5
     const loadMetrics = (orgQuery: string): Promise<any> => {
       const query = orgQuery.trim()
-      const attempt = attempts[query] = (attempts[query] || 0) + 1;
+      const attempt = attempts[query] = (attempts[query] || 0) + 1
       return requestPromise(metricsUrl, {
         resolveWithFullResponse: false,
-        headers: headers,
+        headers,
         json: true,
         qs: {
-          query: query,
-          ...queryParams
-        }
+          query,
+          ...queryParams,
+        },
       }).catch(async (error) => {
         if (attempt < maxAttempts && (error.statusCode && error.statusCode != 404)) {
-          await new Promise(resolve => setTimeout(resolve, attempt * 1000)); // add delay before repeating request
-          return loadMetrics(query);
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000)) // add delay before repeating request
+          return loadMetrics(query)
         }
         return {
           status: error.toString(),
           data: {
-            result: []
-          }
+            result: [],
+          },
         }
       })
-    };
+    }
 
     // return data in same structure as query
-    let data: any;
+    let data: any
     if (typeof payload === "string") {
       data = await loadMetrics(payload)
     } else if (Array.isArray(payload)) {
-      data = await Promise.all(payload.map(loadMetrics));
+      data = await Promise.all(payload.map(loadMetrics))
     } else {
-      data = {};
+      data = {}
       const result = await Promise.all(
         Object.entries(payload).map((queryEntry: any) => {
           const queryName: string = queryEntry[0]
@@ -75,11 +75,11 @@ class MetricsRoute extends LensApi {
           const queries = prometheusProvider.getQueries(queryOpts)
           const q = queries[queryName as keyof (PrometheusNodeQuery | PrometheusClusterQuery | PrometheusPodQuery | PrometheusPvcQuery | PrometheusIngressQuery)]
           return loadMetrics(q)
-        })
-      );
+        }),
+      )
       Object.keys(payload).forEach((metricName, index) => {
-        data[metricName] = result[index];
-      });
+        data[metricName] = result[index]
+      })
     }
 
     this.respondJson(response, data)

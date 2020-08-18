@@ -1,43 +1,42 @@
 import "./service-details.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { t, Trans } from "@lingui/macro";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { Badge } from "../badge";
-import { KubeEventDetails } from "../+events/kube-event-details";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { Service, serviceApi, endpointApi } from "../../api/endpoints";
-import { _i18n } from "../../i18n";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
-import { ServicePortComponent } from "./service-port-component";
-import { endpointStore } from "../+network-endpoints/endpoints.store";
-import { ServiceDetailsEndpoint } from "./service-details-endpoint";
+import React from "react"
+import { observer } from "mobx-react"
+import { t, Trans } from "@lingui/macro"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { Badge } from "../badge"
+import { KubeEventDetails } from "../+events/kube-event-details"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { Service, endpointApi } from "../../api/endpoints"
+import { _i18n } from "../../i18n"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
+import { ServicePortComponent } from "./service-port-component"
+import { endpointStore } from "../+network-endpoints/endpoints.store"
+import { ServiceDetailsEndpoint } from "./service-details-endpoint"
 
 interface Props extends KubeObjectDetailsProps<Service> {
 }
 
 @observer
 export class ServiceDetails extends React.Component<Props> {
-  componentDidMount() {
+  async componentDidMount(): Promise<void> {
     if (!endpointStore.isLoaded) {
-      endpointStore.loadAll();
+      await endpointStore.loadAll()
     }
     endpointApi.watch()
   }
 
-  render() {
-    const { object: service } = this.props;
-    if (!service) return;
-    const { spec } = service;
+  render(): React.ReactNode {
+    const { object: service } = this.props
+    if (!service) return
+    const { spec } = service
     const endpoint = endpointStore.getByName(service.getName(), service.getNs())
     return (
       <div className="ServicesDetails">
-        <KubeObjectMeta object={service}/>
+        <KubeObjectMeta object={service} />
 
         <DrawerItem name={<Trans>Selector</Trans>} labelsOnly>
-          {service.getSelector().map(selector => <Badge key={selector} label={selector}/>)}
+          {service.getSelector().map(selector => <Badge key={selector} label={selector} />)}
         </DrawerItem>
 
         <DrawerItem name={<Trans>Type</Trans>}>
@@ -48,7 +47,7 @@ export class ServiceDetails extends React.Component<Props> {
           {spec.sessionAffinity}
         </DrawerItem>
 
-        <DrawerTitle title={_i18n._(t`Connection`)}/>
+        <DrawerTitle title={_i18n._(t`Connection`)} />
 
         <DrawerItem name={<Trans>Cluster IP</Trans>}>
           {spec.clusterIP}
@@ -64,7 +63,7 @@ export class ServiceDetails extends React.Component<Props> {
           <div>
             {
               service.getPorts().map((port) => (
-                <ServicePortComponent service={service} port={port} key={port.toString()}/>
+                <ServicePortComponent service={service} port={port} key={port.toString()} />
               ))
             }
           </div>
@@ -75,16 +74,14 @@ export class ServiceDetails extends React.Component<Props> {
             {spec.loadBalancerIP}
           </DrawerItem>
         )}
-        <DrawerTitle title={_i18n._(t`Endpoint`)}/>
+        <DrawerTitle title={_i18n._(t`Endpoint`)} />
 
         <ServiceDetailsEndpoint endpoint={endpoint} />
 
-        <KubeEventDetails object={service}/>
+        <KubeEventDetails object={service} />
       </div>
-    );
+    )
   }
 }
 
-apiManager.registerViews(serviceApi, {
-  Details: ServiceDetails,
-})
+

@@ -1,25 +1,25 @@
 import "./storage.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Redirect, Route, Switch } from "react-router";
-import { RouteComponentProps } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { MainLayout, TabRoute } from "../layout/main-layout";
-import { PersistentVolumes, volumesRoute, volumesURL } from "../+storage-volumes";
-import { StorageClasses, storageClassesRoute, storageClassesURL } from "../+storage-classes";
-import { PersistentVolumeClaims, volumeClaimsRoute, volumeClaimsURL } from "../+storage-volume-claims";
-import { namespaceStore } from "../+namespaces/namespace.store";
-import { storageURL } from "./storage.route";
-import { isAllowedResource } from "../../../common/rbac";
+import React from "react"
+import { observer } from "mobx-react"
+import { Redirect, Route, Switch } from "react-router"
+import { RouteComponentProps } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { MainLayout, TabRoute } from "../layout/main-layout"
+import { PersistentVolumes, volumesRoute, volumesURL } from "../+storage-volumes"
+import { StorageClasses, storageClassesRoute, storageClassesURL } from "../+storage-classes"
+import { PersistentVolumeClaims, volumeClaimsRoute, volumeClaimsURL } from "../+storage-volume-claims"
+import { namespaceStore } from "../+namespaces/namespace.store"
+import { storageURL } from "./storage.route"
+import { isAllowedResource } from "../../../common/rbac"
 
-interface Props extends RouteComponentProps<{}> {
+interface Props extends RouteComponentProps {
 }
 
 @observer
 export class Storage extends React.Component<Props> {
-  static get tabRoutes() {
-    const tabRoutes: TabRoute[] = [];
+  static get tabRoutes(): TabRoute[] {
+    const tabRoutes = []
     const query = namespaceStore.getContextParams()
 
     tabRoutes.push({
@@ -35,7 +35,7 @@ export class Storage extends React.Component<Props> {
         component: PersistentVolumes,
         url: volumesURL(),
         path: volumesRoute.path,
-      });
+      })
     }
 
     if (isAllowedResource('storageclasses')) {
@@ -46,16 +46,16 @@ export class Storage extends React.Component<Props> {
         path: storageClassesRoute.path,
       })
     }
-    return tabRoutes;
+    return tabRoutes
   }
 
-  render() {
-    const tabRoutes = Storage.tabRoutes;
+  render(): React.ReactNode {
+    const tabRoutes = Storage.tabRoutes
     return (
       <MainLayout className="Storage" tabs={tabRoutes}>
         <Switch>
-          {tabRoutes.map((route, index) => <Route key={index} {...route}/>)}
-          <Redirect to={storageURL({ query: namespaceStore.getContextParams() })}/>
+          {tabRoutes.map((route, index) => <Route key={index} {...route} />)}
+          <Redirect to={storageURL({ query: namespaceStore.getContextParams() })} />
         </Switch>
       </MainLayout>
     )

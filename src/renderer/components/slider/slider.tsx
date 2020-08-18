@@ -1,10 +1,10 @@
 // Wrapper for <Slider/> component
 // API docs: https://material-ui.com/lab/api/slider/
-import "./slider.scss";
+import "./slider.scss"
 
-import React, { Component } from "react";
-import { cssNames } from "../../utils";
-import MaterialSlider, { SliderClassKey, SliderProps } from "@material-ui/core/Slider";
+import React, { Component } from "react"
+import { cssNames } from "../../utils"
+import MaterialSlider, { SliderClassKey, SliderProps } from "@material-ui/core/Slider"
 
 interface Props extends Omit<SliderProps, "onChange"> {
   className?: string;
@@ -15,10 +15,10 @@ const defaultProps: Partial<Props> = {
   step: 1,
   min: 0,
   max: 100,
-};
+}
 
 export class Slider extends Component<Props> {
-  static defaultProps = defaultProps as object;
+  static defaultProps = defaultProps as Props;
 
   private classNames: Partial<{ [P in SliderClassKey]: string }> = {
     track: "track",
@@ -27,14 +27,14 @@ export class Slider extends Component<Props> {
     vertical: "vertical",
   };
 
-  render() {
-    const { className, ...sliderProps } = this.props;
+  render(): React.ReactNode {
+    const { className, ...sliderProps } = this.props
     return (
       <MaterialSlider
         {...sliderProps}
         classes={{
           root: cssNames("Slider", className),
-          ...this.classNames
+          ...this.classNames,
         }}
       />
     )

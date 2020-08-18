@@ -1,11 +1,11 @@
-import { RouteProps } from "react-router";
-import { buildURL } from "../../navigation";
+import { RouteProps } from "react-router"
+import { buildURL } from "../../navigation"
 
 export const secretsRoute: RouteProps = {
-  path: "/secrets"
+  path: "/secrets",
 }
 
-export interface ISecretsRouteParams {
+export interface SecretsRouteParams {
 }
 
-export const secretsURL = buildURL(secretsRoute.path);
+export const secretsURL = buildURL(secretsRoute.path)

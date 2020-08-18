@@ -16,13 +16,13 @@ function getDefaultRequestOpts(): Partial<request.Options> {
 /**
  * @deprecated
  */
-export function customRequest(opts: request.Options) {
+export function customRequest(opts: request.Options): request.Request {
   return request.defaults(getDefaultRequestOpts())(opts)
 }
 
 /**
  * @deprecated
  */
-export function customRequestPromise(opts: requestPromise.Options) {
+export function customRequestPromise(opts: requestPromise.Options): request.Request {
   return requestPromise.defaults(getDefaultRequestOpts())(opts)
 }

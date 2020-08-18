@@ -1,14 +1,14 @@
 import "./workspace-menu.scss"
-import React from "react";
-import { observer } from "mobx-react";
-import { Link } from "react-router-dom";
-import { workspacesURL } from "./workspaces.route";
-import { Trans } from "@lingui/macro";
-import { Menu, MenuItem, MenuProps } from "../menu";
-import { Icon } from "../icon";
-import { observable } from "mobx";
-import { workspaceStore } from "../../../common/workspace-store";
-import { cssNames } from "../../utils";
+import React from "react"
+import { observer } from "mobx-react"
+import { Link } from "react-router-dom"
+import { workspacesURL } from "./workspaces.route"
+import { Trans } from "@lingui/macro"
+import { Menu, MenuItem, MenuProps } from "../menu"
+import { Icon } from "../icon"
+import { observable } from "mobx"
+import { workspaceStore } from "../../../common/workspace-store"
+import { cssNames } from "../../utils"
 
 interface Props extends Partial<MenuProps> {
 }
@@ -17,9 +17,9 @@ interface Props extends Partial<MenuProps> {
 export class WorkspaceMenu extends React.Component<Props> {
   @observable menuVisible = false;
 
-  render() {
-    const { className, ...menuProps } = this.props;
-    const { workspacesList, currentWorkspace } = workspaceStore;
+  render(): React.ReactNode {
+    const { className, ...menuProps } = this.props
+    const { workspacesList, currentWorkspace } = workspaceStore
     return (
       <Menu
         {...menuProps}
@@ -40,7 +40,7 @@ export class WorkspaceMenu extends React.Component<Props> {
               active={workspaceId === currentWorkspace.id}
               onClick={() => workspaceStore.setActive(workspaceId)}
             >
-              <Icon small material="layers"/>
+              <Icon small material="layers" />
               <span className="workspace">{name}</span>
             </MenuItem>
           )

@@ -1,15 +1,15 @@
-import "./confirm-dialog.scss";
+import "./confirm-dialog.scss"
 
-import React, { ReactNode } from "react";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { cssNames, noop, prevDefault } from "../../utils";
-import { Button, ButtonProps } from "../button";
-import { Dialog, DialogProps } from "../dialog";
-import { Icon } from "../icon";
+import React, { ReactNode } from "react"
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { cssNames, noop, prevDefault } from "../../utils"
+import { Button, ButtonProps } from "../button"
+import { Dialog, DialogProps } from "../dialog"
+import { Icon } from "../icon"
 
-export interface IConfirmDialogParams {
+export interface ConfirmDialogParams {
   ok?: () => void;
   labelOk?: ReactNode;
   labelCancel?: ReactNode;
@@ -25,55 +25,55 @@ interface Props extends Partial<DialogProps> {
 @observer
 export class ConfirmDialog extends React.Component<Props> {
   @observable static isOpen = false;
-  @observable.ref static params: IConfirmDialogParams;
+  @observable.ref static params: ConfirmDialogParams;
 
   @observable isSaving = false;
 
-  static open(params: IConfirmDialogParams) {
-    ConfirmDialog.isOpen = true;
-    ConfirmDialog.params = params;
+  static open(params: ConfirmDialogParams): void {
+    ConfirmDialog.isOpen = true
+    ConfirmDialog.params = params
   }
 
-  static close() {
-    ConfirmDialog.isOpen = false;
+  static close(): void {
+    ConfirmDialog.isOpen = false
   }
 
-  public defaultParams: IConfirmDialogParams = {
+  public defaultParams: ConfirmDialogParams = {
     ok: noop,
     labelOk: <Trans>Ok</Trans>,
     labelCancel: <Trans>Cancel</Trans>,
-    icon: <Icon big material="warning"/>,
+    icon: <Icon big material="warning" />,
   };
 
-  get params(): IConfirmDialogParams {
-    return Object.assign({}, this.defaultParams, ConfirmDialog.params);
+  get params(): ConfirmDialogParams {
+    return Object.assign({}, this.defaultParams, ConfirmDialog.params)
   }
 
-  ok = async () => {
+  ok = async (): Promise<void> => {
     try {
-      this.isSaving = true;
-      await Promise.resolve(this.params.ok()).catch(noop);
+      this.isSaving = true
+      await Promise.resolve(this.params.ok()).catch(noop)
     } finally {
-      this.isSaving = false;
+      this.isSaving = false
     }
-    this.close();
+    this.close()
   }
 
-  onClose = () => {
-    this.isSaving = false;
+  onClose = (): void => {
+    this.isSaving = false
   }
 
-  close = () => {
-    ConfirmDialog.close();
+  close = (): void => {
+    ConfirmDialog.close()
   }
 
-  render() {
-    const { className, ...dialogProps } = this.props;
+  render(): React.ReactNode {
+    const { className, ...dialogProps } = this.props
     const {
       icon, labelOk, labelCancel, message,
       okButtonProps = {},
       cancelButtonProps = {},
-    } = this.params;
+    } = this.params
     return (
       <Dialog
         {...dialogProps}

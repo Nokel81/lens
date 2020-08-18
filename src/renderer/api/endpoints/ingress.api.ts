@@ -1,23 +1,23 @@
-import { KubeObject } from "../kube-object";
-import { autobind } from "../../utils";
-import { IMetrics, metricsApi } from "./metrics.api";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { autobind } from "../../utils"
+import { Metrics, metricsApi } from "./metrics.api"
+import { KubeApi } from "../kube-api"
 
 export class IngressApi extends KubeApi<Ingress> {
-  getMetrics(ingress: string, namespace: string): Promise<IIngressMetrics> {
+  getMetrics(ingress: string, namespace: string): Promise<IngressMetrics> {
     const opts = { category: "ingress", ingress }
     return metricsApi.getMetrics({
       bytesSentSuccess: opts,
       bytesSentFailure: opts,
       requestDurationSeconds: opts,
-      responseDurationSeconds: opts
+      responseDurationSeconds: opts,
     }, {
       namespace,
-    });
+    })
   }
 }
 
-export interface IIngressMetrics<T = IMetrics> {
+export interface IngressMetrics<T = Metrics> {
   [metric: string]: T;
   bytesSentSuccess: T;
   bytesSentFailure: T;
@@ -56,7 +56,7 @@ export class Ingress extends KubeObject {
     };
   }
 
-  getRoutes() {
+  getRoutes(): string[] {
     const { spec: { tls, rules } } = this
     if (!rules) return []
 
@@ -74,16 +74,16 @@ export class Ingress extends KubeObject {
       }
     })
 
-    return routes;
+    return routes
   }
 
-  getHosts() {
+  getHosts(): string[] {
     const { spec: { rules } } = this
     if (!rules) return []
     return rules.filter(rule => rule.host).map(rule => rule.host)
   }
 
-  getPorts() {
+  getPorts(): string {
     const ports: number[] = []
     const { spec: { tls, rules, backend } } = this
     const httpPort = 80
@@ -110,4 +110,4 @@ export const ingressApi = new IngressApi({
   apiBase: "/apis/extensions/v1beta1/ingresses",
   isNamespaced: true,
   objectConstructor: Ingress,
-});
+})

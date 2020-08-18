@@ -1,5 +1,5 @@
 import winston from "winston"
-import { isDebugging } from "../common/vars";
+import { isDebugging } from "../common/vars"
 
 const options = {
   colorize: true,
@@ -16,6 +16,6 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.Console(options),
   ],
-});
+})
 
 export default logger

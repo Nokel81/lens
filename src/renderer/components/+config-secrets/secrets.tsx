@@ -1,17 +1,17 @@
 import "./secrets.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { RouteComponentProps } from "react-router";
-import { Secret, secretsApi } from "../../api/endpoints";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { AddSecretDialog } from "./add-secret-dialog";
-import { ISecretsRouteParams } from "./secrets.route";
-import { KubeObjectListLayout } from "../kube-object";
-import { Badge } from "../badge";
-import { secretsStore } from "./secrets.store";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { RouteComponentProps } from "react-router"
+import { Secret, secretsApi } from "../../api/endpoints"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { AddSecretDialog } from "./add-secret-dialog"
+import { SecretsRouteParams } from "./secrets.route"
+import { KubeObjectListLayout } from "../kube-object"
+import { Badge } from "../badge"
+import { secretsStore } from "./secrets.store"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -22,12 +22,12 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<ISecretsRouteParams> {
+interface Props extends RouteComponentProps<SecretsRouteParams> {
 }
 
 @observer
 export class Secrets extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <>
         <KubeObjectListLayout
@@ -56,28 +56,28 @@ export class Secrets extends React.Component<Props> {
           renderTableContents={(secret: Secret) => [
             secret.getName(),
             secret.getNs(),
-            secret.getLabels().map(label => <Badge key={label} label={label}/>),
+            secret.getLabels().map(label => <Badge key={label} label={label} />),
             secret.getKeys().join(", "),
             secret.type,
             secret.getAge(),
           ]}
           renderItemMenu={(item: Secret) => {
-            return <SecretMenu object={item}/>
+            return <SecretMenu object={item} />
           }}
           addRemoveButtons={{
             onAdd: () => AddSecretDialog.open(),
-            addTooltip: <Trans>Create new Secret</Trans>
+            addTooltip: <Trans>Create new Secret</Trans>,
           }}
         />
-        <AddSecretDialog/>
+        <AddSecretDialog />
       </>
-    );
+    )
   }
 }
 
-export function SecretMenu(props: KubeObjectMenuProps<Secret>) {
+export function SecretMenu(props: KubeObjectMenuProps<Secret>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

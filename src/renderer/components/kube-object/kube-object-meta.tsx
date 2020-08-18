@@ -1,36 +1,35 @@
-import React from "react";
-import { Trans } from "@lingui/macro";
-import { IKubeMetaField, KubeObject } from "../../api/kube-object";
-import { DrawerItem, DrawerItemLabels } from "../drawer";
-import { WorkloadKubeObject } from "../../api/workload-kube-object";
-import { getDetailsUrl } from "../../navigation";
-import { lookupApiLink } from "../../api/kube-api";
-import { Link } from "react-router-dom";
+import React from "react"
+import { Trans } from "@lingui/macro"
+import { KubeMetaField, KubeObject } from "../../api/kube-object"
+import { DrawerItem, DrawerItemLabels } from "../drawer"
+import { getDetailsUrl } from "../../navigation"
+import { lookupApiLink } from "../../api/kube-api"
+import { Link } from "react-router-dom"
 
 export interface Props {
   object: KubeObject;
-  hideFields?: IKubeMetaField[];
+  hideFields?: KubeMetaField[];
 }
 
 export class KubeObjectMeta extends React.Component<Props> {
-  static defaultHiddenFields: IKubeMetaField[] = [
-    "uid", "resourceVersion", "selfLink"
+  static defaultHiddenFields: KubeMetaField[] = [
+    "uid", "resourceVersion", "selfLink",
   ];
 
-  isHidden(field: IKubeMetaField): boolean {
-    const { hideFields = KubeObjectMeta.defaultHiddenFields } = this.props;
-    return hideFields.includes(field);
+  isHidden(field: KubeMetaField): boolean {
+    const { hideFields = KubeObjectMeta.defaultHiddenFields } = this.props
+    return hideFields.includes(field)
   }
 
-  render() {
+  render(): React.ReactNode {
     const object = this.props.object
     const {
       getName, getNs, getLabels, getResourceVersion, selfLink,
       getAnnotations, getFinalizers, getId, getAge,
       metadata: { creationTimestamp },
-    } = object;
+    } = object
 
-    const ownerRefs = object.getOwnerRefs();
+    const ownerRefs = object.getOwnerRefs()
     return (
       <>
         <DrawerItem name={<Trans>Created</Trans>} hidden={this.isHidden("creationTimestamp")}>
@@ -67,19 +66,19 @@ export class KubeObjectMeta extends React.Component<Props> {
           hidden={this.isHidden("finalizers")}
         />
         {ownerRefs && ownerRefs.length > 0 &&
-        <DrawerItem name={<Trans>Controlled By</Trans>} hidden={this.isHidden("ownerReferences")}>
-          {
-            ownerRefs.map(ref => {
-              const { name, kind } = ref;
-              const ownerDetailsUrl = getDetailsUrl(lookupApiLink(ref, object));
-              return (
-                <p key={name}>
-                  {kind} <Link to={ownerDetailsUrl}>{name}</Link>
-                </p>
-              );
-            })
-          }
-        </DrawerItem>
+          <DrawerItem name={<Trans>Controlled By</Trans>} hidden={this.isHidden("ownerReferences")}>
+            {
+              ownerRefs.map(ref => {
+                const { name, kind } = ref
+                const ownerDetailsUrl = getDetailsUrl(lookupApiLink(ref, object))
+                return (
+                  <p key={name}>
+                    {kind} <Link to={ownerDetailsUrl}>{name}</Link>
+                  </p>
+                )
+              })
+            }
+          </DrawerItem>
         }
       </>
     )

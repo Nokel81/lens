@@ -1,7 +1,7 @@
 import packageInfo from "../../package.json"
-import { bundledKubectl, Kubectl } from "../../src/main/kubectl";
+import { bundledKubectl, Kubectl } from "../../src/main/kubectl"
 
-jest.mock("../common/user-store");
+jest.mock("../common/user-store")
 
 describe("kubectlVersion", () => {
   it("returns bundled version if exactly same version used", async () => {
@@ -10,8 +10,8 @@ describe("kubectlVersion", () => {
   })
 
   it("returns bundled version if same major.minor version is used", async () => {
-    const { bundledKubectlVersion } = packageInfo.config;
-    const kubectl = new Kubectl(bundledKubectlVersion);
+    const { bundledKubectlVersion } = packageInfo.config
+    const kubectl = new Kubectl(bundledKubectlVersion)
     expect(kubectl.kubectlVersion).toBe(bundledKubectl.kubectlVersion)
   })
 })

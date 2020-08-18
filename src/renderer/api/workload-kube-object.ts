@@ -1,48 +1,48 @@
-import get from "lodash/get";
-import { KubeObject } from "./kube-object";
+import get from "lodash/get"
+import { KubeObject } from "./kube-object"
 
-interface IToleration {
+interface Toleration {
   key?: string;
   operator?: string;
   effect?: string;
   tolerationSeconds?: number;
 }
 
-interface IMatchExpression {
+interface MatchExpression {
   key: string;
   operator: string;
   values: string[];
 }
 
-interface INodeAffinity {
+interface NodeAffinity {
   nodeSelectorTerms?: {
-    matchExpressions: IMatchExpression[];
+    matchExpressions: MatchExpression[];
   }[];
   weight: number;
   preference: {
-    matchExpressions: IMatchExpression[];
+    matchExpressions: MatchExpression[];
   };
 }
 
-interface IPodAffinity {
+interface PodAffinity {
   labelSelector: {
-    matchExpressions: IMatchExpression[];
+    matchExpressions: MatchExpression[];
   };
   topologyKey: string;
 }
 
-export interface IAffinity {
+export interface Affinity {
   nodeAffinity?: {
-    requiredDuringSchedulingIgnoredDuringExecution?: INodeAffinity[];
-    preferredDuringSchedulingIgnoredDuringExecution?: INodeAffinity[];
+    requiredDuringSchedulingIgnoredDuringExecution?: NodeAffinity[];
+    preferredDuringSchedulingIgnoredDuringExecution?: NodeAffinity[];
   };
   podAffinity?: {
-    requiredDuringSchedulingIgnoredDuringExecution?: IPodAffinity[];
-    preferredDuringSchedulingIgnoredDuringExecution?: IPodAffinity[];
+    requiredDuringSchedulingIgnoredDuringExecution?: PodAffinity[];
+    preferredDuringSchedulingIgnoredDuringExecution?: PodAffinity[];
   };
   podAntiAffinity?: {
-    requiredDuringSchedulingIgnoredDuringExecution?: IPodAffinity[];
-    preferredDuringSchedulingIgnoredDuringExecution?: IPodAffinity[];
+    requiredDuringSchedulingIgnoredDuringExecution?: PodAffinity[];
+    preferredDuringSchedulingIgnoredDuringExecution?: PodAffinity[];
   };
 }
 
@@ -50,29 +50,29 @@ export class WorkloadKubeObject extends KubeObject {
   spec: any; // todo: add proper types
 
   getSelectors(): string[] {
-    const selector = this.spec.selector;
-    return KubeObject.stringifyLabels(selector ? selector.matchLabels : null);
+    const selector = this.spec.selector
+    return KubeObject.stringifyLabels(selector ? selector.matchLabels : null)
   }
 
   getNodeSelectors(): string[] {
-    const nodeSelector = get(this, "spec.template.spec.nodeSelector");
-    return KubeObject.stringifyLabels(nodeSelector);
+    const nodeSelector = get(this, "spec.template.spec.nodeSelector")
+    return KubeObject.stringifyLabels(nodeSelector)
   }
 
   getTemplateLabels(): string[] {
-    const labels = get(this, "spec.template.metadata.labels");
-    return KubeObject.stringifyLabels(labels);
+    const labels = get(this, "spec.template.metadata.labels")
+    return KubeObject.stringifyLabels(labels)
   }
 
-  getTolerations(): IToleration[] {
+  getTolerations(): Toleration[] {
     return get(this, "spec.template.spec.tolerations", [])
   }
 
-  getAffinity(): IAffinity {
+  getAffinity(): Affinity {
     return get(this, "spec.template.spec.affinity")
   }
 
-  getAffinityNumber() {
+  getAffinityNumber(): number {
     const affinity = this.getAffinity()
     if (!affinity) return 0
     return Object.keys(affinity).length

@@ -1,19 +1,19 @@
-import "./config-map-details.scss";
+import "./config-map-details.scss"
 
-import React from "react";
-import { autorun, observable } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { DrawerTitle } from "../drawer";
-import { Notifications } from "../notifications";
-import { Input } from "../input";
-import { Button } from "../button";
-import { KubeEventDetails } from "../+events/kube-event-details";
-import { configMapsStore } from "./config-maps.store";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { ConfigMap, configMapApi } from "../../api/endpoints";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import React from "react"
+import { autorun, observable } from "mobx"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { DrawerTitle } from "../drawer"
+import { Notifications } from "../notifications"
+import { Input } from "../input"
+import { Button } from "../button"
+import { KubeEventDetails } from "../+events/kube-event-details"
+import { configMapsStore } from "./config-maps.store"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { ConfigMap, configMapApi } from "../../api/endpoints"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<ConfigMap> {
 }
@@ -23,43 +23,43 @@ export class ConfigMapDetails extends React.Component<Props> {
   @observable isSaving = false;
   @observable data = observable.map();
 
-  async componentDidMount() {
+  componentDidMount(): void {
     disposeOnUnmount(this, [
       autorun(() => {
-        const { object: configMap } = this.props;
+        const { object: configMap } = this.props
         if (configMap) {
-          this.data.replace(configMap.data); // refresh
+          this.data.replace(configMap.data) // refresh
         }
-      })
+      }),
     ])
   }
 
-  save = async () => {
-    const { object: configMap } = this.props;
+  save = async (): Promise<void> => {
+    const { object: configMap } = this.props
     try {
-      this.isSaving = true;
-      await configMapsStore.update(configMap, { ...configMap, data: this.data.toJSON() });
+      this.isSaving = true
+      await configMapsStore.update(configMap, { ...configMap, data: this.data.toJSON() })
       Notifications.ok(
         <p>
           <Trans>ConfigMap <b>{configMap.getName()}</b> successfully updated.</Trans>
-        </p>
-      );
+        </p>,
+      )
     } finally {
-      this.isSaving = false;
+      this.isSaving = false
     }
   }
 
-  render() {
-    const { object: configMap } = this.props;
-    if (!configMap) return null;
-    const data = Object.entries(this.data.toJSON());
+  render(): React.ReactNode {
+    const { object: configMap } = this.props
+    if (!configMap) return null
+    const data = Object.entries(this.data.toJSON())
     return (
       <div className="ConfigMapDetails">
-        <KubeObjectMeta object={configMap}/>
+        <KubeObjectMeta object={configMap} />
         {
           data.length > 0 && (
             <>
-              <DrawerTitle title={<Trans>Data</Trans>}/>
+              <DrawerTitle title={<Trans>Data</Trans>} />
               {
                 data.map(([name, value]) => {
                   return (
@@ -88,12 +88,12 @@ export class ConfigMapDetails extends React.Component<Props> {
           )
         }
 
-        <KubeEventDetails object={configMap}/>
+        <KubeEventDetails object={configMap} />
       </div>
-    );
+    )
   }
 }
 
 apiManager.registerViews(configMapApi, {
-  Details: ConfigMapDetails
+  Details: ConfigMapDetails,
 })

@@ -1,7 +1,7 @@
-import { KubeObject } from "../kube-object";
-import { KubeJsonApiData } from "../kube-json-api";
-import { autobind } from "../../utils";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { KubeJsonApiData } from "../kube-json-api"
+import { autobind } from "../../utils"
+import { KubeApi } from "../kube-api"
 
 export enum SecretType {
   Opaque = "Opaque",
@@ -14,7 +14,7 @@ export enum SecretType {
   BootstrapToken = "bootstrap.kubernetes.io/token",
 }
 
-export interface ISecretRef {
+export interface SecretRef {
   key?: string;
   name: string;
 }
@@ -30,16 +30,16 @@ export class Secret extends KubeObject {
   }
 
   constructor(data: KubeJsonApiData) {
-    super(data);
-    this.data = this.data || {};
+    super(data)
+    this.data = this.data || {}
   }
 
   getKeys(): string[] {
-    return Object.keys(this.data);
+    return Object.keys(this.data)
   }
 
-  getToken() {
-    return this.data.token;
+  getToken(): string {
+    return this.data.token
   }
 }
 
@@ -48,4 +48,4 @@ export const secretsApi = new KubeApi({
   apiBase: "/api/v1/secrets",
   isNamespaced: true,
   objectConstructor: Secret,
-});
+})

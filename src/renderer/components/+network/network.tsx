@@ -1,27 +1,27 @@
 import "./network.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Redirect, Route, Switch } from "react-router";
-import { RouteComponentProps } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { MainLayout, TabRoute } from "../layout/main-layout";
-import { Services, servicesRoute, servicesURL } from "../+network-services";
-import { Endpoints, endpointRoute, endpointURL } from "../+network-endpoints";
-import { Ingresses, ingressRoute, ingressURL } from "../+network-ingresses";
-import { NetworkPolicies, networkPoliciesRoute, networkPoliciesURL } from "../+network-policies";
-import { namespaceStore } from "../+namespaces/namespace.store";
-import { networkURL } from "./network.route";
-import { isAllowedResource } from "../../../common/rbac";
+import React from "react"
+import { observer } from "mobx-react"
+import { Redirect, Route, Switch } from "react-router"
+import { RouteComponentProps } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { MainLayout, TabRoute } from "../layout/main-layout"
+import { Services, servicesRoute, servicesURL } from "../+network-services"
+import { Endpoints, endpointRoute, endpointURL } from "../+network-endpoints"
+import { Ingresses, ingressRoute, ingressURL } from "../+network-ingresses"
+import { NetworkPolicies, networkPoliciesRoute, networkPoliciesURL } from "../+network-policies"
+import { namespaceStore } from "../+namespaces/namespace.store"
+import { networkURL } from "./network.route"
+import { isAllowedResource } from "../../../common/rbac"
 
-interface Props extends RouteComponentProps<{}> {
+interface Props extends RouteComponentProps {
 }
 
 @observer
 export class Network extends React.Component<Props> {
   static get tabRoutes(): TabRoute[] {
     const query = namespaceStore.getContextParams()
-    const routes: TabRoute[] = [];
+    const routes: TabRoute[] = []
     if (isAllowedResource("services")) {
       routes.push({
         title: <Trans>Services</Trans>,
@@ -57,13 +57,13 @@ export class Network extends React.Component<Props> {
     return routes
   }
 
-  render() {
-    const tabRoutes = Network.tabRoutes;
+  render(): React.ReactNode {
+    const tabRoutes = Network.tabRoutes
     return (
       <MainLayout className="Network" tabs={tabRoutes}>
         <Switch>
-          {tabRoutes.map((route, index) => <Route key={index} {...route}/>)}
-          <Redirect to={networkURL({ query: namespaceStore.getContextParams() })}/>
+          {tabRoutes.map((route, index) => <Route key={index} {...route} />)}
+          <Redirect to={networkURL({ query: namespaceStore.getContextParams() })} />
         </Switch>
       </MainLayout>
     )

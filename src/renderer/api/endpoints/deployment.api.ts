@@ -1,28 +1,42 @@
-import { IAffinity, WorkloadKubeObject } from "../workload-kube-object";
-import { autobind } from "../../utils";
-import { KubeApi } from "../kube-api";
+import { Affinity, WorkloadKubeObject } from "../workload-kube-object"
+import { autobind } from "../../utils"
+import { KubeApi } from "../kube-api"
+import { CancellablePromise } from "../../utils/cancelableFetch"
+import { JsonApiData } from "../json-api"
+
+interface ScaleApiArgs {
+  namespace: string;
+  name: string
+}
 
 export class DeploymentApi extends KubeApi<Deployment> {
-  protected getScaleApiUrl(params: { namespace: string; name: string }) {
+  protected getScaleApiUrl(params: ScaleApiArgs): string {
     return this.getUrl(params) + "/scale"
   }
 
-  getReplicas(params: { namespace: string; name: string }): Promise<number> {
+  getReplicas(params: { namespace: string; name: string }): CancellablePromise<number> {
     return this.request
       .get(this.getScaleApiUrl(params))
       .then(({ status }: any) => status.replicas)
   }
 
-  scale(params: { namespace: string; name: string }, replicas: number) {
+  scale(params: ScaleApiArgs, replicas: number): CancellablePromise<JsonApiData> {
     return this.request.put(this.getScaleApiUrl(params), {
       data: {
         metadata: params,
-        spec: {
-          replicas: replicas
-        }
-      }
+        spec: { replicas },
+      },
     })
   }
+}
+
+interface DeploymentStatusConditon {
+  type: string;
+  status: string;
+  lastUpdateTime: string;
+  lastTransitionTime: string;
+  reason: string;
+  message: string;
 }
 
 @autobind()
@@ -96,13 +110,13 @@ export class Deployment extends WorkloadKubeObject {
         restartPolicy: string;
         terminationGracePeriodSeconds: number;
         dnsPolicy: string;
-        affinity?: IAffinity;
+        affinity?: Affinity;
         nodeSelector?: {
           [selector: string]: string;
         };
         serviceAccountName: string;
         serviceAccount: string;
-        securityContext: {};
+        securityContext: Record<string, any>;
         schedulerName: string;
         tolerations?: {
           key: string;
@@ -135,17 +149,10 @@ export class Deployment extends WorkloadKubeObject {
     readyReplicas: number;
     availableReplicas?: number;
     unavailableReplicas?: number;
-    conditions: {
-      type: string;
-      status: string;
-      lastUpdateTime: string;
-      lastTransitionTime: string;
-      reason: string;
-      message: string;
-    }[];
+    conditions: DeploymentStatusConditon[];
   }
 
-  getConditions(activeOnly = false) {
+  getConditions(activeOnly = false): DeploymentStatusConditon[] {
     const { conditions } = this.status
     if (!conditions) return []
     if (activeOnly) {
@@ -154,12 +161,14 @@ export class Deployment extends WorkloadKubeObject {
     return conditions
   }
 
-  getConditionsText(activeOnly = true) {
-    return this.getConditions(activeOnly).map(({ type }) => type).join(" ")
+  getConditionsText(activeOnly = true): string {
+    return this.getConditions(activeOnly)
+      .map(({ type }) => type)
+      .join(" ")
   }
 
-  getReplicas() {
-    return this.spec.replicas || 0;
+  getReplicas(): number {
+    return this.spec.replicas || 0
   }
 }
 
@@ -168,4 +177,4 @@ export const deploymentApi = new DeploymentApi({
   apiBase: "/apis/apps/v1/deployments",
   isNamespaced: true,
   objectConstructor: Deployment,
-});
+})

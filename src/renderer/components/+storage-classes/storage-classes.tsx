@@ -1,15 +1,15 @@
 import "./storage-classes.scss"
 
-import React from "react";
-import { RouteComponentProps } from "react-router-dom";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { StorageClass, storageClassApi } from "../../api/endpoints/storage-class.api";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { IStorageClassesRouteParams } from "./storage-classes.route";
-import { storageClassStore } from "./storage-class.store";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { RouteComponentProps } from "react-router-dom"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { StorageClass, storageClassApi } from "../../api/endpoints/storage-class.api"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { StorageClassesRouteParams } from "./storage-classes.route"
+import { storageClassStore } from "./storage-class.store"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -18,12 +18,12 @@ enum sortBy {
   reclaimPolicy = "reclaim",
 }
 
-interface Props extends RouteComponentProps<IStorageClassesRouteParams> {
+interface Props extends RouteComponentProps<StorageClassesRouteParams> {
 }
 
 @observer
 export class StorageClasses extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="StorageClasses"
@@ -54,16 +54,16 @@ export class StorageClasses extends React.Component<Props> {
           storageClass.getAge(),
         ]}
         renderItemMenu={(item: StorageClass) => {
-          return <StorageClassMenu object={item}/>
+          return <StorageClassMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function StorageClassMenu(props: KubeObjectMenuProps<StorageClass>) {
+export function StorageClassMenu(props: KubeObjectMenuProps<StorageClass>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

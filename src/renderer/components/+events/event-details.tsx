@@ -1,32 +1,32 @@
-import "./event-details.scss";
+import "./event-details.scss"
 
-import React from "react";
-import kebabCase from "lodash/kebabCase";
-import { Trans } from "@lingui/macro";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { Link } from "react-router-dom";
-import { observer } from "mobx-react";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { eventApi, KubeEvent } from "../../api/endpoints/events.api";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
-import { getDetailsUrl } from "../../navigation";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { lookupApiLink } from "../../api/kube-api";
+import React from "react"
+import kebabCase from "lodash/kebabCase"
+import { Trans } from "@lingui/macro"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { Link } from "react-router-dom"
+import { observer } from "mobx-react"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { eventApi, KubeEvent } from "../../api/endpoints/events.api"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
+import { getDetailsUrl } from "../../navigation"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { lookupApiLink } from "../../api/kube-api"
 
 interface Props extends KubeObjectDetailsProps<KubeEvent> {
 }
 
 @observer
 export class EventDetails extends React.Component<Props> {
-  render() {
-    const { object: event } = this.props;
-    if (!event) return;
-    const { message, reason, count, type, involvedObject } = event;
-    const { kind, name, namespace, fieldPath } = involvedObject;
+  render(): React.ReactNode {
+    const { object: event } = this.props
+    if (!event) return
+    const { message, reason, count, type, involvedObject } = event
+    const { kind, name, namespace, fieldPath } = involvedObject
     return (
       <div className="EventDetails">
-        <KubeObjectMeta object={event}/>
+        <KubeObjectMeta object={event} />
 
         <DrawerItem name={<Trans>Message</Trans>}>
           {message}
@@ -50,7 +50,7 @@ export class EventDetails extends React.Component<Props> {
           <span className={kebabCase(type)}>{type}</span>
         </DrawerItem>
 
-        <DrawerTitle title={<Trans>Involved object</Trans>}/>
+        <DrawerTitle title={<Trans>Involved object</Trans>} />
         <Table>
           <TableHead>
             <TableCell><Trans>Name</Trans></TableCell>
@@ -76,4 +76,4 @@ export class EventDetails extends React.Component<Props> {
 
 apiManager.registerViews(eventApi, {
   Details: EventDetails,
-});
+})

@@ -1,5 +1,5 @@
-import Config from "conf";
-import { isTestEnv } from "../common/vars";
+import Config from "conf"
+import { isTestEnv } from "../common/vars"
 
 export interface MigrationOpts {
   version: string;
@@ -7,15 +7,19 @@ export interface MigrationOpts {
 }
 
 function infoLog(...args: any[]) {
-  if (isTestEnv) return;
-  console.log(...args);
+  if (isTestEnv) return
+  console.log(...args)
 }
 
-export function migration<S = any>({ version, run }: MigrationOpts) {
+interface Migration<S> {
+  [version: string]: (config: Config<S>) => void;
+}
+
+export function migration<S = any>({ version, run }: MigrationOpts): Migration<S> {
   return {
     [version]: (storeConfig: Config<S>) => {
-      infoLog(`STORE MIGRATION (${storeConfig.path}): ${version}`,);
-      run(storeConfig, infoLog);
-    }
-  };
+      infoLog(`STORE MIGRATION (${storeConfig.path}): ${version}`)
+      run(storeConfig, infoLog)
+    },
+  }
 }

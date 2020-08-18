@@ -1,26 +1,26 @@
-import { autobind } from "../../utils";
-import { DockTabStore } from "./dock-tab.store";
-import { dockStore, IDockTab, TabKind } from "./dock.store";
+import { autobind } from "../../utils"
+import { DockTabStore } from "./dock-tab.store"
+import { dockStore, DockTabEntry, TabKind } from "./dock.store"
 
 @autobind()
 export class CreateResourceStore extends DockTabStore<string> {
   constructor() {
     super({
-      storageName: "create_resource"
-    });
+      storageName: "create_resource",
+    })
   }
 }
 
-export const createResourceStore = new CreateResourceStore();
+export const createResourceStore = new CreateResourceStore()
 
-export function createResourceTab(tabParams: Partial<IDockTab> = {}) {
+export function createResourceTab(tabParams: Partial<DockTabEntry> = {}): DockTabEntry {
   return dockStore.createTab({
     kind: TabKind.CREATE_RESOURCE,
     title: "Create resource",
-    ...tabParams
-  });
+    ...tabParams,
+  })
 }
 
-export function isCreateResourceTab(tab: IDockTab) {
-  return tab && tab.kind === TabKind.CREATE_RESOURCE;
+export function isCreateResourceTab(tab: DockTabEntry): boolean {
+  return tab && tab.kind === TabKind.CREATE_RESOURCE
 }

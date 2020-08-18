@@ -1,11 +1,11 @@
-import "./resource-metrics.scss";
+import "./resource-metrics.scss"
 
-import React, { createContext, useEffect, useState } from "react";
-import { Radio, RadioGroup } from "../radio";
-import { useInterval } from "../../hooks";
-import { KubeObject } from "../../api/kube-object";
-import { cssNames } from "../../utils";
-import { Spinner } from "../spinner";
+import React, { createContext, useEffect, useState } from "react"
+import { Radio, RadioGroup } from "../radio"
+import { useInterval } from "../../hooks"
+import { KubeObject } from "../../api/kube-object"
+import { cssNames } from "../../utils"
+import { Spinner } from "../spinner"
 
 interface Props extends React.HTMLProps<any> {
   tabs: React.ReactNode[];
@@ -18,30 +18,30 @@ interface Props extends React.HTMLProps<any> {
   };
 }
 
-export type IResourceMetricsValue<T extends KubeObject = any, P = any> = {
+export interface ResourceMetricsValue<T extends KubeObject = any, P = any> {
   object: T;
   tabId: number;
   params?: P;
 }
 
-export const ResourceMetricsContext = createContext<IResourceMetricsValue>(null);
+export const ResourceMetricsContext = createContext<ResourceMetricsValue>(null)
 
 const defaultProps: Partial<Props> = {
-  interval: 60  // 1 min
-};
+  interval: 60,  // 1 min
+}
 
-ResourceMetrics.defaultProps = defaultProps;
+ResourceMetrics.defaultProps = defaultProps
 
-export function ResourceMetrics({ object, loader, interval, tabs, children, className, params }: Props) {
-  const [tabId, setTabId] = useState<number>(0);
+export function ResourceMetrics({ object, loader, interval, tabs, children, className, params }: Props): JSX.Element {
+  const [tabId, setTabId] = useState<number>(0)
 
   useEffect(() => {
-    if (loader) loader();
-  }, [object]);
+    if (loader) loader()
+  }, [object])
 
   useInterval(() => {
-    if (loader) loader();
-  }, interval * 1000);
+    if (loader) loader()
+  }, interval * 1000)
 
   const renderContents = () => {
     return (
@@ -54,7 +54,7 @@ export function ResourceMetrics({ object, loader, interval, tabs, children, clas
             onChange={value => setTabId(tabs.findIndex(tab => tab == value))}
           >
             {tabs.map((tab, index) => (
-              <Radio key={index} className="box grow" label={tab} value={tab}/>
+              <Radio key={index} className="box grow" label={tab} value={tab} />
             ))}
           </RadioGroup>
         </div>
@@ -64,15 +64,15 @@ export function ResourceMetrics({ object, loader, interval, tabs, children, clas
           </div>
         </ResourceMetricsContext.Provider>
         <div className="loader">
-          <Spinner/>
+          <Spinner />
         </div>
       </>
-    );
+    )
   }
 
   return (
     <div className={cssNames("ResourceMetrics flex column", className)}>
       {renderContents()}
     </div>
-  );
+  )
 }

@@ -1,14 +1,14 @@
-import React from "react";
-import merge from "lodash/merge";
-import moment from "moment";
-import Color from "color";
-import { observer } from "mobx-react";
-import { ChartData, ChartOptions, ChartPoint, Scriptable } from "chart.js";
-import { Chart, ChartKind, ChartProps } from "./chart";
-import { bytesToUnits, cssNames } from "../../utils";
-import { ZebraStripes } from "./zebra-stripes.plugin";
-import { themeStore } from "../../theme.store";
-import { NoMetrics } from "../resource-metrics/no-metrics";
+import React from "react"
+import merge from "lodash/merge"
+import moment from "moment"
+import Color from "color"
+import { observer } from "mobx-react"
+import { ChartData, ChartOptions, ChartPoint, Scriptable } from "chart.js"
+import { Chart, ChartKind, ChartProps } from "./chart"
+import { bytesToUnits, cssNames } from "../../utils"
+import { ZebraStripes } from "./zebra-stripes.plugin"
+import { themeStore } from "../../theme.store"
+import { NoMetrics } from "../resource-metrics/no-metrics"
 
 interface Props extends ChartProps {
   name?: string;
@@ -17,20 +17,20 @@ interface Props extends ChartProps {
 
 const defaultProps: Partial<Props> = {
   timeLabelStep: 10,
-  plugins: [ZebraStripes]
-};
+  plugins: [ZebraStripes],
+}
 
 @observer
 export class BarChart extends React.Component<Props> {
-  static defaultProps = defaultProps as object;
+  static defaultProps = defaultProps as Props;
 
-  render() {
-    const { name, data, className, timeLabelStep, plugins, options: customOptions, ...settings } = this.props;
-    const { textColorPrimary, borderFaintColor, chartStripesColor } = themeStore.activeTheme.colors;
+  render(): React.ReactNode {
+    const { name, data, className, timeLabelStep, plugins, options: customOptions, ...settings } = this.props
+    const { textColorPrimary, borderFaintColor, chartStripesColor } = themeStore.activeTheme.colors
 
     const getBarColor: Scriptable<string> = ({ dataset }) => {
-      const color = dataset.borderColor;
-      return Color(color).alpha(0.2).string();
+      const color = dataset.borderColor
+      return Color(color).alpha(0.2).string()
     }
 
     // Remove empty sets and insert default data
@@ -44,18 +44,18 @@ export class BarChart extends React.Component<Props> {
             borderWidth: { top: 3 },
             barPercentage: 1,
             categoryPercentage: 1,
-            ...item
+            ...item,
           }
-        })
-    };
+        }),
+    }
 
     const formatTimeLabels = (timestamp: string, index: number) => {
-      const label = moment(parseInt(timestamp)).format("HH:mm");
-      const offset = "     ";
-      if (index == 0) return offset + label;
-      if (index == 60) return label + offset;
-      return index % timeLabelStep == 0 ? label : "";
-    };
+      const label = moment(parseInt(timestamp)).format("HH:mm")
+      const offset = "     "
+      if (index == 0) return offset + label
+      if (index == 60) return label + offset
+      return index % timeLabelStep == 0 ? label : ""
+    }
 
     const barOptions: ChartOptions = {
       maintainAspectRatio: false,
@@ -76,16 +76,16 @@ export class BarChart extends React.Component<Props> {
             fontColor: textColorPrimary,
             fontSize: 11,
             maxRotation: 0,
-            minRotation: 0
+            minRotation: 0,
           },
           bounds: "data",
           time: {
             unit: "minute",
             displayFormats: {
-              minute: "x"
+              minute: "x",
             },
-            parser: timestamp => moment.unix(parseInt(timestamp))
-          }
+            parser: timestamp => moment.unix(parseInt(timestamp)),
+          },
         }],
         yAxes: [{
           position: "right",
@@ -93,16 +93,16 @@ export class BarChart extends React.Component<Props> {
             color: borderFaintColor,
             drawBorder: false,
             tickMarkLength: 0,
-            zeroLineWidth: 0
+            zeroLineWidth: 0,
           },
           ticks: {
             maxTicksLimit: 6,
             fontColor: textColorPrimary,
             fontSize: 11,
             padding: 8,
-            min: 0
-          }
-        }]
+            min: 0,
+          },
+        }],
       },
       tooltips: {
         mode: "index",
@@ -110,34 +110,34 @@ export class BarChart extends React.Component<Props> {
         callbacks: {
           title: tooltipItems => {
             const now = new Date().getTime()
-            if (new Date(tooltipItems[0].xLabel).getTime() > now) return "";
+            if (new Date(tooltipItems[0].xLabel).getTime() > now) return ""
             return `${tooltipItems[0].xLabel}`
           },
           labelColor: ({ datasetIndex }) => {
             return {
               borderColor: "darkgray",
-              backgroundColor: chartData.datasets[datasetIndex].borderColor as string
+              backgroundColor: chartData.datasets[datasetIndex].borderColor as string,
             }
-          }
-        }
+          },
+        },
       },
       animation: {
-        duration: 0
+        duration: 0,
       },
       elements: {
         rectangle: {
-          backgroundColor: getBarColor.bind(null)
-        }
+          backgroundColor: getBarColor.bind(null),
+        },
       },
       plugins: {
         ZebraStripes: {
-          stripeColor: chartStripesColor
-        }
-      }
-    };
-    const options = merge(barOptions, customOptions);
+          stripeColor: chartStripesColor,
+        },
+      },
+    }
+    const options = merge(barOptions, customOptions)
     if (chartData.datasets.length == 0) {
-      return <NoMetrics/>
+      return <NoMetrics />
     }
     return (
       <Chart
@@ -159,27 +159,27 @@ export const memoryOptions: ChartOptions = {
       ticks: {
         callback: (value: number | string): string => {
           if (typeof value == "string") {
-            const float = parseFloat(value);
+            const float = parseFloat(value)
             if (float < 1) {
-              return float.toFixed(3);
+              return float.toFixed(3)
             }
-            return bytesToUnits(parseInt(value));
+            return bytesToUnits(parseInt(value))
           }
-          return `${value}`;
+          return `${value}`
         },
-        stepSize: 1
-      }
-    }]
+        stepSize: 1,
+      },
+    }],
   },
   tooltips: {
     callbacks: {
-      label: ({ datasetIndex, index }, { datasets }) => {
-        const { label, data } = datasets[datasetIndex];
-        const value = data[index] as ChartPoint;
-        return `${label}: ${bytesToUnits(parseInt(value.y.toString()), 3)}`;
-      }
-    }
-  }
+      label: ({ datasetIndex, index }: Chart.ChartTooltipItem, { datasets }: Chart.ChartData): string => {
+        const { label, data } = datasets[datasetIndex]
+        const value = data[index] as ChartPoint
+        return `${label}: ${bytesToUnits(parseInt(value.y.toString()), 3)}`
+      },
+    },
+  },
 }
 
 // Default options for all charts with cpu units or other decimal numbers
@@ -188,22 +188,22 @@ export const cpuOptions: ChartOptions = {
     yAxes: [{
       ticks: {
         callback: (value: number | string): string => {
-          const float = parseFloat(`${value}`);
-          if (float == 0) return "0";
-          if (float < 10) return float.toFixed(3);
-          if (float < 100) return float.toFixed(2);
-          return float.toFixed(1);
-        }
-      }
-    }]
+          const float = parseFloat(`${value}`)
+          if (float == 0) return "0"
+          if (float < 10) return float.toFixed(3)
+          if (float < 100) return float.toFixed(2)
+          return float.toFixed(1)
+        },
+      },
+    }],
   },
   tooltips: {
     callbacks: {
-      label: ({ datasetIndex, index }, { datasets }) => {
-        const { label, data } = datasets[datasetIndex];
-        const value = data[index] as ChartPoint;
-        return `${label}: ${parseFloat(value.y as string).toPrecision(2)}`;
-      }
-    }
-  }
+      label: ({ datasetIndex, index }: Chart.ChartTooltipItem, { datasets }: Chart.ChartData): string => {
+        const { label, data } = datasets[datasetIndex]
+        const value = data[index] as ChartPoint
+        return `${label}: ${parseFloat(value.y as string).toPrecision(2)}`
+      },
+    },
+  },
 }

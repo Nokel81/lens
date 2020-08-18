@@ -1,7 +1,7 @@
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { KubeApi } from "../kube-api"
 
-export class PodMetrics extends KubeObject {
+export class KubePodMetrics extends KubeObject {
   timestamp: string
   window: string
   containers: {
@@ -14,8 +14,8 @@ export class PodMetrics extends KubeObject {
 }
 
 export const podMetricsApi = new KubeApi({
-  kind: PodMetrics.kind,
+  kind: KubePodMetrics.kind,
   apiBase: "/apis/metrics.k8s.io/v1beta1/pods",
   isNamespaced: true,
-  objectConstructor: PodMetrics,
-});
+  objectConstructor: KubePodMetrics,
+})

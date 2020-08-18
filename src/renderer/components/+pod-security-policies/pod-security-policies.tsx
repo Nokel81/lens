@@ -1,13 +1,13 @@
-import "./pod-security-policies.scss";
+import "./pod-security-policies.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { KubeObjectListLayout } from "../kube-object";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { podSecurityPoliciesStore } from "./pod-security-policies.store";
-import { PodSecurityPolicy, pspApi } from "../../api/endpoints";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { KubeObjectListLayout } from "../kube-object"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { podSecurityPoliciesStore } from "./pod-security-policies.store"
+import { PodSecurityPolicy, pspApi } from "../../api/endpoints"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -18,7 +18,7 @@ enum sortBy {
 
 @observer
 export class PodSecurityPolicies extends React.Component {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="PodSecurityPolicies"
@@ -51,16 +51,16 @@ export class PodSecurityPolicies extends React.Component {
           ]
         }}
         renderItemMenu={(item: PodSecurityPolicy) => {
-          return <PodSecurityPolicyMenu object={item}/>
+          return <PodSecurityPolicyMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function PodSecurityPolicyMenu(props: KubeObjectMenuProps<PodSecurityPolicy>) {
+export function PodSecurityPolicyMenu(props: KubeObjectMenuProps<PodSecurityPolicy>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

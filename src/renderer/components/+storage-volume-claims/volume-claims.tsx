@@ -1,20 +1,20 @@
 import "./volume-claims.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Link, RouteComponentProps } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { volumeClaimStore } from "./volume-claim.store";
-import { PersistentVolumeClaim, pvcApi } from "../../api/endpoints/persistent-volume-claims.api";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { KubeObjectListLayout } from "../kube-object";
-import { IVolumeClaimsRouteParams } from "./volume-claims.route";
-import { unitsToBytes } from "../../utils/convertMemory";
-import { stopPropagation } from "../../utils";
-import { getDetailsUrl } from "../../navigation";
-import { storageClassApi } from "../../api/endpoints";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Link, RouteComponentProps } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { volumeClaimStore } from "./volume-claim.store"
+import { PersistentVolumeClaim, pvcApi } from "../../api/endpoints/persistent-volume-claims.api"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { KubeObjectListLayout } from "../kube-object"
+import { VolumeClaimsRouteParams } from "./volume-claims.route"
+import { unitsToBytes } from "../../utils/convertMemory"
+import { stopPropagation } from "../../utils"
+import { getDetailsUrl } from "../../navigation"
+import { storageClassApi } from "../../api/endpoints"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -26,12 +26,12 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<IVolumeClaimsRouteParams> {
+interface Props extends RouteComponentProps<VolumeClaimsRouteParams> {
 }
 
 @observer
 export class PersistentVolumeClaims extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="PersistentVolumeClaims"
@@ -61,15 +61,15 @@ export class PersistentVolumeClaims extends React.Component<Props> {
           { title: <Trans>Status</Trans>, className: "status", sortBy: sortBy.status },
         ]}
         renderTableContents={(pvc: PersistentVolumeClaim) => {
-          const pods = pvc.getPods(podsStore.items);
-          const { storageClassName } = pvc.spec;
+          const pods = pvc.getPods(podsStore.items)
+          const { storageClassName } = pvc.spec
           const storageClassDetailsUrl = getDetailsUrl(storageClassApi.getUrl({
-            name: storageClassName
-          }));
+            name: storageClassName,
+          }))
           return [
             pvc.getName(),
             pvc.getNs(),
-            <Link to={storageClassDetailsUrl} onClick={stopPropagation}>
+            <Link key="storage-class-link" to={storageClassDetailsUrl} onClick={stopPropagation}>
               {storageClassName}
             </Link>,
             pvc.getStorage(),
@@ -83,16 +83,16 @@ export class PersistentVolumeClaims extends React.Component<Props> {
           ]
         }}
         renderItemMenu={(item: PersistentVolumeClaim) => {
-          return <PersistentVolumeClaimMenu object={item}/>
+          return <PersistentVolumeClaimMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function PersistentVolumeClaimMenu(props: KubeObjectMenuProps<PersistentVolumeClaim>) {
+export function PersistentVolumeClaimMenu(props: KubeObjectMenuProps<PersistentVolumeClaim>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

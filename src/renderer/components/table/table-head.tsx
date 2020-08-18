@@ -1,7 +1,7 @@
-import "./table-head.scss";
+import "./table-head.scss"
 
-import React from "react";
-import { cssNames } from "../../utils";
+import React from "react"
+import { cssNames } from "../../utils"
 
 export type TableHeadElem = React.ReactElement<TableHeadProps>;
 
@@ -17,12 +17,12 @@ export class TableHead extends React.Component<TableHeadProps> {
     sticky: true,
   }
 
-  render() {
-    const { className, sticky, nowrap, showTopLine, children, ...headProps } = this.props;
+  render(): React.ReactNode {
+    const { className, sticky, nowrap, showTopLine, children, ...headProps } = this.props
     const classNames = cssNames("TableHead", className, {
       sticky, nowrap,
       topLine: showTopLine,
-    });
+    })
     return (
       <div className={classNames} {...headProps}>
         {children}

@@ -4,8 +4,8 @@ import http from "http"
 import path from "path"
 import { readFile } from "fs-extra"
 import { Cluster } from "./cluster"
-import { apiPrefix, appName, outDir } from "../common/vars";
-import { helmRoute, kubeconfigRoute, metricsRoute, portForwardRoute, resourceApplierRoute, watchRoute } from "./routes";
+import { apiPrefix, appName, outDir } from "../common/vars"
+import { helmRoute, kubeconfigRoute, metricsRoute, portForwardRoute, resourceApplierRoute, watchRoute } from "./routes"
 
 export interface RouterRequestOpts {
   req: http.IncomingMessage;
@@ -37,26 +37,39 @@ export interface LensApiRequest<P = any> {
   }
 }
 
+const mimeTypes: Record<string, string> = {
+  html: "text/html",
+  txt: "text/plain",
+  css: "text/css",
+  gif: "image/gif",
+  jpg: "image/jpeg",
+  png: "image/png",
+  svg: "image/svg+xml",
+  js: "application/javascript",
+  woff2: "font/woff2",
+  ttf: "font/ttf",
+}
+
 export class Router {
   protected router: any;
 
   public constructor() {
-    this.router = new Call.Router();
+    this.router = new Call.Router()
     this.addRoutes()
   }
 
   public async route(cluster: Cluster, req: http.IncomingMessage, res: http.ServerResponse): Promise<boolean> {
-    const url = new URL(req.url, "http://localhost");
+    const url = new URL(req.url, "http://localhost")
     const path = url.pathname
     const method = req.method.toLowerCase()
-    const matchingRoute = this.router.route(method, path);
-    const routeFound = !matchingRoute.isBoom;
+    const matchingRoute = this.router.route(method, path)
+    const routeFound = !matchingRoute.isBoom
     if (routeFound) {
-      const request = await this.getRequest({ req, res, cluster, url, params: matchingRoute.params });
+      const request = await this.getRequest({ req, res, cluster, url, params: matchingRoute.params })
       await matchingRoute.route(request)
       return true
     }
-    return false;
+    return false
   }
 
   protected async getRequest(opts: RouterRequestOpts): Promise<LensApiRequest> {
@@ -64,53 +77,41 @@ export class Router {
     const { payload } = await Subtext.parse(req, null, {
       parse: true,
       output: "data",
-    });
+    })
     return {
-      cluster: cluster,
+      cluster,
       path: url.pathname,
       raw: {
-        req: req,
+        req,
       },
       response: res,
       query: url.searchParams,
-      payload: payload,
-      params: params
+      payload,
+      params,
     }
   }
 
-  protected getMimeType(filename: string) {
-    const mimeTypes: Record<string, string> = {
-      html: "text/html",
-      txt: "text/plain",
-      css: "text/css",
-      gif: "image/gif",
-      jpg: "image/jpeg",
-      png: "image/png",
-      svg: "image/svg+xml",
-      js: "application/javascript",
-      woff2: "font/woff2",
-      ttf: "font/ttf"
-    };
+  protected getMimeType(filename: string): string {
     return mimeTypes[path.extname(filename).slice(1)] || "text/plain"
   }
 
-  async handleStaticFile(filePath: string, res: http.ServerResponse) {
-    const asset = path.join(outDir, filePath);
+  async handleStaticFile(filePath: string, res: http.ServerResponse): Promise<void> {
+    const asset = path.join(outDir, filePath)
     try {
-      const data = await readFile(asset);
-      res.setHeader("Content-Type", this.getMimeType(asset));
+      const data = await readFile(asset)
+      res.setHeader("Content-Type", this.getMimeType(asset))
       res.write(data)
       res.end()
     } catch (err) {
-      this.handleStaticFile(`${appName}.html`, res);
+      this.handleStaticFile(`${appName}.html`, res)
     }
   }
 
-  protected addRoutes() {
+  protected addRoutes(): void {
     // Static assets
     this.router.add({ method: 'get', path: '/{path*}' }, ({ params, response }: LensApiRequest) => {
-      this.handleStaticFile(params.path, response);
-    });
+      this.handleStaticFile(params.path, response)
+    })
 
     this.router.add({ method: "get", path: `${apiPrefix}/kubeconfig/service-account/{namespace}/{account}` }, kubeconfigRoute.routeServiceAccountRoute.bind(kubeconfigRoute))
 

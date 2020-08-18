@@ -1,16 +1,16 @@
-import "./deployment-scale-dialog.scss";
+import "./deployment-scale-dialog.scss"
 
-import React, { Component } from "react";
-import { computed, observable } from "mobx";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { Dialog, DialogProps } from "../dialog";
-import { Wizard, WizardStep } from "../wizard";
-import { Deployment, deploymentApi } from "../../api/endpoints";
-import { Icon } from "../icon";
-import { Slider } from "../slider";
-import { Notifications } from "../notifications";
-import { cssNames } from "../../utils";
+import React, { Component } from "react"
+import { computed, observable } from "mobx"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { Dialog, DialogProps } from "../dialog"
+import { Wizard, WizardStep } from "../wizard"
+import { Deployment, deploymentApi } from "../../api/endpoints"
+import { Icon } from "../icon"
+import { Slider } from "../slider"
+import { Notifications } from "../notifications"
+import { cssNames } from "../../utils"
 
 interface Props extends Partial<DialogProps> {
 }
@@ -24,68 +24,68 @@ export class DeploymentScaleDialog extends Component<Props> {
   @observable currentReplicas = 0;
   @observable desiredReplicas = 0;
 
-  static open(deployment: Deployment) {
-    DeploymentScaleDialog.isOpen = true;
-    DeploymentScaleDialog.data = deployment;
+  static open(deployment: Deployment): void {
+    DeploymentScaleDialog.isOpen = true
+    DeploymentScaleDialog.data = deployment
   }
 
-  static close() {
-    DeploymentScaleDialog.isOpen = false;
+  static close(): void {
+    DeploymentScaleDialog.isOpen = false
   }
 
-  get deployment() {
-    return DeploymentScaleDialog.data;
+  get deployment(): Deployment {
+    return DeploymentScaleDialog.data
   }
 
-  close = () => {
-    DeploymentScaleDialog.close();
+  close = (): void => {
+    DeploymentScaleDialog.close()
   }
 
-  @computed get scaleMax() {
-    const { currentReplicas } = this;
-    const defaultMax = 50;
+  @computed get scaleMax(): number {
+    const { currentReplicas } = this
+    const defaultMax = 50
     return currentReplicas <= defaultMax
       ? defaultMax * 2
-      : currentReplicas * 2;
+      : currentReplicas * 2
   }
 
-  onOpen = async () => {
-    const { deployment } = this;
+  onOpen = async (): Promise<void> => {
+    const { deployment } = this
     this.currentReplicas = await deploymentApi.getReplicas({
       namespace: deployment.getNs(),
       name: deployment.getName(),
-    });
-    this.desiredReplicas = this.currentReplicas;
-    this.ready = true;
+    })
+    this.desiredReplicas = this.currentReplicas
+    this.ready = true
   }
 
-  onClose = () => {
-    this.ready = false;
+  onClose = (): void => {
+    this.ready = false
   }
 
-  onChange = (evt: React.ChangeEvent, value: number) => {
-    this.desiredReplicas = value;
+  onChange = (evt: React.ChangeEvent, value: number): void => {
+    this.desiredReplicas = value
   }
 
-  scale = async () => {
-    const { deployment } = this;
-    const { currentReplicas, desiredReplicas, close } = this;
+  scale = async (): Promise<void> => {
+    const { deployment } = this
+    const { currentReplicas, desiredReplicas, close } = this
     try {
       if (currentReplicas !== desiredReplicas) {
         await deploymentApi.scale({
           name: deployment.getName(),
           namespace: deployment.getNs(),
-        }, desiredReplicas);
+        }, desiredReplicas)
       }
-      close();
+      close()
     } catch (err) {
-      Notifications.error(err);
+      Notifications.error(err)
     }
   }
 
-  renderContents() {
-    const { currentReplicas, desiredReplicas, onChange, scaleMax } = this;
-    const warning = currentReplicas < 10 && desiredReplicas > 90;
+  renderContents(): React.ReactNode {
+    const { currentReplicas, desiredReplicas, onChange, scaleMax } = this
+    const warning = currentReplicas < 10 && desiredReplicas > 90
     return (
       <>
         <div className="current-scale">
@@ -96,27 +96,27 @@ export class DeploymentScaleDialog extends Component<Props> {
             <Trans>Desired number of replicas</Trans>: {desiredReplicas}
           </div>
           <div className="slider-container">
-            <Slider value={desiredReplicas} max={scaleMax} onChange={onChange as any /** see: https://github.com/mui-org/material-ui/issues/20191 */}/>
+            <Slider value={desiredReplicas} max={scaleMax} onChange={onChange as any /** see: https://github.com/mui-org/material-ui/issues/20191 */} />
           </div>
         </div>
         {warning &&
-        <div className="warning">
-          <Icon material="warning"/>
-          <Trans>High number of replicas may cause cluster performance issues</Trans>
-        </div>
+          <div className="warning">
+            <Icon material="warning" />
+            <Trans>High number of replicas may cause cluster performance issues</Trans>
+          </div>
         }
       </>
     )
   }
 
-  render() {
-    const { className, ...dialogProps } = this.props;
-    const deploymentName = this.deployment ? this.deployment.getName() : "";
+  render(): React.ReactNode {
+    const { className, ...dialogProps } = this.props
+    const deploymentName = this.deployment ? this.deployment.getName() : ""
     const header = (
       <h5>
         <Trans>Scale Deployment <span>{deploymentName}</span></Trans>
       </h5>
-    );
+    )
     return (
       <Dialog
         {...dialogProps}
@@ -137,6 +137,6 @@ export class DeploymentScaleDialog extends Component<Props> {
           </WizardStep>
         </Wizard>
       </Dialog>
-    );
+    )
   }
 }

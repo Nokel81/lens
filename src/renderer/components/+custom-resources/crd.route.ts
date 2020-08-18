@@ -1,26 +1,26 @@
-import { RouteProps } from "react-router";
-import { buildURL } from "../../navigation";
+import { RouteProps } from "react-router"
+import { buildURL } from "../../navigation"
 
 export const crdRoute: RouteProps = {
-  path: "/crd"
+  path: "/crd",
 }
 
 export const crdDefinitionsRoute: RouteProps = {
-  path: crdRoute.path + "/definitions"
+  path: crdRoute.path + "/definitions",
 }
 
 export const crdResourcesRoute: RouteProps = {
-  path: crdRoute.path + "/:group/:name"
+  path: crdRoute.path + "/:group/:name",
 }
 
-export interface ICRDListQuery {
+export interface CRDListQuery {
   groups?: string;
 }
 
-export interface ICRDRouteParams {
+export interface CRDRouteParams {
   group: string;
   name: string;
 }
 
-export const crdURL = buildURL<{}, ICRDListQuery>(crdDefinitionsRoute.path);
-export const crdResourcesURL = buildURL<ICRDRouteParams>(crdResourcesRoute.path);
+export const crdURL = buildURL<Record<string, any>, CRDListQuery>(crdDefinitionsRoute.path)
+export const crdResourcesURL = buildURL<CRDRouteParams>(crdResourcesRoute.path)

@@ -1,8 +1,8 @@
-import "./table-row.scss";
+import "./table-row.scss"
 
-import React, { CSSProperties } from "react";
-import { cssNames } from "../../utils";
-import { ItemObject } from "../../item.store";
+import React, { CSSProperties } from "react"
+import { cssNames } from "../../utils"
+import { ItemObject } from "../../item.store"
 
 export type TableRowElem = React.ReactElement<TableRowProps>;
 
@@ -17,9 +17,9 @@ export interface TableRowProps extends React.DOMAttributes<HTMLDivElement> {
 }
 
 export class TableRow extends React.Component<TableRowProps> {
-  render() {
-    const { className, nowrap, selected, disabled, children, sortItem, searchItem, ...rowProps } = this.props;
-    const classNames = cssNames("TableRow", className, { selected, nowrap, disabled });
+  render(): React.ReactNode {
+    const { className, nowrap, selected, disabled, children, sortItem, searchItem, ...rowProps } = this.props
+    const classNames = cssNames("TableRow", className, { selected, nowrap, disabled })
     return (
       <div className={classNames} {...rowProps}>
         {children}

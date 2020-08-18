@@ -7,9 +7,9 @@ import { ensureDir, pathExists } from "fs-extra"
 import * as lockFile from "proper-lockfile"
 import { helmCli } from "./helm/helm-cli"
 import { userStore } from "../common/user-store"
-import { customRequest } from "../common/request";
+import { customRequest } from "../common/request"
 import { getBundledKubectlVersion } from "../common/utils/app-version"
-import { isDevelopment, isWindows } from "../common/vars";
+import { isDevelopment, isWindows } from "../common/vars"
 
 const bundledVersion = getBundledKubectlVersion()
 const kubectlMap: Map<string, string> = new Map([
@@ -24,12 +24,12 @@ const kubectlMap: Map<string, string> = new Map([
   ["1.15", "1.15.11"],
   ["1.16", "1.16.8"],
   ["1.17", bundledVersion],
-  ["1.18", "1.18.0"]
+  ["1.18", "1.18.0"],
 ])
 
 const packageMirrors: Map<string, string> = new Map([
   ["default", "https://storage.googleapis.com/kubernetes-release/release"],
-  ["china", "https://mirror.azure.cn/kubernetes/kubectl"]
+  ["china", "https://mirror.azure.cn/kubernetes/kubectl"],
 ])
 
 let bundledPath: string
@@ -52,7 +52,7 @@ export class Kubectl {
   protected path: string
   protected dirname: string
 
-  static get kubectlDir() {
+  static get kubectlDir(): string {
     return path.join((app || remote.app).getPath("userData"), "binaries", "kubectl")
   }
 
@@ -61,7 +61,7 @@ export class Kubectl {
   private static bundledInstance: Kubectl;
 
   // Returns the single bundled Kubectl instance
-  public static bundled() {
+  public static bundled(): Kubectl {
     if (!Kubectl.bundledInstance) Kubectl.bundledInstance = new Kubectl(Kubectl.bundledKubectlVersion)
     return Kubectl.bundledInstance
   }
@@ -109,7 +109,7 @@ export class Kubectl {
     }
   }
 
-  public async binDir() {
+  public async binDir(): Promise<string> {
     try {
       await this.ensureKubectl()
       return this.dirname
@@ -119,7 +119,7 @@ export class Kubectl {
     }
   }
 
-  public async checkBinary(checkVersion = true) {
+  public async checkBinary(checkVersion = true): Promise<boolean> {
     const exists = await pathExists(this.path)
     if (exists) {
       if (!checkVersion) {
@@ -173,10 +173,10 @@ export class Kubectl {
       if (!isValid) {
         await this.downloadKubectl().catch((error) => {
           logger.error(error)
-        });
+        })
       }
       await this.writeInitScripts().catch((error) => {
-        logger.error("Failed to write init scripts");
+        logger.error("Failed to write init scripts")
         logger.error(error)
       })
       logger.debug(`Releasing lock for ${this.kubectlVersion}`)
@@ -189,7 +189,7 @@ export class Kubectl {
     })
   }
 
-  public async downloadKubectl() {
+  public async downloadKubectl(): Promise<unknown> {
     await ensureDir(path.dirname(this.path), 0o755)
 
     logger.info(`Downloading kubectl ${this.kubectlVersion} from ${this.url} to ${this.path}`)
@@ -197,7 +197,7 @@ export class Kubectl {
       const stream = customRequest({
         url: this.url,
         gzip: true,
-      });
+      })
       const file = fs.createWriteStream(this.path)
       stream.on("complete", () => {
         logger.debug("kubectl binary download finished")
@@ -213,7 +213,7 @@ export class Kubectl {
       file.on("close", () => {
         logger.debug("kubectl binary download closed")
         fs.chmod(this.path, 0o755, (err) => {
-          if (err) reject(err);
+          if (err) reject(err)
         })
         resolve()
       })
@@ -221,7 +221,7 @@ export class Kubectl {
     })
   }
 
-  protected async scriptIsLatest(scriptPath: string) {
+  protected async scriptIsLatest(scriptPath: string): Promise<boolean> {
     const scriptExists = await pathExists(scriptPath)
     if (!scriptExists) return false
 
@@ -237,9 +237,9 @@ export class Kubectl {
     }
   }
 
-  protected async writeInitScripts() {
+  protected async writeInitScripts(): Promise<void> {
     const helmPath = helmCli.getBinaryDir()
-    const fsPromises = fs.promises;
+    const fsPromises = fs.promises
     const bashScriptPath = path.join(this.dirname, '.bash_set_path')
     const bashScriptIsLatest = await this.scriptIsLatest(bashScriptPath)
     if (!bashScriptIsLatest) {
@@ -288,7 +288,7 @@ export class Kubectl {
     }
   }
 
-  protected getDownloadMirror() {
+  protected getDownloadMirror(): string {
     const mirror = packageMirrors.get(userStore.preferences?.downloadMirror)
     if (mirror) {
       return mirror

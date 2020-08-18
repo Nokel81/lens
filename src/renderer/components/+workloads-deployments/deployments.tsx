@@ -1,27 +1,27 @@
 import "./deployments.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { RouteComponentProps } from "react-router";
-import { t, Trans } from "@lingui/macro";
-import { Deployment, deploymentApi } from "../../api/endpoints";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { MenuItem } from "../menu";
-import { Icon } from "../icon";
-import { DeploymentScaleDialog } from "./deployment-scale-dialog";
-import { deploymentStore } from "./deployments.store";
-import { replicaSetStore } from "../+workloads-replicasets/replicasets.store";
-import { podsStore } from "../+workloads-pods/pods.store";
-import { nodesStore } from "../+nodes/nodes.store";
-import { eventStore } from "../+events/event.store";
-import { KubeObjectListLayout } from "../kube-object";
-import { IDeploymentsRouteParams } from "../+workloads";
-import { _i18n } from "../../i18n";
-import { cssNames } from "../../utils";
-import kebabCase from "lodash/kebabCase";
-import orderBy from "lodash/orderBy";
-import { KubeEventIcon } from "../+events/kube-event-icon";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { RouteComponentProps } from "react-router"
+import { t, Trans } from "@lingui/macro"
+import { Deployment, deploymentApi } from "../../api/endpoints"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { MenuItem } from "../menu"
+import { Icon } from "../icon"
+import { DeploymentScaleDialog } from "./deployment-scale-dialog"
+import { deploymentStore } from "./deployments.store"
+import { replicaSetStore } from "../+workloads-replicasets/replicasets.store"
+import { podsStore } from "../+workloads-pods/pods.store"
+import { nodesStore } from "../+nodes/nodes.store"
+import { eventStore } from "../+events/event.store"
+import { KubeObjectListLayout } from "../kube-object"
+import { DeploymentsRouteParams } from "../+workloads"
+import { _i18n } from "../../i18n"
+import { cssNames } from "../../utils"
+import kebabCase from "lodash/kebabCase"
+import orderBy from "lodash/orderBy"
+import { KubeEventIcon } from "../+events/kube-event-icon"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -31,17 +31,17 @@ enum sortBy {
   condition = "condition",
 }
 
-interface Props extends RouteComponentProps<IDeploymentsRouteParams> {
+interface Props extends RouteComponentProps<DeploymentsRouteParams> {
 }
 
 @observer
 export class Deployments extends React.Component<Props> {
-  renderPods(deployment: Deployment) {
+  renderPods(deployment: Deployment): React.ReactNode {
     const { replicas, availableReplicas } = deployment.status
     return `${availableReplicas || 0}/${replicas || 0}`
   }
 
-  renderConditions(deployment: Deployment) {
+  renderConditions(deployment: Deployment): React.ReactNode {
     const conditions = orderBy(deployment.getConditions(true), "type", "asc")
     return conditions.map(({ type, message }) => (
       <span key={type} className={cssNames("condition", kebabCase(type))} title={message}>
@@ -50,7 +50,7 @@ export class Deployments extends React.Component<Props> {
     ))
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="Deployments" store={deploymentStore}
@@ -81,24 +81,24 @@ export class Deployments extends React.Component<Props> {
           deployment.getNs(),
           this.renderPods(deployment),
           deployment.getReplicas(),
-          <KubeEventIcon object={deployment}/>,
+          <KubeEventIcon key="kube-event-icon" object={deployment} />,
           deployment.getAge(),
           this.renderConditions(deployment),
         ]}
         renderItemMenu={(item: Deployment) => {
-          return <DeploymentMenu object={item}/>
+          return <DeploymentMenu object={item} />
         }}
       />
     )
   }
 }
 
-export function DeploymentMenu(props: KubeObjectMenuProps<Deployment>) {
-  const { object, toolbar } = props;
+export function DeploymentMenu(props: KubeObjectMenuProps<Deployment>): JSX.Element {
+  const { object, toolbar } = props
   return (
     <KubeObjectMenu {...props}>
       <MenuItem onClick={() => DeploymentScaleDialog.open(object)}>
-        <Icon material="open_with" title={_i18n._(t`Scale`)} interactive={toolbar}/>
+        <Icon material="open_with" title={_i18n._(t`Scale`)} interactive={toolbar} />
         <span className="title"><Trans>Scale</Trans></span>
       </MenuItem>
     </KubeObjectMenu>
@@ -107,4 +107,4 @@ export function DeploymentMenu(props: KubeObjectMenuProps<Deployment>) {
 
 apiManager.registerViews(deploymentApi, {
   Menu: DeploymentMenu,
-});
+})

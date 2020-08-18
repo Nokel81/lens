@@ -1,11 +1,11 @@
-import { IKubeApiParsed, parseKubeApi } from "./kube-api-parse";
+import { KubeApiParsed, parseKubeApi } from "./kube-api-parse"
 
-interface KubeApi_Parse_Test {
+interface KubeApiParseTest {
   url: string;
-  expected: Required<IKubeApiParsed>;
+  expected: Required<KubeApiParsed>;
 }
 
-const tests: KubeApi_Parse_Test[] = [
+const tests: KubeApiParseTest[] = [
   {
     url: "/apis/apiextensions.k8s.io/v1beta1/customresourcedefinitions/prometheuses.monitoring.coreos.com",
     expected: {
@@ -16,7 +16,7 @@ const tests: KubeApi_Parse_Test[] = [
       apiVersionWithGroup: "apiextensions.k8s.io/v1beta1",
       namespace: undefined,
       resource: "customresourcedefinitions",
-      name: "prometheuses.monitoring.coreos.com"
+      name: "prometheuses.monitoring.coreos.com",
     },
   },
   {
@@ -29,7 +29,7 @@ const tests: KubeApi_Parse_Test[] = [
       apiVersionWithGroup: "v1",
       namespace: "kube-system",
       resource: "pods",
-      name: "coredns-6955765f44-v8p27"
+      name: "coredns-6955765f44-v8p27",
     },
   },
   {
@@ -123,13 +123,12 @@ const tests: KubeApi_Parse_Test[] = [
       namespace: undefined,
     },
   },
-];
+]
 
 describe.only("parseApi unit tests", () => {
-  for (const i in tests) {
-    const { url: tUrl, expected:tExpect} = tests[i];
-    test(`test #${parseInt(i)+1}`, () => {
-      expect(parseKubeApi(tUrl)).toStrictEqual(tExpect);
-    });
+  for (const { url, expected } of tests) {
+    test(`testing "${url}"`, () => {
+      expect(parseKubeApi(url)).toStrictEqual(expected)
+    })
   }
-});
+})

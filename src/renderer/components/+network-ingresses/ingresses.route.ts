@@ -1,8 +1,8 @@
 import { RouteProps } from "react-router"
-import { buildURL } from "../../navigation";
+import { buildURL } from "../../navigation"
 
 export const ingressRoute: RouteProps = {
-  path: "/ingresses"
+  path: "/ingresses",
 }
 
 export interface IngressRouteParams {

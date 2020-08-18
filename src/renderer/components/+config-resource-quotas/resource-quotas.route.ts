@@ -1,11 +1,11 @@
-import { RouteProps } from "react-router";
-import { buildURL } from "../../navigation";
+import { RouteProps } from "react-router"
+import { buildURL } from "../../navigation"
 
 export const resourceQuotaRoute: RouteProps = {
-  path: "/resourcequotas"
+  path: "/resourcequotas",
 }
 
-export interface IResourceQuotaRouteParams {
+export interface ResourceQuotaRouteParams {
 }
 
-export const resourceQuotaURL = buildURL<IResourceQuotaRouteParams>(resourceQuotaRoute.path);
+export const resourceQuotaURL = buildURL<ResourceQuotaRouteParams>(resourceQuotaRoute.path)

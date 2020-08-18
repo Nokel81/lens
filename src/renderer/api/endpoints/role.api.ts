@@ -1,18 +1,20 @@
-import { KubeObject } from "../kube-object";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { KubeApi } from "../kube-api"
+
+export interface RoleRule {
+  verbs: string[];
+  apiGroups: string[];
+  resources: string[];
+  resourceNames?: string[];
+}
 
 export class Role extends KubeObject {
   static kind = "Role"
 
-  rules: {
-    verbs: string[];
-    apiGroups: string[];
-    resources: string[];
-    resourceNames?: string[];
-  }[]
+  rules: RoleRule[]
 
-  getRules() {
-    return this.rules || [];
+  getRules(): RoleRule[] {
+    return this.rules || []
   }
 }
 
@@ -21,4 +23,4 @@ export const roleApi = new KubeApi({
   apiBase: "/apis/rbac.authorization.k8s.io/v1/roles",
   isNamespaced: true,
   objectConstructor: Role,
-});
+})

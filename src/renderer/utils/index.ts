@@ -1,7 +1,7 @@
 // Common usage utils & helpers
 
-export const noop: any = Function();
-export const isElectron = !!navigator.userAgent.match(/Electron/);
+export const noop: any = Function()
+export const isElectron = !!navigator.userAgent.match(/Electron/)
 
 export * from '../../common/utils/camelCase'
 export * from '../../common/utils/base64'

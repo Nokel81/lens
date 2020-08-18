@@ -1,29 +1,29 @@
 import "./role-details.scss"
 
-import React from "react";
-import { Trans } from "@lingui/macro";
-import { DrawerTitle } from "../drawer";
-import { KubeEventDetails } from "../+events/kube-event-details";
-import { observer } from "mobx-react";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { clusterRoleApi, Role, roleApi } from "../../api/endpoints";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import React from "react"
+import { Trans } from "@lingui/macro"
+import { DrawerTitle } from "../drawer"
+import { KubeEventDetails } from "../+events/kube-event-details"
+import { observer } from "mobx-react"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { clusterRoleApi, Role, roleApi } from "../../api/endpoints"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<Role> {
 }
 
 @observer
 export class RoleDetails extends React.Component<Props> {
-  render() {
-    const { object: role } = this.props;
-    if (!role) return;
-    const rules = role.getRules();
+  render(): React.ReactNode {
+    const { object: role } = this.props
+    if (!role) return
+    const rules = role.getRules()
     return (
       <div className="RoleDetails">
-        <KubeObjectMeta object={role}/>
+        <KubeObjectMeta object={role} />
 
-        <DrawerTitle title={<Trans>Rules</Trans>}/>
+        <DrawerTitle title={<Trans>Rules</Trans>} />
         {rules.map(({ resourceNames, apiGroups, resources, verbs }, index) => {
           return (
             <div className="rule" key={index}>
@@ -60,7 +60,7 @@ export class RoleDetails extends React.Component<Props> {
           )
         })}
 
-        <KubeEventDetails object={role}/>
+        <KubeEventDetails object={role} />
       </div>
     )
   }

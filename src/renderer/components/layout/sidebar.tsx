@@ -1,35 +1,35 @@
-import type { TabRoute } from "./main-layout";
-import "./sidebar.scss";
+import type { TabRoute } from "./main-layout"
+import "./sidebar.scss"
 
-import React from "react";
-import { computed, observable, reaction } from "mobx";
-import { observer } from "mobx-react";
-import { matchPath, NavLink } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { createStorage, cssNames } from "../../utils";
-import { Icon } from "../icon";
-import { workloadsRoute, workloadsURL } from "../+workloads/workloads.route";
-import { namespacesURL } from "../+namespaces/namespaces.route";
-import { nodesURL } from "../+nodes/nodes.route";
-import { usersManagementRoute, usersManagementURL } from "../+user-management/user-management.routes";
-import { networkRoute, networkURL } from "../+network/network.route";
-import { storageRoute, storageURL } from "../+storage/storage.route";
-import { clusterURL } from "../+cluster";
-import { Config, configRoute, configURL } from "../+config";
-import { eventRoute, eventsURL } from "../+events";
-import { Apps, appsRoute, appsURL } from "../+apps";
-import { namespaceStore } from "../+namespaces/namespace.store";
-import { Workloads } from "../+workloads";
-import { UserManagement } from "../+user-management";
-import { Storage } from "../+storage";
-import { Network } from "../+network";
-import { crdStore } from "../+custom-resources/crd.store";
-import { CrdList, crdResourcesRoute, crdRoute, crdURL } from "../+custom-resources";
-import { CustomResources } from "../+custom-resources/custom-resources";
-import { navigation } from "../../navigation";
+import React from "react"
+import { computed, observable, reaction } from "mobx"
+import { observer } from "mobx-react"
+import { matchPath, NavLink } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { StorageHelper, cssNames } from "../../utils"
+import { Icon } from "../icon"
+import { workloadsRoute, workloadsURL } from "../+workloads/workloads.route"
+import { namespacesURL } from "../+namespaces/namespaces.route"
+import { nodesURL } from "../+nodes/nodes.route"
+import { usersManagementRoute, usersManagementURL } from "../+user-management/user-management.routes"
+import { networkRoute, networkURL } from "../+network/network.route"
+import { storageRoute, storageURL } from "../+storage/storage.route"
+import { clusterURL } from "../+cluster"
+import { Config, configRoute, configURL } from "../+config"
+import { eventRoute, eventsURL } from "../+events"
+import { Apps, appsRoute, appsURL } from "../+apps"
+import { namespaceStore } from "../+namespaces/namespace.store"
+import { Workloads } from "../+workloads"
+import { UserManagement } from "../+user-management"
+import { Storage } from "../+storage"
+import { Network } from "../+network"
+import { crdStore } from "../+custom-resources/crd.store"
+import { CrdList, crdResourcesRoute, crdRoute, crdURL } from "../+custom-resources"
+import { CustomResources } from "../+custom-resources/custom-resources"
+import { navigation } from "../../navigation"
 import { isAllowedResource } from "../../../common/rbac"
 
-const SidebarContext = React.createContext<SidebarContextValue>({ pinned: false });
+const SidebarContext = React.createContext<SidebarContextValue>({ pinned: false })
 type SidebarContextValue = {
   pinned: boolean;
 };
@@ -42,11 +42,11 @@ interface Props {
 
 @observer
 export class Sidebar extends React.Component<Props> {
-  async componentDidMount() {
-    if (!crdStore.isLoaded && isAllowedResource('customresourcedefinitions')) crdStore.loadAll()
+  async componentDidMount(): Promise<void> {
+    if (!crdStore.isLoaded && isAllowedResource('customresourcedefinitions')) return crdStore.loadAll()
   }
 
-  renderCustomResources() {
+  renderCustomResources(): React.ReactNode {
     return Object.entries(crdStore.groups).map(([group, crds]) => {
       const submenus = crds.map(crd => {
         return {
@@ -69,15 +69,15 @@ export class Sidebar extends React.Component<Props> {
     })
   }
 
-  render() {
-    const { toggle, isPinned, className } = this.props;
-    const query = namespaceStore.getContextParams();
+  render(): React.ReactNode {
+    const { toggle, isPinned, className } = this.props
+    const query = namespaceStore.getContextParams()
     return (
       <SidebarContext.Provider value={{ pinned: isPinned }}>
         <div className={cssNames("Sidebar flex column", className, { pinned: isPinned })}>
           <div className="header flex align-center">
             <NavLink exact to="/" className="box grow">
-              <Icon svg="logo-full" className="logo-icon"/>
+              <Icon svg="logo-full" className="logo-icon" />
               <div className="logo-text">Lens</div>
             </NavLink>
             <Icon
@@ -94,14 +94,14 @@ export class Sidebar extends React.Component<Props> {
               isHidden={!isAllowedResource('nodes')}
               url={clusterURL()}
               text={<Trans>Cluster</Trans>}
-              icon={<Icon svg="kube"/>}
+              icon={<Icon svg="kube" />}
             />
             <SidebarNavItem
               id="nodes"
               isHidden={!isAllowedResource('nodes')}
               url={nodesURL()}
               text={<Trans>Nodes</Trans>}
-              icon={<Icon svg="nodes"/>}
+              icon={<Icon svg="nodes" />}
             />
             <SidebarNavItem
               id="workloads"
@@ -110,7 +110,7 @@ export class Sidebar extends React.Component<Props> {
               routePath={workloadsRoute.path}
               subMenus={Workloads.tabRoutes}
               text={<Trans>Workloads</Trans>}
-              icon={<Icon svg="workloads"/>}
+              icon={<Icon svg="workloads" />}
             />
             <SidebarNavItem
               id="config"
@@ -119,7 +119,7 @@ export class Sidebar extends React.Component<Props> {
               routePath={configRoute.path}
               subMenus={Config.tabRoutes}
               text={<Trans>Configuration</Trans>}
-              icon={<Icon material="list"/>}
+              icon={<Icon material="list" />}
             />
             <SidebarNavItem
               id="networks"
@@ -128,7 +128,7 @@ export class Sidebar extends React.Component<Props> {
               routePath={networkRoute.path}
               subMenus={Network.tabRoutes}
               text={<Trans>Network</Trans>}
-              icon={<Icon material="device_hub"/>}
+              icon={<Icon material="device_hub" />}
             />
             <SidebarNavItem
               id="storage"
@@ -136,14 +136,14 @@ export class Sidebar extends React.Component<Props> {
               url={storageURL({ query })}
               routePath={storageRoute.path}
               subMenus={Storage.tabRoutes}
-              icon={<Icon svg="storage"/>}
+              icon={<Icon svg="storage" />}
               text={<Trans>Storage</Trans>}
             />
             <SidebarNavItem
               id="namespaces"
               isHidden={!isAllowedResource('namespaces')}
               url={namespacesURL()}
-              icon={<Icon material="layers"/>}
+              icon={<Icon material="layers" />}
               text={<Trans>Namespaces</Trans>}
             />
             <SidebarNavItem
@@ -151,7 +151,7 @@ export class Sidebar extends React.Component<Props> {
               isHidden={!isAllowedResource('events')}
               url={eventsURL({ query })}
               routePath={eventRoute.path}
-              icon={<Icon material="access_time"/>}
+              icon={<Icon material="access_time" />}
               text={<Trans>Events</Trans>}
             />
             <SidebarNavItem
@@ -159,7 +159,7 @@ export class Sidebar extends React.Component<Props> {
               url={appsURL({ query })}
               subMenus={Apps.tabRoutes}
               routePath={appsRoute.path}
-              icon={<Icon material="apps"/>}
+              icon={<Icon material="apps" />}
               text={<Trans>Apps</Trans>}
             />
             <SidebarNavItem
@@ -167,7 +167,7 @@ export class Sidebar extends React.Component<Props> {
               url={usersManagementURL({ query })}
               routePath={usersManagementRoute.path}
               subMenus={UserManagement.tabRoutes}
-              icon={<Icon material="security"/>}
+              icon={<Icon material="security" />}
               text={<Trans>Access Control</Trans>}
             />
             <SidebarNavItem
@@ -176,7 +176,7 @@ export class Sidebar extends React.Component<Props> {
               url={crdURL()}
               subMenus={CustomResources.tabRoutes}
               routePath={crdRoute.path}
-              icon={<Icon material="extension"/>}
+              icon={<Icon material="extension" />}
               text={<Trans>Custom Resources</Trans>}
             >
               {this.renderCustomResources()}
@@ -199,9 +199,9 @@ interface SidebarNavItemProps {
   subMenus?: TabRoute[];
 }
 
-const navItemStorage = createStorage<[string, boolean][]>("sidebar_menu_item", []);
-const navItemState = observable.map<string, boolean>(navItemStorage.get());
-reaction(() => [...navItemState], value => navItemStorage.set(value));
+const navItemStorage = new StorageHelper<[string, boolean][]>("sidebar_menu_item", [])
+const navItemState = observable.map<string, boolean>(navItemStorage.get())
+reaction(() => [...navItemState], value => navItemStorage.set(value))
 
 @observer
 class SidebarNavItem extends React.Component<SidebarNavItemProps> {
@@ -209,29 +209,29 @@ class SidebarNavItem extends React.Component<SidebarNavItemProps> {
   public context: SidebarContextValue;
 
   @computed get isExpanded() {
-    return navItemState.get(this.props.id);
+    return navItemState.get(this.props.id)
   }
 
   toggleSubMenu = () => {
-    navItemState.set(this.props.id, !this.isExpanded);
+    navItemState.set(this.props.id, !this.isExpanded)
   }
 
   isActive = () => {
-    const { routePath, url } = this.props;
-    const { pathname } = navigation.location;
+    const { routePath, url } = this.props
+    const { pathname } = navigation.location
     return !!matchPath(pathname, {
-      path: routePath || url
-    });
+      path: routePath || url,
+    })
   }
 
-  render() {
-    const { id, isHidden, subMenus = [], icon, text, url, children, className } = this.props;
+  render(): React.ReactNode {
+    const { id, isHidden, subMenus = [], icon, text, url, children, className } = this.props
     if (isHidden) {
-      return null;
+      return null
     }
-    const extendedView = (subMenus.length > 0 || children) && this.context.pinned;
+    const extendedView = (subMenus.length > 0 || children) && this.context.pinned
     if (extendedView) {
-      const isActive = this.isActive();
+      const isActive = this.isActive()
       return (
         <div id={id} className={cssNames("SidebarNavItem", className)}>
           <div className={cssNames("nav-item", { active: isActive })} onClick={this.toggleSubMenu}>
@@ -250,8 +250,8 @@ class SidebarNavItem extends React.Component<SidebarNavItemProps> {
             ))}
             {React.Children.toArray(children).map((child: React.ReactElement<any>) => {
               return React.cloneElement(child, {
-                className: cssNames(child.props.className, { visible: this.isExpanded })
-              });
+                className: cssNames(child.props.className, { visible: this.isExpanded }),
+              })
             })}
           </ul>
         </div>

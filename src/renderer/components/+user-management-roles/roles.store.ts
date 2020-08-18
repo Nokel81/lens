@@ -1,24 +1,24 @@
-import { clusterRoleApi, Role, roleApi } from "../../api/endpoints";
-import { autobind } from "../../utils";
-import { KubeObjectStore } from "../../kube-object.store";
-import { apiManager } from "../../api/api-manager";
+import { clusterRoleApi, Role, roleApi } from "../../api/endpoints"
+import { autobind } from "../../utils"
+import { KubeObjectStore } from "../../kube-object.store"
+import { apiManager } from "../../api/api-manager"
 
 @autobind()
 export class RolesStore extends KubeObjectStore<Role> {
   api = clusterRoleApi
 
-  subscribe() {
+  subscribe(): () => void {
     return super.subscribe([roleApi, clusterRoleApi])
   }
 
-  protected sortItems(items: Role[]) {
+  protected sortItems(items: Role[]): Role[] {
     return super.sortItems(items, [
       role => role.kind,
       role => role.getName(),
     ])
   }
 
-  protected loadItem(params: { name: string; namespace?: string }) {
+  protected loadItem(params: { name: string; namespace?: string }): Promise<Role> {
     if (params.namespace) return roleApi.get(params)
     return clusterRoleApi.get(params)
   }
@@ -26,7 +26,7 @@ export class RolesStore extends KubeObjectStore<Role> {
   protected loadItems(namespaces?: string[]): Promise<Role[]> {
     if (namespaces) {
       return Promise.all(
-        namespaces.map(namespace => roleApi.list({ namespace }))
+        namespaces.map(namespace => roleApi.list({ namespace })),
       ).then(items => items.flat())
     }
     else {
@@ -35,7 +35,7 @@ export class RolesStore extends KubeObjectStore<Role> {
     }
   }
 
-  protected async createItem(params: { name: string; namespace?: string }, data?: Partial<Role>) {
+  protected async createItem(params: { name: string; namespace?: string }, data?: Partial<Role>): Promise<Role> {
     if (params.namespace) {
       return roleApi.create(params, data)
     }
@@ -45,7 +45,7 @@ export class RolesStore extends KubeObjectStore<Role> {
   }
 }
 
-export const rolesStore = new RolesStore();
+export const rolesStore = new RolesStore()
 
-apiManager.registerStore(roleApi, rolesStore);
-apiManager.registerStore(clusterRoleApi, rolesStore);
+apiManager.registerStore(roleApi, rolesStore)
+apiManager.registerStore(clusterRoleApi, rolesStore)

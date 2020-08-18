@@ -1,12 +1,12 @@
 import { RouteProps } from "react-router"
-import { volumeClaimsURL } from "../+storage-volume-claims";
-import { Storage } from "./storage";
-import { IURLParams } from "../../navigation";
+import { volumeClaimsURL } from "../+storage-volume-claims"
+import { Storage } from "./storage"
+import { URLParams } from "../../navigation"
 
 export const storageRoute: RouteProps = {
   get path() {
     return Storage.tabRoutes.map(({ path }) => path).flat()
-  }
+  },
 }
 
-export const storageURL = (params?: IURLParams) => volumeClaimsURL(params);
+export const storageURL = (params?: URLParams<any, any>): string => volumeClaimsURL(params)

@@ -1,24 +1,24 @@
-import "./pod-menu.scss";
+import "./pod-menu.scss"
 
-import React from "react";
-import { t, Trans } from "@lingui/macro";
-import { MenuItem, SubMenu } from "../menu";
-import { IPodContainer, Pod, nodesApi } from "../../api/endpoints";
-import { Icon } from "../icon";
-import { StatusBrick } from "../status-brick";
-import { PodLogsDialog } from "./pod-logs-dialog";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { cssNames, prevDefault } from "../../utils";
-import { terminalStore, createTerminalTab } from "../dock/terminal.store";
-import { _i18n } from "../../i18n";
-import { hideDetails } from "../../navigation";
+import React from "react"
+import { t, Trans } from "@lingui/macro"
+import { MenuItem, SubMenu } from "../menu"
+import { PodContainer, Pod } from "../../api/endpoints"
+import { Icon } from "../icon"
+import { StatusBrick } from "../status-brick"
+import { PodLogsDialog } from "./pod-logs-dialog"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { cssNames, prevDefault } from "../../utils"
+import { terminalStore, createTerminalTab } from "../dock/terminal.store"
+import { _i18n } from "../../i18n"
+import { hideDetails } from "../../navigation"
 
 interface Props extends KubeObjectMenuProps<Pod> {
 }
 
 export class PodMenu extends React.Component<Props> {
-  async execShell(container?: string) {
-    hideDetails();
+  execShell(container?: string): void {
+    hideDetails()
     const { object: pod } = this.props
     const containerParam = container ? `-c ${container}` : ""
     let command = `kubectl exec -i -t -n ${pod.getNs()} ${pod.getName()} ${containerParam} "--"`
@@ -32,37 +32,37 @@ export class PodMenu extends React.Component<Props> {
     }
 
     const shell = createTerminalTab({
-      title: _i18n._(t`Pod`) + `: ${pod.getName()} (namespace: ${pod.getNs()})`
-    });
+      title: _i18n._(t`Pod`) + `: ${pod.getName()} (namespace: ${pod.getNs()})`,
+    })
 
     terminalStore.sendCommand(command, {
       enter: true,
-      tabId: shell.id
-    });
+      tabId: shell.id,
+    })
   }
 
-  showLogs(container: IPodContainer) {
-    PodLogsDialog.open(this.props.object, container);
+  showLogs(container: PodContainer): void {
+    PodLogsDialog.open(this.props.object, container)
   }
 
-  renderShellMenu() {
+  renderShellMenu(): React.ReactNode {
     const { object: pod, toolbar } = this.props
-    const containers = pod.getRunningContainers();
-    if (!containers.length) return;
+    const containers = pod.getRunningContainers()
+    if (!containers.length) return
     return (
       <MenuItem onClick={prevDefault(() => this.execShell(containers[0].name))}>
-        <Icon svg="ssh" interactive={toolbar} title={_i18n._(t`Pod shell`)}/>
+        <Icon svg="ssh" interactive={toolbar} title={_i18n._(t`Pod shell`)} />
         <span className="title"><Trans>Shell</Trans></span>
         {containers.length > 1 && (
           <>
-            <Icon className="arrow" material="keyboard_arrow_right"/>
+            <Icon className="arrow" material="keyboard_arrow_right" />
             <SubMenu>
               {
                 containers.map(container => {
-                  const { name } = container;
+                  const { name } = container
                   return (
                     <MenuItem key={name} onClick={prevDefault(() => this.execShell(name))} className="flex align-center">
-                      <StatusBrick/>
+                      <StatusBrick />
                       {name}
                     </MenuItem>
                   )
@@ -75,23 +75,23 @@ export class PodMenu extends React.Component<Props> {
     )
   }
 
-  renderLogsMenu() {
+  renderLogsMenu(): React.ReactNode {
     const { object: pod, toolbar } = this.props
-    const containers = pod.getAllContainers();
-    const statuses = pod.getContainerStatuses();
-    if (!containers.length) return;
+    const containers = pod.getAllContainers()
+    const statuses = pod.getContainerStatuses()
+    if (!containers.length) return
     return (
       <MenuItem onClick={prevDefault(() => this.showLogs(containers[0]))}>
-        <Icon material="subject" title={_i18n._(t`Logs`)} interactive={toolbar}/>
+        <Icon material="subject" title={_i18n._(t`Logs`)} interactive={toolbar} />
         <span className="title"><Trans>Logs</Trans></span>
         {containers.length > 1 && (
           <>
-            <Icon className="arrow" material="keyboard_arrow_right"/>
+            <Icon className="arrow" material="keyboard_arrow_right" />
             <SubMenu>
               {
                 containers.map(container => {
                   const { name } = container
-                  const status = statuses.find(status => status.name === name);
+                  const status = statuses.find(status => status.name === name)
                   const brick = status ? (
                     <StatusBrick
                       className={cssNames(Object.keys(status.state)[0], { ready: status.ready })}
@@ -112,8 +112,8 @@ export class PodMenu extends React.Component<Props> {
     )
   }
 
-  render() {
-    const { ...menuProps } = this.props;
+  render(): React.ReactNode {
+    const { ...menuProps } = this.props
     return (
       <KubeObjectMenu {...menuProps} className="PodMenu">
         {this.renderShellMenu()}

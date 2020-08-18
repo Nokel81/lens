@@ -1,20 +1,20 @@
 import "./workloads.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Redirect, Route, Switch } from "react-router";
-import { RouteComponentProps } from "react-router-dom";
-import { Trans } from "@lingui/macro";
-import { MainLayout, TabRoute } from "../layout/main-layout";
-import { WorkloadsOverview } from "../+workloads-overview/overview";
-import { cronJobsRoute, cronJobsURL, daemonSetsRoute, daemonSetsURL, deploymentsRoute, deploymentsURL, jobsRoute, jobsURL, overviewRoute, overviewURL, podsRoute, podsURL, statefulSetsRoute, statefulSetsURL, workloadsURL } from "./workloads.route";
-import { namespaceStore } from "../+namespaces/namespace.store";
-import { Pods } from "../+workloads-pods";
-import { Deployments } from "../+workloads-deployments";
-import { DaemonSets } from "../+workloads-daemonsets";
-import { StatefulSets } from "../+workloads-statefulsets";
-import { Jobs } from "../+workloads-jobs";
-import { CronJobs } from "../+workloads-cronjobs";
+import React from "react"
+import { observer } from "mobx-react"
+import { Redirect, Route, Switch } from "react-router"
+import { RouteComponentProps } from "react-router-dom"
+import { Trans } from "@lingui/macro"
+import { MainLayout, TabRoute } from "../layout/main-layout"
+import { WorkloadsOverview } from "../+workloads-overview/overview"
+import { cronJobsRoute, cronJobsURL, daemonSetsRoute, daemonSetsURL, deploymentsRoute, deploymentsURL, jobsRoute, jobsURL, overviewRoute, overviewURL, podsRoute, podsURL, statefulSetsRoute, statefulSetsURL, workloadsURL } from "./workloads.route"
+import { namespaceStore } from "../+namespaces/namespace.store"
+import { Pods } from "../+workloads-pods"
+import { Deployments } from "../+workloads-deployments"
+import { DaemonSets } from "../+workloads-daemonsets"
+import { StatefulSets } from "../+workloads-statefulsets"
+import { Jobs } from "../+workloads-jobs"
+import { CronJobs } from "../+workloads-cronjobs"
 import { isAllowedResource } from "../../../common/rbac"
 
 interface Props extends RouteComponentProps {
@@ -23,21 +23,21 @@ interface Props extends RouteComponentProps {
 @observer
 export class Workloads extends React.Component<Props> {
   static get tabRoutes(): TabRoute[] {
-    const query = namespaceStore.getContextParams();
+    const query = namespaceStore.getContextParams()
     const routes: TabRoute[] = [
       {
         title: <Trans>Overview</Trans>,
         component: WorkloadsOverview,
         url: overviewURL({ query }),
-        path: overviewRoute.path
-      }
+        path: overviewRoute.path,
+      },
     ]
     if (isAllowedResource("pods")) {
       routes.push({
         title: <Trans>Pods</Trans>,
         component: Pods,
         url: podsURL({ query }),
-        path: podsRoute.path
+        path: podsRoute.path,
       })
     }
     if (isAllowedResource("deployments")) {
@@ -80,16 +80,16 @@ export class Workloads extends React.Component<Props> {
         path: cronJobsRoute.path,
       })
     }
-    return routes;
+    return routes
   }
 
-  render() {
-    const tabRoutes = Workloads.tabRoutes;
+  render(): React.ReactNode {
+    const tabRoutes = Workloads.tabRoutes
     return (
       <MainLayout className="Workloads" tabs={tabRoutes}>
         <Switch>
-          {tabRoutes.map((route, index) => <Route key={index} {...route}/>)}
-          <Redirect to={workloadsURL({ query: namespaceStore.getContextParams() })}/>
+          {tabRoutes.map((route, index) => <Route key={index} {...route} />)}
+          <Redirect to={workloadsURL({ query: namespaceStore.getContextParams() })} />
         </Switch>
       </MainLayout>
     )

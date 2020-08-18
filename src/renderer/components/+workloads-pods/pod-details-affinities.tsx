@@ -1,17 +1,17 @@
-import "./pod-details-affinities.scss";
-import React from "react";
-import jsYaml from "js-yaml";
-import { Trans } from "@lingui/macro";
-import { AceEditor } from "../ace-editor";
-import { DrawerParamToggler, DrawerItem } from "../drawer";
-import { Pod, Deployment, DaemonSet, StatefulSet, ReplicaSet, Job } from "../../api/endpoints";
+import "./pod-details-affinities.scss"
+import React from "react"
+import jsYaml from "js-yaml"
+import { Trans } from "@lingui/macro"
+import { AceEditor } from "../ace-editor"
+import { DrawerParamToggler, DrawerItem } from "../drawer"
+import { Pod, Deployment, DaemonSet, StatefulSet, ReplicaSet, Job } from "../../api/endpoints"
 
 interface Props {
   workload: Pod | Deployment | DaemonSet | StatefulSet | ReplicaSet | Job;
 }
 
 export class PodDetailsAffinities extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     const { workload } = this.props
     const affinitiesNum = workload.getAffinityNumber()
     const affinities = workload.getAffinity()

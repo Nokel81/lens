@@ -75,12 +75,12 @@ export class PrometheusProviderRegistry {
 
   static getProvider(type: string): PrometheusProvider {
     if (!this.prometheusProviders[type]) {
-      throw "Unknown Prometheus provider";
+      throw "Unknown Prometheus provider"
     }
     return this.prometheusProviders[type]
   }
 
-  static registerProvider(key: string, provider: PrometheusProvider) {
+  static registerProvider(key: string, provider: PrometheusProvider): void {
     this.prometheusProviders[key] = provider
   }
 

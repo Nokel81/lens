@@ -3,19 +3,19 @@
 const base = 1024
 const suffixes = ['K', 'M', 'G', 'T', 'P', 'E'] // Equivalents: Ki, Mi, Gi, Ti, Pi, Ei
 
-export function unitsToBytes(value: string) {
+export function unitsToBytes(value: string): number {
   if (!suffixes.some(suffix => value.includes(suffix))) {
     return parseFloat(value)
   }
- 
-  const suffix = value.replace(/[0-9]|i|\./g, '');
-  const index = suffixes.indexOf(suffix);
+
+  const suffix = value.replace(/[0-9]|i|\./g, '')
+  const index = suffixes.indexOf(suffix)
   return parseInt(
-    (parseFloat(value) * Math.pow(base, index + 1)).toFixed(1)
+    (parseFloat(value) * Math.pow(base, index + 1)).toFixed(1),
   )
 }
 
-export function bytesToUnits(bytes: number, precision = 1) {
+export function bytesToUnits(bytes: number, precision = 1): string {
   const sizes = ["B", ...suffixes]
   const index = Math.floor(Math.log(bytes) / Math.log(base))
   if (!bytes) {

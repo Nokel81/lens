@@ -1,6 +1,6 @@
-import "./drawer-title.scss";
-import React from "react";
-import { cssNames } from "../../utils";
+import "./drawer-title.scss"
+import React from "react"
+import { cssNames } from "../../utils"
 
 interface Props {
   className?: string;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export class DrawerTitle extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     const { title, children, className } = this.props
     return (
       <div className={cssNames("DrawerTitle", className)}>

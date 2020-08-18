@@ -1,13 +1,12 @@
-import "./kube-event-details.scss";
+import "./kube-event-details.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { KubeObject } from "../../api/kube-object";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { cssNames } from "../../utils";
-import { Icon } from "../icon";
-import { eventStore } from "./event.store";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { KubeObject } from "../../api/kube-object"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { cssNames } from "../../utils"
+import { eventStore } from "./event.store"
 
 interface Props {
   object: KubeObject;
@@ -15,13 +14,13 @@ interface Props {
 
 @observer
 export class KubeEventDetails extends React.Component<Props> {
-  async componentDidMount() {
-    eventStore.loadAll();
+  async componentDidMount(): Promise<void> {
+    await eventStore.loadAll()
   }
 
-  render() {
-    const { object } = this.props;
-    const events = eventStore.getEventsByObject(object);
+  render(): React.ReactNode {
+    const { object } = this.props
+    const events = eventStore.getEventsByObject(object)
     if (!events.length) {
       return (
         <DrawerTitle className="flex gaps align-center">

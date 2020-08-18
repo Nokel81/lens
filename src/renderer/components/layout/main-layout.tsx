@@ -1,17 +1,17 @@
-import "./main-layout.scss";
+import "./main-layout.scss"
 
-import React from "react";
-import { observable, reaction } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { matchPath, RouteProps } from "react-router-dom";
-import { createStorage, cssNames } from "../../utils";
-import { Tab, Tabs } from "../tabs";
-import { Sidebar } from "./sidebar";
-import { ErrorBoundary } from "../error-boundary";
-import { Dock } from "../dock";
-import { navigate, navigation } from "../../navigation";
-import { themeStore } from "../../theme.store";
-import { getHostedCluster } from "../../../common/cluster-store";
+import React from "react"
+import { observable, reaction } from "mobx"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { matchPath, RouteProps } from "react-router-dom"
+import { StorageHelper, cssNames } from "../../utils"
+import { Tab, Tabs } from "../tabs"
+import { Sidebar } from "./sidebar"
+import { ErrorBoundary } from "../error-boundary"
+import { Dock } from "../dock"
+import { navigate, navigation } from "../../navigation"
+import { themeStore } from "../../theme.store"
+import { getHostedCluster } from "../../../common/cluster-store"
 
 export interface TabRoute extends RouteProps {
   title: React.ReactNode;
@@ -29,26 +29,26 @@ interface Props {
 
 @observer
 export class MainLayout extends React.Component<Props> {
-  public storage = createStorage("main_layout", { pinnedSidebar: true });
+  public storage = new StorageHelper("main_layout", { pinnedSidebar: true });
 
   @observable isPinned = this.storage.get().pinnedSidebar;
   @observable isAccessible = true;
 
   @disposeOnUnmount syncPinnedStateWithStorage = reaction(
     () => this.isPinned,
-    isPinned => this.storage.merge({ pinnedSidebar: isPinned })
+    isPinned => this.storage.merge({ pinnedSidebar: isPinned }),
   );
 
-  toggleSidebar = () => {
-    this.isPinned = !this.isPinned;
-    this.isAccessible = false;
-    setTimeout(() => this.isAccessible = true, 250);
+  toggleSidebar = (): void => {
+    this.isPinned = !this.isPinned
+    this.isAccessible = false
+    setTimeout(() => this.isAccessible = true, 250)
   }
 
-  render() {
-    const { className, contentClass, headerClass, tabs, footer, footerClass, children } = this.props;
-    const { contextName: clusterName } = getHostedCluster();
-    const routePath = navigation.location.pathname;
+  render(): React.ReactNode {
+    const { className, contentClass, headerClass, tabs, footer, footerClass, children } = this.props
+    const { contextName: clusterName } = getHostedCluster()
+    const routePath = navigation.location.pathname
     return (
       <div className={cssNames("MainLayout", className, themeStore.activeTheme.type)}>
         <header className={cssNames("flex gaps align-center", headerClass)}>
@@ -66,8 +66,8 @@ export class MainLayout extends React.Component<Props> {
         {tabs && (
           <Tabs center onChange={url => navigate(url)}>
             {tabs.map(({ title, path, url, ...routeProps }) => {
-              const isActive = !!matchPath(routePath, { path, ...routeProps });
-              return <Tab key={url} label={title} value={url} active={isActive}/>
+              const isActive = !!matchPath(routePath, { path, ...routeProps })
+              return <Tab key={url} label={title} value={url} active={isActive} />
             })}
           </Tabs>
         )}
@@ -79,9 +79,9 @@ export class MainLayout extends React.Component<Props> {
         </main>
 
         <footer className={footerClass}>
-          {footer === undefined ? <Dock/> : footer}
+          {footer === undefined ? <Dock /> : footer}
         </footer>
       </div>
-    );
+    )
   }
 }

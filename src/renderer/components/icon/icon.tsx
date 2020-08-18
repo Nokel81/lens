@@ -1,11 +1,11 @@
 import './icon.scss'
 
-import React, { ReactNode } from "react";
-import { findDOMNode } from "react-dom";
-import { NavLink } from "react-router-dom";
-import { LocationDescriptor } from 'history';
-import { autobind, cssNames } from "../../utils";
-import { TooltipDecoratorProps, withTooltip } from "../tooltip";
+import React, { ReactNode } from "react"
+import { findDOMNode } from "react-dom"
+import { NavLink } from "react-router-dom"
+import { LocationDescriptor } from 'history'
+import { autobind, cssNames } from "../../utils"
+import { TooltipDecoratorProps, withTooltip } from "../tooltip"
 import isNumber from "lodash/isNumber"
 
 export interface IconProps extends React.HTMLAttributes<any>, TooltipDecoratorProps {
@@ -29,38 +29,39 @@ export class Icon extends React.PureComponent<IconProps> {
     focusable: true,
   };
 
-  get isInteractive() {
-    const { interactive, onClick, href, link } = this.props;
-    return interactive || !!(onClick || href || link);
+  get isInteractive(): boolean {
+    const { interactive, onClick, href, link } = this.props
+    return interactive || !!(onClick || href || link)
   }
 
   @autobind()
-  onClick(evt: React.MouseEvent) {
+  onClick(evt: React.MouseEvent): void {
     if (this.props.disabled) {
-      return;
+      return
     }
     if (this.props.onClick) {
-      this.props.onClick(evt);
+      this.props.onClick(evt)
     }
   }
 
   @autobind()
-  onKeyDown(evt: React.KeyboardEvent<any>) {
+  onKeyDown(evt: React.KeyboardEvent<any>): void {
     switch (evt.nativeEvent.code) {
-    case "Space":
-    case "Enter":
-      const icon = findDOMNode(this) as HTMLElement;
-      setTimeout(() => icon.click());
-      evt.preventDefault();
-      break;
+      case "Space":
+      case "Enter":
+        // eslint-disable-next-line react/no-find-dom-node
+        const icon = findDOMNode(this) as HTMLElement
+        setTimeout(() => icon.click())
+        evt.preventDefault()
+        break
     }
     if (this.props.onKeyDown) {
-      this.props.onKeyDown(evt);
+      this.props.onKeyDown(evt)
     }
   }
 
-  render() {
-    const { isInteractive } = this;
+  render(): React.ReactNode {
+    const { isInteractive } = this
     const {
       // skip passing props to icon's html element
       className, href, link, material, svg, size, small, big,
@@ -69,30 +70,30 @@ export class Icon extends React.PureComponent<IconProps> {
       onClick: _onClick,
       onKeyDown: _onKeyDown,
       ...elemProps
-    } = this.props;
+    } = this.props
 
-    let iconContent: ReactNode;
+    let iconContent: ReactNode
     const iconProps: Partial<IconProps> = {
       className: cssNames("Icon", className,
         { svg, material, interactive: isInteractive, disabled, sticker, active, focusable },
-        !size ? { small, big } : {}
+        !size ? { small, big } : {},
       ),
       onClick: isInteractive ? this.onClick : undefined,
       onKeyDown: isInteractive ? this.onKeyDown : undefined,
       tabIndex: isInteractive && focusable && !disabled ? 0 : undefined,
       style: size ? { "--size": size + (isNumber(size) ? "px" : "") } as React.CSSProperties : undefined,
-      ...elemProps
-    };
+      ...elemProps,
+    }
 
     // render as inline svg-icon
     if (svg) {
-      const svgIconText = require("!!raw-loader!./" + svg + ".svg").default;
-      iconContent = <span className="icon" dangerouslySetInnerHTML={{ __html: svgIconText }}/>;
+      const svgIconText = require("!!raw-loader!./" + svg + ".svg").default
+      iconContent = <span className="icon" dangerouslySetInnerHTML={{ __html: svgIconText }} />
     }
 
     // render as material-icon
     if (material) {
-      iconContent = <span className="icon">{material}</span>;
+      iconContent = <span className="icon">{material}</span>
     }
 
     // wrap icon's content passed from decorator
@@ -101,14 +102,14 @@ export class Icon extends React.PureComponent<IconProps> {
         {iconContent}
         {children}
       </>
-    );
+    )
 
     // render icon type
     if (link) {
-      return <NavLink {...iconProps} to={link}/>
+      return <NavLink {...iconProps} to={link} />
     }
     if (href) {
-      return <a {...iconProps} href={href}/>
+      return <a {...iconProps} href={href} />
     }
     return <i {...iconProps} />
   }

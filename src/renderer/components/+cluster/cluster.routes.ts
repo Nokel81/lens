@@ -1,8 +1,8 @@
-import { RouteProps } from "react-router";
-import { buildURL } from "../../navigation";
+import { RouteProps } from "react-router"
+import { buildURL } from "../../navigation"
 
 export const clusterRoute: RouteProps = {
-  path: "/cluster"
+  path: "/cluster",
 }
 
 export const clusterURL = buildURL(clusterRoute.path)

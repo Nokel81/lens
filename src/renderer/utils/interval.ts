@@ -2,31 +2,32 @@
 
 type IntervalCallback = (count: number) => void;
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function interval(timeSec = 1, callback: IntervalCallback, autoRun = false) {
-  let count = 0;
-  let timer = -1;
-  let isRunning = false;
+  let count = 0
+  let timer = -1
+  let isRunning = false
   const intervalManager = {
-    start: function (runImmediately = false) {
-      if (isRunning) return;
-      const tick = () => callback(++count);
-      isRunning = true;
-      timer = window.setInterval(tick, 1000 * timeSec);
-      if (runImmediately) tick();
+    start (runImmediately = false) {
+      if (isRunning) return
+      const tick = () => callback(++count)
+      isRunning = true
+      timer = window.setInterval(tick, 1000 * timeSec)
+      if (runImmediately) tick()
     },
-    stop: function () {
-      count = 0;
-      isRunning = false;
-      clearInterval(timer);
+    stop () {
+      count = 0
+      isRunning = false
+      clearInterval(timer)
     },
-    restart: function (runImmediately = false) {
-      this.stop();
-      this.start(runImmediately);
+    restart (runImmediately = false) {
+      this.stop()
+      this.start(runImmediately)
     },
     get isRunning() {
-      return isRunning;
-    }
+      return isRunning
+    },
   }
-  if (autoRun) intervalManager.start();
-  return intervalManager;
+  if (autoRun) intervalManager.start()
+  return intervalManager
 }

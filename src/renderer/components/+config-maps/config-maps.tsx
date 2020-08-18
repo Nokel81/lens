@@ -1,15 +1,15 @@
 import "./config-maps.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { RouteComponentProps } from "react-router";
-import { configMapsStore } from "./config-maps.store";
-import { ConfigMap, configMapApi } from "../../api/endpoints/configmap.api";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { KubeObjectListLayout } from "../kube-object";
-import { IConfigMapsRouteParams } from "./config-maps.route";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { RouteComponentProps } from "react-router"
+import { configMapsStore } from "./config-maps.store"
+import { ConfigMap, configMapApi } from "../../api/endpoints/configmap.api"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { KubeObjectListLayout } from "../kube-object"
+import { ConfigMapsRouteParams } from "./config-maps.route"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -18,12 +18,12 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<IConfigMapsRouteParams> {
+interface Props extends RouteComponentProps<ConfigMapsRouteParams> {
 }
 
 @observer
 export class ConfigMaps extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <KubeObjectListLayout
         className="ConfigMaps" store={configMapsStore}
@@ -35,7 +35,7 @@ export class ConfigMaps extends React.Component<Props> {
         }}
         searchFilters={[
           (item: ConfigMap) => item.getSearchFields(),
-          (item: ConfigMap) => item.getKeys()
+          (item: ConfigMap) => item.getKeys(),
         ]}
         renderHeaderTitle={<Trans>Config Maps</Trans>}
         renderTableHeader={[
@@ -51,16 +51,16 @@ export class ConfigMaps extends React.Component<Props> {
           configMap.getAge(),
         ]}
         renderItemMenu={(item: ConfigMap) => {
-          return <ConfigMapMenu object={item}/>
+          return <ConfigMapMenu object={item} />
         }}
       />
-    );
+    )
   }
 }
 
-export function ConfigMapMenu(props: KubeObjectMenuProps<ConfigMap>) {
+export function ConfigMapMenu(props: KubeObjectMenuProps<ConfigMap>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 

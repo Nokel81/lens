@@ -1,21 +1,21 @@
-import "./cluster-settings.scss";
+import "./cluster-settings.scss"
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { observer } from "mobx-react";
-import { Features } from "./features";
-import { Removal } from "./removal";
-import { Status } from "./status";
-import { General } from "./general";
-import { getHostedCluster } from "../../../common/cluster-store";
-import { WizardLayout } from "../layout/wizard-layout";
-import { ClusterIcon } from "../cluster-icon";
-import { Icon } from "../icon";
+import React from "react"
+import { Link } from "react-router-dom"
+import { observer } from "mobx-react"
+import { Features } from "./features"
+import { Removal } from "./removal"
+import { Status } from "./status"
+import { General } from "./general"
+import { getHostedCluster } from "../../../common/cluster-store"
+import { WizardLayout } from "../layout/wizard-layout"
+import { ClusterIcon } from "../cluster-icon"
+import { Icon } from "../icon"
 
 @observer
 export class ClusterSettings extends React.Component {
-  render() {
-    const cluster = getHostedCluster();
+  render(): React.ReactNode {
+    const cluster = getHostedCluster()
     const header = (
       <>
         <ClusterIcon
@@ -28,7 +28,7 @@ export class ClusterSettings extends React.Component {
           <Icon material="close" big />
         </Link>
       </>
-    );
+    )
     return (
       <WizardLayout header={header} className="ClusterSettings">
         <div className="settings-wrapper">
@@ -38,6 +38,6 @@ export class ClusterSettings extends React.Component {
           <Removal cluster={cluster}></Removal>
         </div>
       </WizardLayout>
-    );
+    )
   }
 }

@@ -1,12 +1,14 @@
-import { useState } from "react";
-import { createStorage, IStorageHelperOptions } from "../utils";
+import { useState } from "react"
+import { StorageHelper, StorageHelperOptions } from "../utils"
 
-export function useStorage<T>(key: string, initialValue?: T, options?: IStorageHelperOptions) {
-  const storage = createStorage(key, initialValue, options);
-  const [storageValue, setStorageValue] = useState(storage.get());
+export type ValueUpdater<T> = (value: T) => void;
+
+export function useStorage<T>(key: string, initialValue?: T, options?: StorageHelperOptions): [T, ValueUpdater<T>] {
+  const storage = new StorageHelper<T>(key, initialValue, options)
+  const [storageValue, setStorageValue] = useState(storage.get())
   const setValue = (value: T) => {
-    setStorageValue(value);
-    storage.set(value);
-  };
-  return [storageValue, setValue] as [T, (value: T) => void];
+    setStorageValue(value)
+    storage.set(value)
+  }
+  return [storageValue, setValue]
 }

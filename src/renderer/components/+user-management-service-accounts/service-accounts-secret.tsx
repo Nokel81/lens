@@ -1,11 +1,11 @@
 import "./service-accounts-secret.scss"
 
-import React from "react";
-import moment from "moment";
-import { Trans } from "@lingui/macro";
-import { Icon } from "../icon";
-import { Secret } from "../../api/endpoints/secret.api";
-import { prevDefault } from "../../utils";
+import React from "react"
+import moment from "moment"
+import { Trans } from "@lingui/macro"
+import { Icon } from "../icon"
+import { Secret } from "../../api/endpoints/secret.api"
+import { prevDefault } from "../../utils"
 
 interface Props {
   secret: Secret;
@@ -20,7 +20,7 @@ export class ServiceAccountsSecret extends React.Component<Props, State> {
     showToken: false,
   }
 
-  renderSecretValue() {
+  renderSecretValue(): React.ReactNode {
     const { secret } = this.props
     const { showToken } = this.state
     return (
@@ -31,6 +31,7 @@ export class ServiceAccountsSecret extends React.Component<Props, State> {
             <Icon
               small material="lock_open"
               tooltip={<Trans>Show value</Trans>}
+              // eslint-disable-next-line react/no-set-state
               onClick={prevDefault(() => this.setState({ showToken: true }))}
             />
           </>
@@ -42,8 +43,8 @@ export class ServiceAccountsSecret extends React.Component<Props, State> {
     )
   }
 
-  render() {
-    const { metadata: { name, creationTimestamp }, type } = this.props.secret;
+  render(): React.ReactNode {
+    const { metadata: { name, creationTimestamp }, type } = this.props.secret
     return (
       <div className="ServiceAccountsSecret box grow-fixed">
         <div className="secret-row">

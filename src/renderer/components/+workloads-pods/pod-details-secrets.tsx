@@ -1,11 +1,11 @@
-import "./pod-details-secrets.scss";
+import "./pod-details-secrets.scss"
 
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import { autorun, observable } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { Pod, Secret, secretsApi } from "../../api/endpoints";
-import { getDetailsUrl } from "../../navigation";
+import React, { Component } from "react"
+import { Link } from "react-router-dom"
+import { autorun, observable } from "mobx"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { Pod, Secret, secretsApi } from "../../api/endpoints"
+import { getDetailsUrl } from "../../navigation"
 
 interface Props {
   pod: Pod;
@@ -17,16 +17,16 @@ export class PodDetailsSecrets extends Component<Props> {
 
   @disposeOnUnmount
   secretsLoader = autorun(async () => {
-    const { pod } = this.props;
+    const { pod } = this.props
     this.secrets = await Promise.all(
       pod.getSecrets().map(secretName => secretsApi.get({
         name: secretName,
         namespace: pod.getNs(),
-      }))
-    );
+      })),
+    )
   });
 
-  render() {
+  render(): React.ReactNode {
     return (
       <div className="PodDetailsSecrets">
         {
@@ -35,10 +35,10 @@ export class PodDetailsSecrets extends Component<Props> {
               <Link key={secret.getId()} to={getDetailsUrl(secret.selfLink)}>
                 {secret.getName()}
               </Link>
-            );
+            )
           })
         }
       </div>
-    );
+    )
   }
 }

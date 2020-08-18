@@ -1,19 +1,19 @@
-import "./service-accounts.scss";
+import "./service-accounts.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { ServiceAccount, serviceAccountsApi } from "../../api/endpoints/service-accounts.api";
-import { RouteComponentProps } from "react-router";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu";
-import { MenuItem } from "../menu";
-import { openServiceAccountKubeConfig } from "../kubeconfig-dialog";
-import { Icon } from "../icon";
-import { KubeObjectListLayout } from "../kube-object";
-import { IServiceAccountsRouteParams } from "../+user-management";
-import { serviceAccountsStore } from "./service-accounts.store";
-import { CreateServiceAccountDialog } from "./create-service-account-dialog";
-import { apiManager } from "../../api/api-manager";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { ServiceAccount, serviceAccountsApi } from "../../api/endpoints/service-accounts.api"
+import { RouteComponentProps } from "react-router"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../kube-object/kube-object-menu"
+import { MenuItem } from "../menu"
+import { openServiceAccountKubeConfig } from "../kubeconfig-dialog"
+import { Icon } from "../icon"
+import { KubeObjectListLayout } from "../kube-object"
+import { ServiceAccountsRouteParams } from "../+user-management"
+import { serviceAccountsStore } from "./service-accounts.store"
+import { CreateServiceAccountDialog } from "./create-service-account-dialog"
+import { apiManager } from "../../api/api-manager"
 
 enum sortBy {
   name = "name",
@@ -21,12 +21,12 @@ enum sortBy {
   age = "age",
 }
 
-interface Props extends RouteComponentProps<IServiceAccountsRouteParams> {
+interface Props extends RouteComponentProps<ServiceAccountsRouteParams> {
 }
 
 @observer
 export class ServiceAccounts extends React.Component<Props> {
-  render() {
+  render(): React.ReactNode {
     return (
       <>
         <KubeObjectListLayout
@@ -51,25 +51,25 @@ export class ServiceAccounts extends React.Component<Props> {
             account.getAge(),
           ]}
           renderItemMenu={(item: ServiceAccount) => {
-            return <ServiceAccountMenu object={item}/>
+            return <ServiceAccountMenu object={item} />
           }}
           addRemoveButtons={{
             onAdd: () => CreateServiceAccountDialog.open(),
             addTooltip: <Trans>Create new Service Account</Trans>,
           }}
         />
-        <CreateServiceAccountDialog/>
+        <CreateServiceAccountDialog />
       </>
     )
   }
 }
 
-export function ServiceAccountMenu(props: KubeObjectMenuProps<ServiceAccount>) {
-  const { object, toolbar } = props;
+export function ServiceAccountMenu(props: KubeObjectMenuProps<ServiceAccount>): JSX.Element {
+  const { object, toolbar } = props
   return (
     <KubeObjectMenu {...props}>
       <MenuItem onClick={() => openServiceAccountKubeConfig(object)}>
-        <Icon material="insert_drive_file" title="Kubeconfig File" interactive={toolbar}/>
+        <Icon material="insert_drive_file" title="Kubeconfig File" interactive={toolbar} />
         <span className="title"><Trans>Kubeconfig</Trans></span>
       </MenuItem>
     </KubeObjectMenu>

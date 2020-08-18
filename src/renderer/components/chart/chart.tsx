@@ -1,10 +1,10 @@
-import "./chart.scss";
-import React from "react";
-import ChartJS from "chart.js";
-import { isEqual, remove } from "lodash";
-import { cssNames } from "../../utils";
-import { StatusBrick } from "../status-brick";
-import { Badge } from "../badge";
+import "./chart.scss"
+import React from "react"
+import ChartJS from "chart.js"
+import { isEqual, remove } from "lodash"
+import { cssNames } from "../../utils"
+import { StatusBrick } from "../status-brick"
+import { Badge } from "../badge"
 
 export interface ChartData extends ChartJS.ChartData {
   datasets?: ChartDataSets[];
@@ -45,11 +45,11 @@ const defaultProps: Partial<ChartProps> = {
   showLegend: true,
   legendPosition: "bottom",
   plugins: [],
-  redraw: false
-};
+  redraw: false,
+}
 
 export class Chart extends React.Component<ChartProps> {
-  static defaultProps = defaultProps as object;
+  static defaultProps = defaultProps as ChartProps;
 
   private canvas = React.createRef<HTMLCanvasElement>()
   private chart: ChartJS
@@ -57,13 +57,13 @@ export class Chart extends React.Component<ChartProps> {
   // We clone new data prop into currentChartData to compare props and prevProps
   private currentChartData: ChartData
 
-  componentDidMount() {
+  componentDidMount(): void {
     const { showChart } = this.props
     if (!showChart) return
     this.renderChart()
   }
 
-  componentDidUpdate(prevProps: ChartProps) {
+  componentDidUpdate(prevProps: ChartProps): void {
     const { data, showChart, redraw } = this.props
     if (redraw) {
       this.chart.destroy()
@@ -76,19 +76,19 @@ export class Chart extends React.Component<ChartProps> {
     }
   }
 
-  memoizeDataProps() {
+  memoizeDataProps(): void {
     const { data } = this.props
     this.currentChartData = {
       ...data,
       datasets: data.datasets && data.datasets.map(set => {
         return {
-          ...set
+          ...set,
         }
-      })
+      }),
     }
   }
 
-  updateChart() {
+  updateChart(): void {
     const { options } = this.props
 
     if (!this.chart) return
@@ -102,7 +102,7 @@ export class Chart extends React.Component<ChartProps> {
 
     // Remove stale datasets if they're not available in nextDatasets
     if (datasets.length > nextDatasets.length) {
-      const sets = [...datasets];
+      const sets = [...datasets]
       sets.forEach(set => {
         if (!nextDatasets.find(next => next.id === set.id)) {
           remove(datasets, (item => item.id === set.id))
@@ -124,7 +124,7 @@ export class Chart extends React.Component<ChartProps> {
         const { data, ...props } = next
         datasets[index] = {
           ...datasets[index],
-          ...props
+          ...props,
         }
       } else {
         datasets[datasetIndex] = next
@@ -133,7 +133,7 @@ export class Chart extends React.Component<ChartProps> {
     this.chart.update()
   }
 
-  renderLegend() {
+  renderLegend(): React.ReactNode {
     if (!this.props.showLegend) return null
     const { data, legendColors } = this.props
     const { labels, datasets } = data
@@ -143,7 +143,7 @@ export class Chart extends React.Component<ChartProps> {
         className="flex gaps align-center"
         label={(
           <div>
-            <StatusBrick style={{ backgroundColor: color }}/>
+            <StatusBrick style={{ backgroundColor: color }} />
             <span>{title}</span>
           </div>
         )}
@@ -158,13 +158,13 @@ export class Chart extends React.Component<ChartProps> {
           return labelElem(label, color)
         })}
         {!labels && datasets.map(({ borderColor, label, tooltip }) =>
-          labelElem(label, borderColor as any, tooltip)
+          labelElem(label, borderColor as any, tooltip),
         )}
       </div>
     )
   }
 
-  renderChart() {
+  renderChart(): void {
     const { type, options, plugins } = this.props
     this.memoizeDataProps()
     this.chart = new ChartJS(this.canvas.current, {
@@ -173,28 +173,28 @@ export class Chart extends React.Component<ChartProps> {
       options: {
         ...options,
         legend: {
-          display: false
+          display: false,
         },
       },
       data: this.currentChartData,
     })
   }
 
-  render() {
+  render(): React.ReactNode {
     const { width, height, showChart, title, className } = this.props
     return (
       <>
         <div className={cssNames("Chart", className)}>
           {title && <div className="chart-title">{title}</div>}
           {showChart &&
-          <div className="chart-container">
-            <canvas
-              ref={this.canvas}
-              width={width}
-              height={height}
-            />
-            <div className="chartjs-tooltip flex column"></div>
-          </div>
+            <div className="chart-container">
+              <canvas
+                ref={this.canvas}
+                width={width}
+                height={height}
+              />
+              <div className="chartjs-tooltip flex column"></div>
+            </div>
           }
           {this.renderLegend()}
         </div>

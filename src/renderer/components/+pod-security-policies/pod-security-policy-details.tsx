@@ -1,15 +1,15 @@
-import "./pod-security-policy-details.scss";
+import "./pod-security-policy-details.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { DrawerItem, DrawerTitle } from "../drawer";
-import { KubeObjectDetailsProps } from "../kube-object";
-import { PodSecurityPolicy, pspApi } from "../../api/endpoints";
-import { Badge } from "../badge";
-import { Table, TableCell, TableHead, TableRow } from "../table";
-import { apiManager } from "../../api/api-manager";
-import { KubeObjectMeta } from "../kube-object/kube-object-meta";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { DrawerItem, DrawerTitle } from "../drawer"
+import { KubeObjectDetailsProps } from "../kube-object"
+import { PodSecurityPolicy, pspApi } from "../../api/endpoints"
+import { Badge } from "../badge"
+import { Table, TableCell, TableHead, TableRow } from "../table"
+import { apiManager } from "../../api/api-manager"
+import { KubeObjectMeta } from "../kube-object/kube-object-meta"
 
 interface Props extends KubeObjectDetailsProps<PodSecurityPolicy> {
 }
@@ -21,19 +21,19 @@ export class PodSecurityPolicyDetails extends React.Component<Props> {
     group: {
       rule: string;
       ranges?: { max: number; min: number }[];
-    }) {
-    if (!group) return;
-    const { rule, ranges } = group;
+    }): JSX.Element {
+    if (!group) return
+    const { rule, ranges } = group
     return (
       <>
-        <DrawerTitle title={title}/>
+        <DrawerTitle title={title} />
         <DrawerItem name={<Trans>Rule</Trans>}>
           {rule}
         </DrawerItem>
         {ranges && (
           <DrawerItem name={<Trans>Ranges (Min-Max)</Trans>} labelsOnly>
             {ranges.map(({ min, max }, index) => {
-              return <Badge key={index} label={`${min} - ${max}`}/>
+              return <Badge key={index} label={`${min} - ${max}`} />
             })}
           </DrawerItem>
         )}
@@ -41,20 +41,20 @@ export class PodSecurityPolicyDetails extends React.Component<Props> {
     )
   }
 
-  render() {
-    const { object: psp } = this.props;
+  render(): React.ReactNode {
+    const { object: psp } = this.props
     if (!psp) {
-      return null;
+      return null
     }
     const {
       allowedHostPaths, allowedCapabilities, allowedCSIDrivers, allowedFlexVolumes, allowedProcMountTypes,
-      allowedUnsafeSysctls, allowPrivilegeEscalation, defaultAddCapabilities, defaultAllowPrivilegeEscalation,
-      forbiddenSysctls, fsGroup, hostIPC, hostNetwork, hostPID, hostPorts, privileged, readOnlyRootFilesystem,
-      requiredDropCapabilities, runAsGroup, runAsUser, runtimeClass, seLinux, supplementalGroups, volumes
-    } = psp.spec;
+      allowedUnsafeSysctls, allowPrivilegeEscalation, defaultAddCapabilities, forbiddenSysctls, fsGroup,
+      hostIPC, hostNetwork, hostPID, hostPorts, privileged, readOnlyRootFilesystem, requiredDropCapabilities,
+      runAsGroup, runAsUser, runtimeClass, seLinux, supplementalGroups, volumes,
+    } = psp.spec
     return (
       <div className="PodSecurityPolicyDetails">
-        <KubeObjectMeta object={psp}/>
+        <KubeObjectMeta object={psp} />
 
         {allowedCapabilities && (
           <DrawerItem name={<Trans>Allowed Capabilities</Trans>}>
@@ -137,14 +137,14 @@ export class PodSecurityPolicyDetails extends React.Component<Props> {
         {hostPorts && (
           <DrawerItem name={<Trans>Host Ports (Min-Max)</Trans>} labelsOnly>
             {hostPorts.map(({ min, max }, index) => {
-              return <Badge key={index} label={`${min} - ${max}`}/>
+              return <Badge key={index} label={`${min} - ${max}`} />
             })}
           </DrawerItem>
         )}
 
         {allowedHostPaths && (
           <>
-            <DrawerTitle title={<Trans>Allowed Host Paths</Trans>}/>
+            <DrawerTitle title={<Trans>Allowed Host Paths</Trans>} />
             <Table>
               <TableHead>
                 <TableCell><Trans>Path Prefix</Trans></TableCell>
@@ -169,7 +169,7 @@ export class PodSecurityPolicyDetails extends React.Component<Props> {
 
         {runtimeClass && (
           <>
-            <DrawerTitle title={<Trans>Runtime Class</Trans>}/>
+            <DrawerTitle title={<Trans>Runtime Class</Trans>} />
             <DrawerItem name={<Trans>Allowed Runtime Class Names</Trans>}>
               {(runtimeClass.allowedRuntimeClassNames || []).join(", ") || "-"}
             </DrawerItem>
@@ -181,7 +181,7 @@ export class PodSecurityPolicyDetails extends React.Component<Props> {
 
         {seLinux && (
           <>
-            <DrawerTitle title={<Trans>Se Linux</Trans>}/>
+            <DrawerTitle title={<Trans>Se Linux</Trans>} />
             <DrawerItem name={<Trans>Rule</Trans>}>
               {seLinux.rule}
             </DrawerItem>
@@ -211,4 +211,4 @@ export class PodSecurityPolicyDetails extends React.Component<Props> {
 
 apiManager.registerViews(pspApi, {
   Details: PodSecurityPolicyDetails,
-});
+})

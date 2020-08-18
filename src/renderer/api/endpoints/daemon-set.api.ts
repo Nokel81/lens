@@ -1,8 +1,8 @@
-import get from "lodash/get";
-import { IPodContainer } from "./pods.api";
-import { IAffinity, WorkloadKubeObject } from "../workload-kube-object";
-import { autobind } from "../../utils";
-import { KubeApi } from "../kube-api";
+import get from "lodash/get"
+import { PodContainer } from "./pods.api"
+import { Affinity, WorkloadKubeObject } from "../workload-kube-object"
+import { autobind } from "../../utils"
+import { KubeApi } from "../kube-api"
 
 @autobind()
 export class DaemonSet extends WorkloadKubeObject {
@@ -22,17 +22,17 @@ export class DaemonSet extends WorkloadKubeObject {
         };
       };
       spec: {
-        containers: IPodContainer[];
-        initContainers?: IPodContainer[];
+        containers: PodContainer[];
+        initContainers?: PodContainer[];
         restartPolicy: string;
         terminationGracePeriodSeconds: number;
         dnsPolicy: string;
         hostPID: boolean;
-        affinity?: IAffinity;
+        affinity?: Affinity;
         nodeSelector?: {
           [selector: string]: string;
         };
-        securityContext: {};
+        securityContext: Record<string, any>;
         schedulerName: string;
         tolerations: {
           key: string;
@@ -61,9 +61,9 @@ export class DaemonSet extends WorkloadKubeObject {
     numberUnavailable: number;
   }
 
-  getImages() {
-    const containers: IPodContainer[] = get(this, "spec.template.spec.containers", [])
-    const initContainers: IPodContainer[] = get(this, "spec.template.spec.initContainers", [])
+  getImages(): string[] {
+    const containers: PodContainer[] = get(this, "spec.template.spec.containers", [])
+    const initContainers: PodContainer[] = get(this, "spec.template.spec.initContainers", [])
     return [...containers, ...initContainers].map(container => container.image)
   }
 }
@@ -73,4 +73,4 @@ export const daemonSetApi = new KubeApi({
   apiBase: "/apis/apps/v1/daemonsets",
   isNamespaced: true,
   objectConstructor: DaemonSet,
-});
+})

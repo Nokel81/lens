@@ -1,7 +1,7 @@
 import "./wizard-layout.scss"
-import React from "react";
-import { observer } from "mobx-react";
-import { cssNames, IClassName } from "../../utils";
+import React from "react"
+import { observer } from "mobx-react"
+import { cssNames, IClassName } from "../../utils"
 
 interface Props {
   className?: IClassName;
@@ -14,8 +14,8 @@ interface Props {
 
 @observer
 export class WizardLayout extends React.Component<Props> {
-  render() {
-    const { className, contentClass, infoPanelClass, infoPanel, header, headerClass, children: content } = this.props;
+  render(): React.ReactNode {
+    const { className, contentClass, infoPanelClass, infoPanel, header, headerClass, children: content } = this.props
     return (
       <div className={cssNames("WizardLayout", className)}>
         {header && (

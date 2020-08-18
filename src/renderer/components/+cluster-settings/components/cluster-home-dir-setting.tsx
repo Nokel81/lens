@@ -1,9 +1,9 @@
-import React from "react";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { Cluster } from "../../../../main/cluster";
-import { Input } from "../../input";
-import { SubTitle } from "../../layout/sub-title";
+import React from "react"
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { Cluster } from "../../../../main/cluster"
+import { Input } from "../../input"
+import { SubTitle } from "../../layout/sub-title"
 
 interface Props {
   cluster: Cluster;
@@ -13,18 +13,18 @@ interface Props {
 export class ClusterHomeDirSetting extends React.Component<Props> {
   @observable directory = this.props.cluster.preferences.terminalCWD || "";
 
-  save = () => {
-    this.props.cluster.preferences.terminalCWD = this.directory;
+  save = (): void => {
+    this.props.cluster.preferences.terminalCWD = this.directory
   };
 
-  onChange = (value: string) => {
-    this.directory = value;
+  onChange = (value: string): void => {
+    this.directory = value
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <>
-        <SubTitle title="Working Directory"/>
+        <SubTitle title="Working Directory" />
         <p>Terminal working directory.</p>
         <Input
           theme="round-black"
@@ -38,6 +38,6 @@ export class ClusterHomeDirSetting extends React.Component<Props> {
           this is used as the current working directory (cwd) for the shell process.
         </span>
       </>
-    );
+    )
   }
 }

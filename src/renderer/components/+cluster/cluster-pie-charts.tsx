@@ -1,21 +1,21 @@
-import "./cluster-pie-charts.scss";
+import "./cluster-pie-charts.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { t, Trans } from "@lingui/macro";
-import { useLingui } from "@lingui/react";
-import { clusterStore, MetricNodeRole } from "./cluster.store";
-import { Spinner } from "../spinner";
-import { Icon } from "../icon";
-import { nodesStore } from "../+nodes/nodes.store";
-import { ChartData, PieChart } from "../chart";
-import { ClusterNoMetrics } from "./cluster-no-metrics";
-import { bytesToUnits } from "../../utils";
-import { themeStore } from "../../theme.store";
-import { getMetricLastPoints } from "../../api/endpoints/metrics.api";
+import React from "react"
+import { observer } from "mobx-react"
+import { t, Trans } from "@lingui/macro"
+import { useLingui } from "@lingui/react"
+import { clusterStore, MetricNodeRole } from "./cluster.store"
+import { Spinner } from "../spinner"
+import { Icon } from "../icon"
+import { nodesStore } from "../+nodes/nodes.store"
+import { ChartData, PieChart } from "../chart"
+import { ClusterNoMetrics } from "./cluster-no-metrics"
+import { bytesToUnits } from "../../utils"
+import { themeStore } from "../../theme.store"
+import { getMetricLastPoints } from "../../api/endpoints/metrics.api"
 
 export const ClusterPieCharts = observer(() => {
-  const { i18n } = useLingui();
+  const { i18n } = useLingui()
 
   const renderLimitWarning = () => {
     return (
@@ -23,19 +23,19 @@ export const ClusterPieCharts = observer(() => {
         <Icon material="info"/>
         <p><Trans>Specified limits are higher than node capacity!</Trans></p>
       </div>
-    );
+    )
   }
 
   const renderCharts = () => {
-    const data = getMetricLastPoints(clusterStore.metrics);
-    const { memoryUsage, memoryRequests, memoryCapacity, memoryLimits } = data;
-    const { cpuUsage, cpuRequests, cpuCapacity, cpuLimits } = data;
-    const { podUsage, podCapacity } = data;
-    const cpuLimitsOverload = cpuLimits > cpuCapacity;
-    const memoryLimitsOverload = memoryLimits > memoryCapacity;
-    const defaultColor = themeStore.activeTheme.colors.pieChartDefaultColor;
+    const data = getMetricLastPoints(clusterStore.metrics)
+    const { memoryUsage, memoryRequests, memoryCapacity, memoryLimits } = data
+    const { cpuUsage, cpuRequests, cpuCapacity, cpuLimits } = data
+    const { podUsage, podCapacity } = data
+    const cpuLimitsOverload = cpuLimits > cpuCapacity
+    const memoryLimitsOverload = memoryLimits > memoryCapacity
+    const defaultColor = themeStore.activeTheme.colors.pieChartDefaultColor
 
-    if (!memoryCapacity || !cpuCapacity || !podCapacity) return null;
+    if (!memoryCapacity || !cpuCapacity || !podCapacity) return null
     const cpuData: ChartData = {
       datasets: [
         {
@@ -47,7 +47,7 @@ export const ClusterPieCharts = observer(() => {
             "#c93dce",
             defaultColor,
           ],
-          id: "cpuUsage"
+          id: "cpuUsage",
         },
         {
           data: [
@@ -58,7 +58,7 @@ export const ClusterPieCharts = observer(() => {
             "#4caf50",
             defaultColor,
           ],
-          id: "cpuRequests"
+          id: "cpuRequests",
         },
         {
           data: [
@@ -69,16 +69,16 @@ export const ClusterPieCharts = observer(() => {
             "#3d90ce",
             defaultColor,
           ],
-          id: "cpuLimits"
+          id: "cpuLimits",
         },
       ],
       labels: [
         i18n._(t`Usage`) + `: ${cpuUsage ? cpuUsage.toFixed(2) : "N/A"}`,
         i18n._(t`Requests`) + `: ${cpuRequests ? cpuRequests.toFixed(2) : "N/A"}`,
         i18n._(t`Limits`) + `: ${cpuLimits ? cpuLimits.toFixed(2) : "N/A"}`,
-        i18n._(t`Capacity`) + `: ${cpuCapacity || "N/A"}`
-      ]
-    };
+        i18n._(t`Capacity`) + `: ${cpuCapacity || "N/A"}`,
+      ],
+    }
     const memoryData: ChartData = {
       datasets: [
         {
@@ -90,7 +90,7 @@ export const ClusterPieCharts = observer(() => {
             "#c93dce",
             defaultColor,
           ],
-          id: "memoryUsage"
+          id: "memoryUsage",
         },
         {
           data: [
@@ -101,7 +101,7 @@ export const ClusterPieCharts = observer(() => {
             "#4caf50",
             defaultColor,
           ],
-          id: "memoryRequests"
+          id: "memoryRequests",
         },
         {
           data: [
@@ -112,7 +112,7 @@ export const ClusterPieCharts = observer(() => {
             "#3d90ce",
             defaultColor,
           ],
-          id: "memoryLimits"
+          id: "memoryLimits",
         },
       ],
       labels: [
@@ -120,8 +120,8 @@ export const ClusterPieCharts = observer(() => {
         i18n._(t`Requests`) + `: ${bytesToUnits(memoryRequests)}`,
         i18n._(t`Limits`) + `: ${bytesToUnits(memoryLimits)}`,
         i18n._(t`Capacity`) + `: ${bytesToUnits(memoryCapacity)}`,
-      ]
-    };
+      ],
+    }
     const podsData: ChartData = {
       datasets: [
         {
@@ -133,14 +133,14 @@ export const ClusterPieCharts = observer(() => {
             "#4caf50",
             defaultColor,
           ],
-          id: "podUsage"
+          id: "podUsage",
         },
       ],
       labels: [
         i18n._(t`Usage`) + `: ${podUsage || 0}`,
         i18n._(t`Capacity`) + `: ${podCapacity}`,
-      ]
-    };
+      ],
+    }
     return (
       <div className="NodeCharts flex justify-center box grow gaps">
         <div className="chart flex column align-center box grow">
@@ -167,38 +167,38 @@ export const ClusterPieCharts = observer(() => {
           />
         </div>
       </div>
-    );
+    )
   }
 
   const renderContent = () => {
-    const { masterNodes, workerNodes } = nodesStore;
-    const { metricNodeRole, metricsLoaded } = clusterStore;
-    const nodes = metricNodeRole === MetricNodeRole.MASTER ? masterNodes : workerNodes;
+    const { masterNodes, workerNodes } = nodesStore
+    const { metricNodeRole, metricsLoaded } = clusterStore
+    const nodes = metricNodeRole === MetricNodeRole.MASTER ? masterNodes : workerNodes
     if (!nodes.length) {
       return (
         <div className="empty flex column box grow align-center justify-center">
           <Icon material="info"/>
           <Trans>No Nodes Available.</Trans>
         </div>
-      );
+      )
     }
     if (!metricsLoaded) {
       return (
         <div className="flex justify-center align-center box grow empty">
           <Spinner/>
         </div>
-      );
+      )
     }
-    const { memoryCapacity, cpuCapacity, podCapacity } = getMetricLastPoints(clusterStore.metrics);
+    const { memoryCapacity, cpuCapacity, podCapacity } = getMetricLastPoints(clusterStore.metrics)
     if (!memoryCapacity || !cpuCapacity || !podCapacity) {
-      return <ClusterNoMetrics className="empty"/>;
+      return <ClusterNoMetrics className="empty"/>
     }
-    return renderCharts();
+    return renderCharts()
   }
 
   return (
     <div className="ClusterPieCharts flex">
       {renderContent()}
     </div>
-  );
+  )
 })

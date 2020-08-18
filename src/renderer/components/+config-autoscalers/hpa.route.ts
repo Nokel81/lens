@@ -1,11 +1,11 @@
-import { RouteProps } from "react-router";
-import { buildURL } from "../../navigation";
+import { RouteProps } from "react-router"
+import { buildURL } from "../../navigation"
 
 export const hpaRoute: RouteProps = {
-  path: "/hpa"
+  path: "/hpa",
 }
 
-export interface IHpaRouteParams {
+export interface HpaRouteParams {
 }
 
-export const hpaURL = buildURL<IHpaRouteParams>(hpaRoute.path)
+export const hpaURL = buildURL<HpaRouteParams>(hpaRoute.path)

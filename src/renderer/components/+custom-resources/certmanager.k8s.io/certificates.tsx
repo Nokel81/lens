@@ -1,16 +1,16 @@
 import "./certificates.scss"
 
-import React from "react";
-import { observer } from "mobx-react";
-import { Trans } from "@lingui/macro";
-import { KubeObjectMenu, KubeObjectMenuProps } from "../../kube-object/kube-object-menu";
-import { KubeObjectListLayout, KubeObjectListLayoutProps } from "../../kube-object";
-import { Certificate, certificatesApi } from "../../../api/endpoints/cert-manager.api";
-import { cssNames, stopPropagation } from "../../../utils";
-import { Link } from "react-router-dom";
-import { Badge } from "../../badge";
-import { apiManager } from "../../../api/api-manager";
-import { Spinner } from "../../spinner";
+import React from "react"
+import { observer } from "mobx-react"
+import { Trans } from "@lingui/macro"
+import { KubeObjectMenu, KubeObjectMenuProps } from "../../kube-object/kube-object-menu"
+import { KubeObjectListLayout, KubeObjectListLayoutProps } from "../../kube-object"
+import { Certificate, certificatesApi } from "../../../api/endpoints/cert-manager.api"
+import { cssNames, stopPropagation } from "../../../utils"
+import { Link } from "react-router-dom"
+import { Badge } from "../../badge"
+import { apiManager } from "../../../api/api-manager"
+import { Spinner } from "../../spinner"
 
 enum sortBy {
   name = "name",
@@ -24,10 +24,10 @@ enum sortBy {
 
 @observer
 export class Certificates extends React.Component<KubeObjectListLayoutProps> {
-  render() {
-    const { store = apiManager.getStore(certificatesApi), ...layoutProps } = this.props;
+  render(): React.ReactNode {
+    const { store = apiManager.getStore(certificatesApi), ...layoutProps } = this.props
     if (!store) {
-      return <Spinner center/>
+      return <Spinner center />
     }
     return (
       <KubeObjectListLayout
@@ -66,10 +66,10 @@ export class Certificates extends React.Component<KubeObjectListLayoutProps> {
             cert.getNs(),
             cert.getCommonName(),
             cert.getType(),
-            <Link to={cert.getIssuerDetailsUrl()} onClick={stopPropagation}>
+            <Link key={cert.getIssuerName()} to={cert.getIssuerDetailsUrl()} onClick={stopPropagation}>
               {cert.getIssuerName()}
             </Link>,
-            <Link to={cert.getSecretDetailsUrl()} onClick={stopPropagation}>
+            <Link key={cert.getSecretName()} to={cert.getSecretDetailsUrl()} onClick={stopPropagation}>
               {cert.getSecretName()}
             </Link>,
             cert.getAge(),
@@ -82,24 +82,24 @@ export class Certificates extends React.Component<KubeObjectListLayoutProps> {
                   className={cssNames({ [type.toLowerCase()]: isReady })}
                 />
               )
-            })
+            }),
           ]
         }}
         renderItemMenu={(item: Certificate) => {
-          return <CertificateMenu object={item}/>
+          return <CertificateMenu object={item} />
         }}
       />
-    );
+    )
   }
 }
 
-export function CertificateMenu(props: KubeObjectMenuProps<Certificate>) {
+export function CertificateMenu(props: KubeObjectMenuProps<Certificate>): JSX.Element {
   return (
-    <KubeObjectMenu {...props}/>
+    <KubeObjectMenu {...props} />
   )
 }
 
 apiManager.registerViews(certificatesApi, {
   List: Certificates,
-  Menu: CertificateMenu
+  Menu: CertificateMenu,
 })

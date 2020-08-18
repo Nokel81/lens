@@ -2,10 +2,175 @@
 // Reference: https://docs.cert-manager.io/en/latest/reference/index.html
 // API docs: https://docs.cert-manager.io/en/latest/reference/api-docs/index.html
 
-import { KubeObject } from "../kube-object";
-import { ISecretRef, secretsApi } from "./secret.api";
-import { getDetailsUrl } from "../../navigation";
-import { KubeApi } from "../kube-api";
+import { KubeObject } from "../kube-object"
+import { SecretRef, secretsApi } from "./secret.api"
+import { getDetailsUrl } from "../../navigation"
+import { KubeApi } from "../kube-api"
+
+interface IssuerCondition {
+  lastTransitionTime: string // 2019-06-05T07:10:42Z,
+  message: string // The ACME account was registered with the ACME server,
+  reason: string // ACMEAccountRegistered,
+  status: string // True,
+  type: string // Ready
+}
+
+interface IssuerConditionAnnotated extends IssuerCondition {
+  isReady: boolean;
+  tooltip: string;
+}
+
+export class Issuer extends KubeObject {
+  static kind = "Issuer"
+
+  spec: {
+    acme?: {
+      email: string;
+      server: string;
+      skipTLSVerify?: boolean;
+      privateKeySecretRef: SecretRef;
+      solvers?: {
+        dns01?: {
+          cnameStrategy: string;
+          acmedns?: {
+            host: string;
+            accountSecretRef: SecretRef;
+          };
+          akamai?: {
+            accessTokenSecretRef: SecretRef;
+            clientSecretSecretRef: SecretRef;
+            clientTokenSecretRef: SecretRef;
+            serviceConsumerDomain: string;
+          };
+          azuredns?: {
+            clientID: string;
+            clientSecretSecretRef: SecretRef;
+            hostedZoneName: string;
+            resourceGroupName: string;
+            subscriptionID: string;
+            tenantID: string;
+          };
+          clouddns?: {
+            project: string;
+            serviceAccountSecretRef: SecretRef;
+          };
+          cloudflare?: {
+            email: string;
+            apiKeySecretRef: SecretRef;
+          };
+          digitalocean?: {
+            tokenSecretRef: SecretRef;
+          };
+          rfc2136?: {
+            nameserver: string;
+            tsigAlgorithm: string;
+            tsigKeyName: string;
+            tsigSecretSecretRef: SecretRef;
+          };
+          route53?: {
+            accessKeyID: string;
+            hostedZoneID: string;
+            region: string;
+            secretAccessKeySecretRef: SecretRef;
+          };
+          webhook?: {
+            config: Record<string, any>; // arbitrary json
+            groupName: string;
+            solverName: string;
+          };
+        };
+        http01?: {
+          ingress: {
+            class: string;
+            name: string;
+            serviceType: string;
+          };
+        };
+        selector?: {
+          dnsNames: string[];
+          matchLabels: {
+            [label: string]: string;
+          };
+        };
+      }[];
+    };
+    ca?: {
+      secretName: string;
+    };
+    vault?: {
+      path: string;
+      server: string;
+      caBundle: string; // <base64 encoded caBundle PEM file>
+      auth: {
+        appRole: {
+          path: string;
+          roleId: string;
+          secretRef: SecretRef;
+        };
+      };
+    };
+    selfSigned?: Record<string, any>;
+    venafi?: {
+      zone: string;
+      cloud?: {
+        apiTokenSecretRef: SecretRef;
+      };
+      tpp?: {
+        url: string;
+        caBundle: string; // <base64 encoded caBundle PEM file>
+        credentialsRef: {
+          name: string;
+        };
+      };
+    };
+  }
+
+  status: {
+    acme?: {
+      uri: string;
+    };
+    conditions?: IssuerCondition[];
+  }
+
+  getType(): "ACME" | "CA" | "SelfSigned" | "Vault" | "Venafi" {
+    const { acme, ca, selfSigned, vault, venafi } = this.spec
+    if (acme) return "ACME"
+    if (ca) return "CA"
+    if (selfSigned) return "SelfSigned"
+    if (vault) return "Vault"
+    if (venafi) return "Venafi"
+  }
+
+  getConditions(): IssuerConditionAnnotated[] {
+    const { conditions = [] } = this.status
+    return conditions.map(condition => {
+      const { message, reason, lastTransitionTime, status } = condition
+      return {
+        ...condition,
+        isReady: status === "True",
+        tooltip: `${message || reason} (${lastTransitionTime})`,
+      }
+    })
+  }
+}
+
+export class ClusterIssuer extends Issuer {
+  static kind = "ClusterIssuer"
+}
+
+export const issuersApi = new KubeApi({
+  kind: Issuer.kind,
+  apiBase: "/apis/cert-manager.io/v1alpha2/issuers",
+  isNamespaced: true,
+  objectConstructor: Issuer,
+})
+
+export const clusterIssuersApi = new KubeApi({
+  kind: ClusterIssuer.kind,
+  apiBase: "/apis/cert-manager.io/v1alpha2/clusterissuers",
+  isNamespaced: false,
+  objectConstructor: ClusterIssuer,
+})
 
 export class Certificate extends KubeObject {
   static kind = "Certificate"
@@ -51,192 +216,48 @@ export class Certificate extends KubeObject {
   }
 
   getType(): string {
-    const { isCA, acme } = this.spec;
+    const { isCA, acme } = this.spec
     if (isCA) return "CA"
     if (acme) return "ACME"
   }
 
-  getCommonName() {
+  getCommonName(): string {
     return this.spec.commonName || ""
   }
 
-  getIssuerName() {
-    return this.spec.issuerRef.name;
+  getIssuerName(): string {
+    return this.spec.issuerRef.name
   }
 
-  getSecretName() {
-    return this.spec.secretName;
+  getSecretName(): string {
+    return this.spec.secretName
   }
 
-  getIssuerDetailsUrl() {
+  getIssuerDetailsUrl(): string {
     return getDetailsUrl(issuersApi.getUrl({
       namespace: this.getNs(),
       name: this.getIssuerName(),
     }))
   }
 
-  getSecretDetailsUrl() {
+  getSecretDetailsUrl(): string {
     return getDetailsUrl(secretsApi.getUrl({
       namespace: this.getNs(),
       name: this.getSecretName(),
     }))
   }
 
-  getConditions() {
-    const { conditions = [] } = this.status;
+  getConditions(): { isReady: boolean; tooltip: string; lastTransitionTime: string; message: string; reason: string; status: string; type: string; }[] {
+    const { conditions = [] } = this.status
     return conditions.map(condition => {
-      const { message, reason, lastTransitionTime, status } = condition;
-      return {
-        ...condition,
-        isReady: status === "True",
-        tooltip: `${message || reason} (${lastTransitionTime})`
-      }
-    });
-  }
-}
-
-export class Issuer extends KubeObject {
-  static kind = "Issuer"
-
-  spec: {
-    acme?: {
-      email: string;
-      server: string;
-      skipTLSVerify?: boolean;
-      privateKeySecretRef: ISecretRef;
-      solvers?: {
-        dns01?: {
-          cnameStrategy: string;
-          acmedns?: {
-            host: string;
-            accountSecretRef: ISecretRef;
-          };
-          akamai?: {
-            accessTokenSecretRef: ISecretRef;
-            clientSecretSecretRef: ISecretRef;
-            clientTokenSecretRef: ISecretRef;
-            serviceConsumerDomain: string;
-          };
-          azuredns?: {
-            clientID: string;
-            clientSecretSecretRef: ISecretRef;
-            hostedZoneName: string;
-            resourceGroupName: string;
-            subscriptionID: string;
-            tenantID: string;
-          };
-          clouddns?: {
-            project: string;
-            serviceAccountSecretRef: ISecretRef;
-          };
-          cloudflare?: {
-            email: string;
-            apiKeySecretRef: ISecretRef;
-          };
-          digitalocean?: {
-            tokenSecretRef: ISecretRef;
-          };
-          rfc2136?: {
-            nameserver: string;
-            tsigAlgorithm: string;
-            tsigKeyName: string;
-            tsigSecretSecretRef: ISecretRef;
-          };
-          route53?: {
-            accessKeyID: string;
-            hostedZoneID: string;
-            region: string;
-            secretAccessKeySecretRef: ISecretRef;
-          };
-          webhook?: {
-            config: object; // arbitrary json
-            groupName: string;
-            solverName: string;
-          };
-        };
-        http01?: {
-          ingress: {
-            class: string;
-            name: string;
-            serviceType: string;
-          };
-        };
-        selector?: {
-          dnsNames: string[];
-          matchLabels: {
-            [label: string]: string;
-          };
-        };
-      }[];
-    };
-    ca?: {
-      secretName: string;
-    };
-    vault?: {
-      path: string;
-      server: string;
-      caBundle: string; // <base64 encoded caBundle PEM file>
-      auth: {
-        appRole: {
-          path: string;
-          roleId: string;
-          secretRef: ISecretRef;
-        };
-      };
-    };
-    selfSigned?: {};
-    venafi?: {
-      zone: string;
-      cloud?: {
-        apiTokenSecretRef: ISecretRef;
-      };
-      tpp?: {
-        url: string;
-        caBundle: string; // <base64 encoded caBundle PEM file>
-        credentialsRef: {
-          name: string;
-        };
-      };
-    };
-  }
-
-  status: {
-    acme?: {
-      uri: string;
-    };
-    conditions?: {
-      lastTransitionTime: string; // 2019-06-05T07:10:42Z,
-      message: string; // The ACME account was registered with the ACME server,
-      reason: string; // ACMEAccountRegistered,
-      status: string; // True,
-      type: string; // Ready
-    }[];
-  }
-
-  getType() {
-    const { acme, ca, selfSigned, vault, venafi } = this.spec;
-    if (acme) return "ACME"
-    if (ca) return "CA"
-    if (selfSigned) return "SelfSigned"
-    if (vault) return "Vault"
-    if (venafi) return "Venafi"
-  }
-
-  getConditions() {
-    const { conditions = [] } = this.status;
-    return conditions.map(condition => {
-      const { message, reason, lastTransitionTime, status } = condition;
+      const { message, reason, lastTransitionTime, status } = condition
       return {
         ...condition,
         isReady: status === "True",
         tooltip: `${message || reason} (${lastTransitionTime})`,
       }
-    });
+    })
   }
-}
-
-export class ClusterIssuer extends Issuer {
-  static kind = "ClusterIssuer"
 }
 
 export const certificatesApi = new KubeApi({
@@ -244,18 +265,4 @@ export const certificatesApi = new KubeApi({
   apiBase: "/apis/cert-manager.io/v1alpha2/certificates",
   isNamespaced: true,
   objectConstructor: Certificate,
-});
-
-export const issuersApi = new KubeApi({
-  kind: Issuer.kind,
-  apiBase: "/apis/cert-manager.io/v1alpha2/issuers",
-  isNamespaced: true,
-  objectConstructor: Issuer,
-});
-
-export const clusterIssuersApi = new KubeApi({
-  kind: ClusterIssuer.kind,
-  apiBase: "/apis/cert-manager.io/v1alpha2/clusterissuers",
-  isNamespaced: false,
-  objectConstructor: ClusterIssuer,
-});
+})

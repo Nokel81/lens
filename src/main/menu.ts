@@ -1,38 +1,38 @@
-import type { WindowManager } from "./window-manager";
+import type { WindowManager } from "./window-manager"
 import { app, BrowserWindow, dialog, Menu, MenuItem, MenuItemConstructorOptions, shell, webContents } from "electron"
-import { autorun } from "mobx";
-import { broadcastIpc } from "../common/ipc";
-import { appName, isMac, issuesTrackerUrl, isWindows, slackUrl } from "../common/vars";
-import { clusterStore } from "../common/cluster-store";
-import { addClusterURL } from "../renderer/components/+add-cluster/add-cluster.route";
-import { preferencesURL } from "../renderer/components/+preferences/preferences.route";
-import { whatsNewURL } from "../renderer/components/+whats-new/whats-new.route";
-import { clusterSettingsURL } from "../renderer/components/+cluster-settings/cluster-settings.route";
-import logger from "./logger";
+import { autorun } from "mobx"
+import { broadcastIpc } from "../common/ipc"
+import { appName, isMac, issuesTrackerUrl, isWindows, slackUrl } from "../common/vars"
+import { clusterStore } from "../common/cluster-store"
+import { addClusterURL } from "../renderer/components/+add-cluster/add-cluster.route"
+import { preferencesURL } from "../renderer/components/+preferences/preferences.route"
+import { whatsNewURL } from "../renderer/components/+whats-new/whats-new.route"
+import { clusterSettingsURL } from "../renderer/components/+cluster-settings/cluster-settings.route"
+import logger from "./logger"
 
-export function initMenu(windowManager: WindowManager) {
+export function initMenu(windowManager: WindowManager): void {
   autorun(() => {
-    logger.debug(`[MENU]: building menu, cluster=${clusterStore.activeClusterId}`);
-    buildMenu(windowManager);
-  });
+    logger.debug(`[MENU]: building menu, cluster=${clusterStore.activeClusterId}`)
+    buildMenu(windowManager)
+  })
 }
 
-function buildMenu(windowManager: WindowManager) {
-  const hasClusters = clusterStore.hasClusters();
-  const activeClusterId = clusterStore.activeClusterId;
+function buildMenu(windowManager: WindowManager): void {
+  const hasClusters = clusterStore.hasClusters()
+  const activeClusterId = clusterStore.activeClusterId
 
-  function navigate(url: string) {
-    const clusterView = windowManager.getClusterView(activeClusterId);
+  function navigate(url: string): void {
+    const clusterView = windowManager.getClusterView(activeClusterId)
     broadcastIpc({
       channel: "menu:navigate",
       webContentId: clusterView ? clusterView.id : undefined /*no-clusters*/,
       args: [url],
-    });
+    })
   }
 
   function macOnly(menuItems: MenuItemConstructorOptions[]): MenuItemConstructorOptions[] {
-    if (!isMac) return [];
-    return menuItems;
+    if (!isMac) return []
+    return menuItems
   }
 
   const fileMenu: MenuItemConstructorOptions = {
@@ -40,22 +40,22 @@ function buildMenu(windowManager: WindowManager) {
     submenu: [
       {
         label: 'Add Cluster',
-        click() {
+        click(): void {
           navigate(addClusterURL())
-        }
+        },
       },
       ...(hasClusters ? [{
         label: 'Cluster Settings',
-        click() {
+        click(): void {
           navigate(clusterSettingsURL())
-        }
+        },
       }] : []),
       { type: 'separator' },
       {
         label: 'Preferences',
-        click() {
+        click(): void {
           navigate(preferencesURL())
-        }
+        },
       },
       ...macOnly([
         { type: 'separator' },
@@ -66,9 +66,9 @@ function buildMenu(windowManager: WindowManager) {
         { role: 'unhide' },
       ]),
       { type: 'separator' },
-      { role: 'quit' }
-    ]
-  };
+      { role: 'quit' },
+    ],
+  }
 
   const editMenu: MenuItemConstructorOptions = {
     label: 'Edit',
@@ -82,8 +82,8 @@ function buildMenu(windowManager: WindowManager) {
       { role: 'delete' },
       { type: 'separator' },
       { role: 'selectAll' },
-    ]
-  };
+    ],
+  }
 
   const viewMenu: MenuItemConstructorOptions = {
     label: 'View',
@@ -91,23 +91,23 @@ function buildMenu(windowManager: WindowManager) {
       {
         label: 'Back',
         accelerator: 'CmdOrCtrl+[',
-        click() {
+        click(): void {
           webContents.getFocusedWebContents().executeJavaScript('window.history.back()')
-        }
+        },
       },
       {
         label: 'Forward',
         accelerator: 'CmdOrCtrl+]',
-        click() {
+        click(): void {
           webContents.getFocusedWebContents().executeJavaScript('window.history.forward()')
-        }
+        },
       },
       {
         label: 'Reload',
         accelerator: 'CmdOrCtrl+R',
-        click() {
+        click(): void {
           webContents.getFocusedWebContents().reload()
-        }
+        },
       },
       { role: 'toggleDevTools' },
       { type: 'separator' },
@@ -115,40 +115,40 @@ function buildMenu(windowManager: WindowManager) {
       { role: 'zoomIn' },
       { role: 'zoomOut' },
       { type: 'separator' },
-      { role: 'togglefullscreen' }
-    ]
-  };
+      { role: 'togglefullscreen' },
+    ],
+  }
 
   const helpMenu: MenuItemConstructorOptions = {
     role: 'help',
     submenu: [
       {
         label: "What's new?",
-        click() {
+        click(): void {
           navigate(whatsNewURL())
         },
       },
       {
         label: "License",
         click: async () => {
-          shell.openExternal('https://lakendlabs.com/licenses/lens-eula.md');
+          shell.openExternal('https://lakendlabs.com/licenses/lens-eula.md')
         },
       },
       {
         label: "Community Slack",
         click: async () => {
-          shell.openExternal(slackUrl);
+          shell.openExternal(slackUrl)
         },
       },
       {
         label: 'Report an Issue',
         click: async () => {
-          shell.openExternal(issuesTrackerUrl);
+          shell.openExternal(issuesTrackerUrl)
         },
       },
       {
         label: "About Lens",
-        click(menuItem: MenuItem, browserWindow: BrowserWindow) {
+        click(menuItem: MenuItem, browserWindow: BrowserWindow): void {
           const appInfo = [
             `${appName}: ${app.getVersion()}`,
             `Electron: ${process.versions.electron}`,
@@ -160,14 +160,14 @@ function buildMenu(windowManager: WindowManager) {
             type: "info",
             buttons: ["Close"],
             message: `Lens`,
-            detail: appInfo.join("\r\n")
+            detail: appInfo.join("\r\n"),
           })
-        }
-      }
-    ]
-  };
+        },
+      },
+    ],
+  }
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
-    fileMenu, editMenu, viewMenu, helpMenu
-  ]));
+    fileMenu, editMenu, viewMenu, helpMenu,
+  ]))
 }

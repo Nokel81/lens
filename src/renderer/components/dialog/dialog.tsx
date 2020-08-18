@@ -1,12 +1,12 @@
-import "./dialog.scss";
+import "./dialog.scss"
 
-import React from "react";
-import { createPortal, findDOMNode } from "react-dom";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { reaction } from "mobx";
-import { Animate } from "../animate";
-import { cssNames, noop, stopPropagation } from "../../utils";
-import { navigation } from "../../navigation";
+import React from "react"
+import { createPortal, findDOMNode } from "react-dom"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { reaction } from "mobx"
+import { Animate } from "../animate"
+import { cssNames, noop, stopPropagation } from "../../utils"
+import { navigation } from "../../navigation"
 
 // todo: refactor + handle animation-end in props.onClose()?
 
@@ -48,99 +48,102 @@ export class Dialog extends React.PureComponent<DialogProps, DialogState> {
     isOpen: this.props.isOpen,
   }
 
-  get elem() {
-    return findDOMNode(this) as HTMLElement;
+  get elem(): HTMLElement {
+    // eslint-disable-next-line react/no-find-dom-node
+    return findDOMNode(this) as HTMLElement
   }
 
-  get isOpen() {
-    return this.state.isOpen;
+  get isOpen(): boolean {
+    return this.state.isOpen
   }
 
-  componentDidMount() {
-    if (this.isOpen) this.onOpen();
+  componentDidMount(): void {
+    if (this.isOpen) this.onOpen()
   }
 
-  componentDidUpdate(prevProps: DialogProps) {
-    const { isOpen } = this.props;
+  componentDidUpdate(prevProps: DialogProps): void {
+    const { isOpen } = this.props
     if (isOpen !== prevProps.isOpen) {
-      this.toggle(isOpen);
+      this.toggle(isOpen)
     }
   }
 
-  componentWillUnmount() {
-    if (this.isOpen) this.onClose();
+  componentWillUnmount(): void {
+    if (this.isOpen) this.onClose()
   }
 
-  toggle(isOpen: boolean) {
-    if (isOpen) this.open();
-    else this.close();
+  toggle(isOpen: boolean): void {
+    if (isOpen) this.open()
+    else this.close()
   }
 
-  open() {
-    requestAnimationFrame(this.onOpen); // wait for render(), bind close-event to this.elem
-    this.setState({ isOpen: true });
-    this.props.open();
+  open(): void {
+    requestAnimationFrame(this.onOpen) // wait for render(), bind close-event to this.elem
+    // eslint-disable-next-line react/no-set-state
+    this.setState({ isOpen: true })
+    this.props.open()
   }
 
-  close() {
-    this.onClose(); // must be first to get access to dialog's content from outside
-    this.setState({ isOpen: false });
-    this.props.close();
+  close(): void {
+    this.onClose() // must be first to get access to dialog's content from outside
+    // eslint-disable-next-line react/no-set-state
+    this.setState({ isOpen: false })
+    this.props.close()
   }
 
-  onOpen = () => {
-    this.props.onOpen();
+  onOpen = (): void => {
+    this.props.onOpen()
     if (!this.props.pinned) {
-      if (this.elem) this.elem.addEventListener('click', this.onClickOutside);
-      window.addEventListener('keydown', this.onEscapeKey);
+      if (this.elem) this.elem.addEventListener('click', this.onClickOutside)
+      window.addEventListener('keydown', this.onEscapeKey)
     }
   }
 
-  onClose = () => {
-    this.props.onClose();
+  onClose = (): void => {
+    this.props.onClose()
     if (!this.props.pinned) {
-      if (this.elem) this.elem.removeEventListener('click', this.onClickOutside);
-      window.removeEventListener('keydown', this.onEscapeKey);
+      if (this.elem) this.elem.removeEventListener('click', this.onClickOutside)
+      window.removeEventListener('keydown', this.onEscapeKey)
     }
   }
 
-  onEscapeKey = (evt: KeyboardEvent) => {
-    const escapeKey = evt.code === "Escape";
+  onEscapeKey = (evt: KeyboardEvent): void => {
+    const escapeKey = evt.code === "Escape"
     if (escapeKey) {
-      this.close();
-      evt.stopPropagation();
+      this.close()
+      evt.stopPropagation()
     }
   }
 
-  onClickOutside = (evt: MouseEvent) => {
-    const target = evt.target as HTMLElement;
+  onClickOutside = (evt: MouseEvent): void => {
+    const target = evt.target as HTMLElement
     if (!this.contentElem.contains(target)) {
-      this.close();
-      evt.stopPropagation();
+      this.close()
+      evt.stopPropagation()
     }
   }
 
-  render() {
-    const { modal, animated, pinned } = this.props;
-    let { className } = this.props;
-    className = cssNames("Dialog flex center", className, { modal, pinned });
+  render(): React.ReactNode {
+    const { modal, animated, pinned } = this.props
+    let { className } = this.props
+    className = cssNames("Dialog flex center", className, { modal, pinned })
     let dialog = (
       <div className={className} onClick={stopPropagation}>
         <div className="box" ref={e => this.contentElem = e}>
           {this.props.children}
         </div>
       </div>
-    );
+    )
     if (animated) {
       dialog = (
         <Animate enter={this.isOpen} name="opacity-scale">
           {dialog}
         </Animate>
-      );
+      )
     }
     else if (!this.isOpen) {
-      return null;
+      return null
     }
-    return createPortal(dialog, document.body);
+    return createPortal(dialog, document.body)
   }
 }

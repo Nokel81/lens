@@ -1,13 +1,13 @@
 import "./error-boundary.scss"
 
-import React, { ErrorInfo } from "react";
-import { reaction } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
-import { t, Trans } from "@lingui/macro";
-import { Button } from "../button";
-import { navigation } from "../../navigation";
-import { _i18n } from "../../i18n";
-import { issuesTrackerUrl, slackUrl } from "../../../common/vars";
+import React, { ErrorInfo } from "react"
+import { reaction } from "mobx"
+import { disposeOnUnmount, observer } from "mobx-react"
+import { t, Trans } from "@lingui/macro"
+import { Button } from "../button"
+import { navigation } from "../../navigation"
+import { _i18n } from "../../i18n"
+import { issuesTrackerUrl, slackUrl } from "../../../common/vars"
 
 interface Props {
 }
@@ -24,23 +24,25 @@ export class ErrorBoundary extends React.Component<Props, State> {
   @disposeOnUnmount
   resetOnNavigate = reaction(
     () => navigation.getPath(),
-    () => this.setState({ error: null, errorInfo: null })
+    // eslint-disable-next-line react/no-set-state
+    () => this.setState({ error: null, errorInfo: null }),
   )
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    this.setState({ error, errorInfo });
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    // eslint-disable-next-line react/no-set-state
+    this.setState({ error, errorInfo })
   }
 
-  back = () => {
-    navigation.goBack();
+  back = (): void => {
+    navigation.goBack()
   }
 
-  render() {
-    const { error, errorInfo } = this.state;
+  render(): React.ReactNode {
+    const { error, errorInfo } = this.state
     if (error) {
-      const slackLink = <a href={slackUrl} target="_blank">Slack</a>
-      const githubLink = <a href={issuesTrackerUrl} target="_blank">Github</a>
-      const pageUrl = location.href;
+      const slackLink = <a href={slackUrl} rel="noreferrer" target="_blank">Slack</a>
+      const githubLink = <a href={issuesTrackerUrl} rel="noreferrer" target="_blank">Github</a>
+      const pageUrl = location.href
       return (
         <div className="ErrorBoundary flex column gaps">
           <h5>
@@ -57,7 +59,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
               {errorInfo.componentStack}
             </code>
             <code className="box grow">
-              <p className="contrast"><Trans>Error stack</Trans>:</p> <br/>
+              <p className="contrast"><Trans>Error stack</Trans>:</p> <br />
               {error.stack}
             </code>
           </div>
@@ -69,6 +71,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
         </div>
       )
     }
-    return this.props.children;
+    return this.props.children
   }
 }

@@ -1,10 +1,10 @@
-import React from "react";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
-import { Cluster } from "../../../../main/cluster";
-import { Input } from "../../input";
-import { isUrl } from "../../input/input.validators";
-import { SubTitle } from "../../layout/sub-title";
+import React from "react"
+import { observable } from "mobx"
+import { observer } from "mobx-react"
+import { Cluster } from "../../../../main/cluster"
+import { Input } from "../../input"
+import { isUrl } from "../../input/input.validators"
+import { SubTitle } from "../../layout/sub-title"
 
 interface Props {
   cluster: Cluster;
@@ -14,18 +14,18 @@ interface Props {
 export class ClusterProxySetting extends React.Component<Props> {
   @observable proxy = this.props.cluster.preferences.httpsProxy || "";
 
-  save = () => {
-    this.props.cluster.preferences.httpsProxy = this.proxy;
+  save = (): void => {
+    this.props.cluster.preferences.httpsProxy = this.proxy
   };
 
-  onChange = (value: string) => {
-    this.proxy = value;
+  onChange = (value: string): void => {
+    this.proxy = value
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <>
-        <SubTitle title="HTTP Proxy"/>
+        <SubTitle title="HTTP Proxy" />
         <p>HTTP Proxy server. Used for communicating with Kubernetes API.</p>
         <Input
           theme="round-black"
@@ -36,6 +36,6 @@ export class ClusterProxySetting extends React.Component<Props> {
           validators={isUrl}
         />
       </>
-    );
+    )
   }
 }
