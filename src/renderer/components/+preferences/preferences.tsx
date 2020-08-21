@@ -1,21 +1,24 @@
-import "./preferences.scss"
-import React from "react";
-import { observer } from "mobx-react";
-import { action, computed, observable } from "mobx";
-import { t, Trans } from "@lingui/macro";
-import { _i18n } from "../../i18n";
-import { WizardLayout } from "../layout/wizard-layout";
-import { Icon } from "../icon";
-import { Select, SelectOption } from "../select";
-import { userStore } from "../../../common/user-store";
-import { HelmRepo, repoManager } from "../../../main/helm/helm-repo-manager";
-import { Input } from "../input";
-import { Checkbox } from "../checkbox";
-import { Notifications } from "../notifications";
-import { Badge } from "../badge";
-import { themeStore } from "../../theme.store";
-import { history } from "../../navigation";
-import { Tooltip } from "../tooltip";
+import './preferences.scss';
+
+import { t, Trans } from '@lingui/macro';
+import { action, computed, observable, toJS } from 'mobx';
+import { observer } from 'mobx-react';
+import React from 'react';
+
+import { userStore } from '../../../common/user-store';
+import { HelmRepo, repoManager } from '../../../main/helm/helm-repo-manager';
+import { _i18n } from '../../i18n';
+import { history } from '../../navigation';
+import { themeStore } from '../../theme.store';
+import { Badge } from '../badge';
+import { Checkbox } from '../checkbox';
+import { Icon } from '../icon';
+import { Input } from '../input';
+import { WizardLayout } from '../layout/wizard-layout';
+import { Notifications } from '../notifications';
+import { Select, SelectOption } from '../select';
+import { Tooltip } from '../tooltip';
+import { AutoDetectExectuables } from '../AutoDetectExecutables';
 
 @observer
 export class Preferences extends React.Component {
@@ -98,7 +101,7 @@ export class Preferences extends React.Component {
     return (
       <div className="flex gaps">
         <span>{repo.name}</span>
-        {isAdded && <Icon small material="check" className="box right"/>}
+        {isAdded && <Icon small material="check" className="box right" />}
       </div>
     )
   }
@@ -108,9 +111,10 @@ export class Preferences extends React.Component {
     const header = (
       <>
         <h2>Preferences</h2>
-        <Icon material="close" big onClick={history.goBack}/>
+        <Icon material="close" big onClick={history.goBack} />
       </>
     );
+
     return (
       <div className="Preferences">
         <WizardLayout header={header} centered>
@@ -188,8 +192,15 @@ export class Preferences extends React.Component {
             onChange={v => preferences.allowTelemetry = v}
           />
           <small className="hint">
-            <Trans>Telemetry & usage data is collected to continuously improve the Lens experience.</Trans>
+            <Trans>Telemetry and usage data is collected to continuously improve the Lens experience.</Trans>
           </small>
+
+          <h2><Trans>Autodetect Executables</Trans></h2>
+          <small className="hint">
+            <Trans>These are global Lens preferences for where to look for the executables that Lens uses.</Trans>{" "}
+            <Trans>The options also appear in the workspace settings and the cluster settings for more fine grained control.</Trans>
+          </small>
+          <AutoDetectExectuables preferences={preferences} />
         </WizardLayout>
       </div>
     );

@@ -1,7 +1,6 @@
 import "./cluster-settings.scss";
 
 import React from "react";
-import { Link } from "react-router-dom";
 import { observer } from "mobx-react";
 import { Features } from "./features";
 import { Removal } from "./removal";
@@ -26,7 +25,7 @@ export class ClusterSettings extends React.Component {
           showTooltip={false}
         />
         <h2>{cluster.preferences.clusterName}</h2>
-        <Icon material="close" onClick={() => navigate("/")} big/>
+        <Icon material="close" onClick={() => navigate("/")} big />
       </>
     );
     return (

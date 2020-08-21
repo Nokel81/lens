@@ -1,6 +1,6 @@
 import type { ThemeId } from "../renderer/theme.store";
 import semver from "semver"
-import { readFile } from "fs-extra"
+import { PathLike, readFile } from "fs-extra"
 import { action, observable, reaction, toJS } from "mobx";
 import { BaseStore } from "./base-store";
 import migrations from "../migrations/user-store"
@@ -8,6 +8,7 @@ import { getAppVersion } from "./utils/app-version";
 import { kubeConfigDefaultPath, loadConfig } from "./kube-helpers";
 import { tracker } from "./tracker";
 import logger from "../main/logger";
+import { AutoDetectExecVersion, SupportedExecutables, VersionFindingScheme } from "./multi-placement-options";
 
 export interface UserStoreModel {
   kubeConfigPath: string;
@@ -16,7 +17,7 @@ export interface UserStoreModel {
   preferences: UserPreferences;
 }
 
-export interface UserPreferences {
+export interface UserPreferences extends AutoDetectExecVersion {
   httpsProxy?: string;
   colorTheme?: string;
   allowUntrustedCAs?: boolean;
@@ -29,8 +30,8 @@ export class UserStore extends BaseStore<UserStoreModel> {
 
   private constructor() {
     super({
-      // configName: "lens-user-store", // todo: migrate from default "config.json"
-      migrations: migrations,
+      configName: "lens-user-store",
+      migrations,
     });
 
     // track telemetry availability
@@ -57,6 +58,28 @@ export class UserStore extends BaseStore<UserStoreModel> {
 
   get isNewVersion() {
     return semver.gt(getAppVersion(), this.lastSeenAppVersion);
+  }
+
+  /**
+   * resolve the executable finding scheme for a given executable at the global level 
+   * taking only this store into account
+   * @param execName the name of the executable that we wish to know the resolved scheme of
+   */
+  resolveVersionFindingScheme(execName: SupportedExecutables): VersionFindingScheme | PathLike {
+    const { versionFindingScheme } = this.preferences.autoDetectExecVersions?.for?.[execName] || {};
+    if (versionFindingScheme !== undefined) {
+      return versionFindingScheme
+    }
+
+    return this.preferences.autoDetectExecVersions?.versionFindingScheme ?? VersionFindingScheme.AUTO
+  }
+
+  /**
+   * a quick way to know the set scheme of a executable or the default
+   * @param execName the name of the executable that we wish to know the scheme of
+   */
+  versionFindingScheme(execName: SupportedExecutables): VersionFindingScheme | PathLike {
+    return this.preferences.autoDetectExecVersions?.for?.[execName]?.versionFindingScheme ?? VersionFindingScheme.AUTO;
   }
 
   @action

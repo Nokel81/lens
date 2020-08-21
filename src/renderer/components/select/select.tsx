@@ -118,7 +118,7 @@ export class Select extends React.Component<SelectProps> {
       }
     }
     return isCreatable
-      ? <Creatable {...selectProps}/>
-      : <ReactSelect {...selectProps}/>;
+      ? <Creatable {...selectProps} />
+      : <ReactSelect {...selectProps} />;
   }
 }

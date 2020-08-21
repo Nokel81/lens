@@ -1,4 +1,4 @@
-module.exports =  {
+module.exports = {
   overrides: [
     {
       files: [
@@ -11,7 +11,7 @@ module.exports =  {
       env: {
         node: true
       },
-      parserOptions:  {
+      parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
       },
@@ -27,10 +27,10 @@ module.exports =  {
         "integration/**/*.ts"
       ],
       parser: "@typescript-eslint/parser",
-      extends:  [
+      extends: [
         'plugin:@typescript-eslint/recommended',
       ],
-      parserOptions:  {
+      parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
       },
@@ -50,10 +50,13 @@ module.exports =  {
         "src/renderer/**/*.tsx",
       ],
       parser: "@typescript-eslint/parser",
-      extends:  [
+      extends: [
         'plugin:@typescript-eslint/recommended',
       ],
-      parserOptions:  {
+      plugins: [
+        "@typescript-eslint",
+      ],
+      parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
         jsx: true,

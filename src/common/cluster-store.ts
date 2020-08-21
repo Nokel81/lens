@@ -11,6 +11,7 @@ import { tracker } from "./tracker";
 import { dumpConfigYaml } from "./kube-helpers";
 import { saveToAppFiles } from "./utils/saveToAppFiles";
 import { KubeConfig } from "@kubernetes/client-node";
+import { AutoDetectExecVersion } from "./multi-placement-options";
 
 export interface ClusterIconUpload {
   clusterId: string;
@@ -36,7 +37,7 @@ export interface ClusterModel {
   kubeConfig?: string; // yaml
 }
 
-export interface ClusterPreferences {
+export interface ClusterPreferences extends AutoDetectExecVersion {
   terminalCWD?: string;
   clusterName?: string;
   prometheus?: {

@@ -2,12 +2,19 @@ import type { InputProps } from "./input";
 import { ReactNode } from "react";
 import { t } from "@lingui/macro";
 import { _i18n } from '../../i18n';
+import fse from "fs-extra"
 
 export interface Validator {
   debounce?: number; // debounce for async validators in ms
   condition?(props: InputProps): boolean; // auto-bind condition depending on input props
   message?: ReactNode | ((value: string, props?: InputProps) => ReactNode | string);
   validate(value: string, props?: InputProps): boolean | Promise<any>; // promise can throw error message
+}
+
+export const isPath: Validator = {
+  condition: ({ type }) => type === "text",
+  message: () => _i18n._(t`This field must be a path to an existing file`),
+  validate: value => fse.pathExistsSync(value),
 }
 
 export const isRequired: Validator = {

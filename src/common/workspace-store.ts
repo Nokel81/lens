@@ -3,6 +3,7 @@ import { BaseStore } from "./base-store";
 import { clusterStore } from "./cluster-store"
 import { landingURL } from "../renderer/components/+landing-page/landing-page.route";
 import { navigate } from "../renderer/navigation";
+import { AutoDetectExecVersion } from "./multi-placement-options";
 
 export type WorkspaceId = string;
 
@@ -11,10 +12,14 @@ export interface WorkspaceStoreModel {
   workspaces: Workspace[]
 }
 
+export interface WorkspacePreferences extends AutoDetectExecVersion {
+}
+
 export interface Workspace {
   id: WorkspaceId;
   name: string;
   description?: string;
+  preferences?: WorkspacePreferences;
 }
 
 export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {

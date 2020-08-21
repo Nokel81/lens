@@ -15,6 +15,7 @@ import { mangleProxyEnv } from "./proxy-env"
 import { registerFileProtocol } from "../common/register-protocol";
 import { clusterStore } from "../common/cluster-store"
 import { userStore } from "../common/user-store";
+import { fileNameMigration } from "../migrations/user-store"
 import { workspaceStore } from "../common/workspace-store";
 import { tracker } from "../common/tracker";
 import logger from "./logger"
@@ -33,6 +34,12 @@ mangleProxyEnv()
 if (app.commandLine.getSwitchValue("proxy-server") !== "") {
   process.env.HTTPS_PROXY = app.commandLine.getSwitchValue("proxy-server")
 }
+
+/**
+ * This needs to be before the `userStore.load()` call because that is what
+ * creats the `conf` instance with the configured name
+ */
+fileNameMigration()
 
 async function main() {
   await shellSync();

@@ -29,7 +29,7 @@ export class WorkspaceMenu extends React.Component<Props> {
         open={() => this.menuVisible = true}
         close={() => this.menuVisible = false}
       >
-        <Link className="workspaces-title" to={workspacesURL()}>
+        <Link className="workspaces-title" to={workspacesURL()} onClick={() => this.menuVisible = false}>
           <Trans>Workspaces</Trans>
         </Link>
         {workspacesList.map(({ id: workspaceId, name, description }) => {
@@ -40,7 +40,7 @@ export class WorkspaceMenu extends React.Component<Props> {
               active={workspaceId === currentWorkspace.id}
               onClick={() => workspaceStore.setActive(workspaceId)}
             >
-              <Icon small material="layers"/>
+              <Icon small material="layers" />
               <span className="workspace">{name}</span>
             </MenuItem>
           )

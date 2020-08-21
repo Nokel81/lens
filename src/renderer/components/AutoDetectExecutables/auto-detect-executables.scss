@@ -1,0 +1,13 @@
+.AutoDetectExecutables {
+  &.list {
+    padding: 0px $padding * 2;
+
+    .Select {
+      margin-top: $padding;
+    }
+  }
+
+  h4 {
+    padding-top: $padding;
+  }
+}
