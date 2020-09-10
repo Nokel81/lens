@@ -33,19 +33,13 @@ const packageMirrors: Map<string, string> = new Map([
   ["china", "https://mirror.azure.cn/kubernetes/kubectl"]
 ])
 
-let bundledPath: string
-const initScriptVersionString = "# lens-initscript v3\n"
+const initScriptVersionString = "# lens-initscript v3"
 
-if (isDevelopment || isTestEnv) {
-  const platformName = isWindows ? "windows" : process.platform
-  bundledPath = path.join(process.cwd(), "binaries", "client", platformName, process.arch, "kubectl")
-} else {
-  bundledPath = path.join(process.resourcesPath, process.arch, "kubectl")
-}
-
-if (isWindows) {
-  bundledPath = `${bundledPath}.exe`
-}
+const execName = isWindows ? "kubectl.exe" : "kubectl";
+const platformName = isWindows ? "windows" : process.platform
+const bundledPath = isDevelopment || isTestEnv
+  ? path.join(process.cwd(), "binaries", "client", platformName, process.arch, execName)
+  : path.join(process.resourcesPath, process.arch, execName);
 
 export class Kubectl {
   public kubectlVersion: string
@@ -110,7 +104,7 @@ export class Kubectl {
   }
 
   protected getDownloadDir() {
-    return userStore.preferences?.downloadBinariesPath || Kubectl.kubectlDir
+    return userStore.preferences?.downloadBinariesPath || Kubectl.kubectlDir
   }
 
   public async getPath(bundled = false): Promise<string> {
@@ -214,7 +208,7 @@ export class Kubectl {
         });
         isValid = !await this.checkBinary(this.path, false)
       }
-      if(!isValid) {
+      if (!isValid) {
         logger.debug(`Releasing lock for ${this.kubectlVersion}`)
         release()
         return false
