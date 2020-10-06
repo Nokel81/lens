@@ -14,11 +14,11 @@ import { Button } from "../button";
 import { Icon } from "../icon";
 import { WizardLayout } from "../layout/wizard-layout";
 import { kubeConfigDefaultPath, loadConfig, splitConfig, validateConfig } from "../../../common/kube-helpers";
-import { ClusterModel, ClusterStore, clusterStore } from "../../../common/cluster-store";
-import { workspaceStore } from "../../../common/workspace-store";
-import { v4 as uuid } from "uuid"
+import { ClusterModel, ClusterStore } from "../../../common/cluster-store";
+import { WorkspaceStore } from "../../../common/workspace-store";
+import { v4 as v4UUID } from "uuid"
 import { navigate } from "../../navigation";
-import { userStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-store";
 import { clusterViewURL } from "../cluster-manager/cluster-view.route";
 import { cssNames } from "../../utils";
 import { Notifications } from "../notifications";
@@ -45,11 +45,11 @@ export class AddCluster extends React.Component {
   @observable dropAreaActive = false;
 
   componentDidMount() {
-    this.setKubeConfig(userStore.kubeConfigPath);
+    this.setKubeConfig(UserStore.getInstance().kubeConfigPath);
   }
 
   componentWillUnmount() {
-    userStore.markNewContextsAsSeen();
+    UserStore.getInstance().markNewContextsAsSeen();
   }
 
   @action
@@ -59,7 +59,7 @@ export class AddCluster extends React.Component {
       validateConfig(this.kubeConfigLocal);
       this.refreshContexts();
       this.kubeConfigPath = filePath;
-      userStore.kubeConfigPath = filePath; // save to store
+      UserStore.getInstance().kubeConfigPath = filePath; // save to store
     } catch (err) {
       Notifications.error(
         <div>Can't setup <code>{filePath}</code> as kubeconfig: {String(err)}</div>
@@ -126,7 +126,7 @@ export class AddCluster extends React.Component {
       this.error = ""
       this.isWaiting = true
       const newClusters: ClusterModel[] = this.selectedContexts.map(context => {
-        const clusterId = uuid();
+        const clusterId = v4UUID();
         const kubeConfig = this.kubeContexts.get(context);
         const kubeConfigPath = this.sourceTab === KubeConfigSourceTab.FILE
           ? this.kubeConfigPath // save link to original kubeconfig in file-system
@@ -134,7 +134,7 @@ export class AddCluster extends React.Component {
         return {
           id: clusterId,
           kubeConfigPath: kubeConfigPath,
-          workspace: workspaceStore.currentWorkspaceId,
+          workspace: WorkspaceStore.getInstance().currentWorkspaceId,
           contextName: kubeConfig.currentContext,
           preferences: {
             clusterName: kubeConfig.currentContext,
@@ -143,10 +143,10 @@ export class AddCluster extends React.Component {
         }
       });
       runInAction(() => {
-        clusterStore.addCluster(...newClusters);
+        ClusterStore.getInstance().addCluster(...newClusters);
         if (newClusters.length === 1) {
           const clusterId = newClusters[0].id;
-          clusterStore.setActive(clusterId);
+          ClusterStore.getInstance().setActive(clusterId);
           navigate(clusterViewURL({ params: { clusterId } }));
         } else {
           Notifications.ok(
@@ -297,13 +297,13 @@ export class AddCluster extends React.Component {
   }
 
   onKubeConfigInputBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
-    const isChanged = this.kubeConfigPath !== userStore.kubeConfigPath;
+    const isChanged = this.kubeConfigPath !== UserStore.getInstance().kubeConfigPath;
     if (isChanged) {
       this.kubeConfigPath = this.kubeConfigPath.replace("~", os.homedir());
       try {
         this.setKubeConfig(this.kubeConfigPath, { throwError: true });
       } catch (err) {
-        this.setKubeConfig(userStore.kubeConfigPath); // revert to previous valid path
+        this.setKubeConfig(UserStore.getInstance().kubeConfigPath); // revert to previous valid path
       }
     }
   }
@@ -315,7 +315,7 @@ export class AddCluster extends React.Component {
   }
 
   protected formatContextLabel = ({ value: context }: SelectOption<string>) => {
-    const isNew = userStore.newContexts.has(context);
+    const isNew = UserStore.getInstance().newContexts.has(context);
     const isSelected = this.selectedContexts.includes(context);
     return (
       <div className={cssNames("kube-context flex gaps align-center", context)}>

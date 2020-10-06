@@ -8,5 +8,6 @@ export function defineGlobal(propName: string, descriptor: PropertyDescriptor) {
     console.info(`Global variable "${propName}" already exists. Skipping.`)
     return;
   }
+
   Object.defineProperty(scope, propName, descriptor);
 }

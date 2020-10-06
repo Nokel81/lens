@@ -3,11 +3,12 @@ import mockFs from "mock-fs";
 import yaml from "js-yaml";
 import { Cluster } from "../../main/cluster";
 import { ClusterStore } from "../cluster-store";
-import { workspaceStore } from "../workspace-store";
+import { WorkspaceStore } from "../workspace-store";
+import { Console } from "console";
 
 const testDataIcon = fs.readFileSync("test-data/cluster-store-migration-icon.png")
 
-console.log("") // fix bug
+console = new Console(process.stdout, process.stderr) // fix bug
 
 let clusterStore: ClusterStore;
 
@@ -20,8 +21,8 @@ describe("empty config", () => {
       }
     }
     mockFs(mockOpts);
-    clusterStore = ClusterStore.getInstance<ClusterStore>();
-    return clusterStore.load();
+    clusterStore = ClusterStore.getInstance();
+    return clusterStore.init();
   })
 
   afterEach(() => {
@@ -40,7 +41,7 @@ describe("empty config", () => {
             clusterName: "minikube"
           },
           kubeConfigPath: ClusterStore.embedCustomKubeConfig("foo", "fancy foo config"),
-          workspace: workspaceStore.currentWorkspaceId
+          workspace: WorkspaceStore.getInstance().currentWorkspaceId
         })
       );
     })
@@ -178,8 +179,8 @@ describe("config with existing clusters", () => {
       }
     }
     mockFs(mockOpts);
-    clusterStore = ClusterStore.getInstance<ClusterStore>();
-    return clusterStore.load();
+    clusterStore = ClusterStore.getInstance();
+    return clusterStore.init();
   })
 
   afterEach(() => {
@@ -227,8 +228,8 @@ describe("pre 2.0 config with an existing cluster", () => {
       }
     };
     mockFs(mockOpts);
-    clusterStore = ClusterStore.getInstance<ClusterStore>();
-    return clusterStore.load();
+    clusterStore = ClusterStore.getInstance();
+    return clusterStore.init();
   })
 
   afterEach(() => {
@@ -259,8 +260,8 @@ describe("pre 2.6.0 config with a cluster that has arrays in auth config", () =>
       }
     }
     mockFs(mockOpts);
-    clusterStore = ClusterStore.getInstance<ClusterStore>();
-    return clusterStore.load();
+    clusterStore = ClusterStore.getInstance();
+    return clusterStore.init();
   })
 
   afterEach(() => {
@@ -299,8 +300,8 @@ describe("pre 2.6.0 config with a cluster icon", () => {
       }
     }
     mockFs(mockOpts);
-    clusterStore = ClusterStore.getInstance<ClusterStore>();
-    return clusterStore.load();
+    clusterStore = ClusterStore.getInstance();
+    return clusterStore.init();
   })
 
   afterEach(() => {
@@ -336,8 +337,8 @@ describe("for a pre 2.7.0-beta.0 config without a workspace", () => {
       }
     }
     mockFs(mockOpts);
-    clusterStore = ClusterStore.getInstance<ClusterStore>();
-    return clusterStore.load();
+    clusterStore = ClusterStore.getInstance();
+    return clusterStore.init();
   })
 
   afterEach(() => {
@@ -376,8 +377,8 @@ describe("pre 3.6.0-beta.1 config with an existing cluster", () => {
       }
     };
     mockFs(mockOpts);
-    clusterStore = ClusterStore.getInstance<ClusterStore>();
-    return clusterStore.load();
+    clusterStore = ClusterStore.getInstance();
+    return clusterStore.init();
   })
 
   afterEach(() => {

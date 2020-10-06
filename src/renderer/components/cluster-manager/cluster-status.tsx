@@ -10,7 +10,7 @@ import { Icon } from "../icon";
 import { Button } from "../button";
 import { cssNames, IClassName } from "../../utils";
 import { Cluster } from "../../../main/cluster";
-import { ClusterId, clusterStore } from "../../../common/cluster-store";
+import { ClusterId, ClusterStore } from "../../../common/cluster-store";
 import { CubeSpinner } from "../spinner";
 
 interface Props {
@@ -24,7 +24,7 @@ export class ClusterStatus extends React.Component<Props> {
   @observable isReconnecting = false;
 
   get cluster(): Cluster {
-    return clusterStore.getById(this.props.clusterId);
+    return ClusterStore.getInstance().getById(this.props.clusterId);
   }
 
   @computed get hasErrors(): boolean {
@@ -63,7 +63,7 @@ export class ClusterStatus extends React.Component<Props> {
     if (!hasErrors || this.isReconnecting) {
       return (
         <>
-          <CubeSpinner/>
+          <CubeSpinner />
           <pre className="kube-auth-out">
             <p>{this.isReconnecting ? "Reconnecting..." : "Connecting..."}</p>
             {authOutput.map(({ data, error }, index) => {
@@ -75,7 +75,7 @@ export class ClusterStatus extends React.Component<Props> {
     }
     return (
       <>
-        <Icon material="cloud_off" className="error"/>
+        <Icon material="cloud_off" className="error" />
         <h2>
           {cluster.preferences.clusterName}
         </h2>

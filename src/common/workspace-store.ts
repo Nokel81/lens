@@ -1,6 +1,6 @@
 import { action, computed, observable, toJS } from "mobx";
 import { BaseStore } from "./base-store";
-import { clusterStore } from "./cluster-store"
+import { ClusterStore } from "./cluster-store"
 import { landingURL } from "../renderer/components/+landing-page/landing-page.route";
 import { navigate } from "../renderer/navigation";
 
@@ -20,7 +20,7 @@ export interface Workspace {
 export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
   static readonly defaultId: WorkspaceId = "default"
 
-  private constructor() {
+  constructor() {
     super({
       configName: "lens-workspace-store",
     });
@@ -63,7 +63,7 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
     }
     this.currentWorkspaceId = id;
     if (resetActiveCluster) {
-      clusterStore.setActive(null)
+      ClusterStore.getInstance().setActive(null)
     }
     if (redirectToLanding) {
       navigate(landingURL())
@@ -95,7 +95,7 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
       this.currentWorkspaceId = WorkspaceStore.defaultId; // reset to default
     }
     this.workspaces.delete(id);
-    clusterStore.removeByWorkspaceId(id)
+    ClusterStore.getInstance().removeByWorkspaceId(id)
   }
 
   @action
@@ -120,5 +120,3 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
     })
   }
 }
-
-export const workspaceStore = WorkspaceStore.getInstance<WorkspaceStore>()

@@ -1,12 +1,12 @@
 import path from "path";
-import { app, ipcRenderer, remote, webFrame, webContents } from "electron";
+import { app, ipcRenderer, remote, webFrame } from "electron";
 import { unlink } from "fs-extra";
 import { action, computed, observable, toJS } from "mobx";
 import { BaseStore } from "./base-store";
 import { Cluster, ClusterState } from "../main/cluster";
 import migrations from "../migrations/cluster-store"
 import logger from "../main/logger";
-import { tracker } from "./tracker";
+import { Tracker } from "./tracker";
 import { dumpConfigYaml } from "./kube-helpers";
 import { saveToAppFiles } from "./utils/saveToAppFiles";
 import { KubeConfig } from "@kubernetes/client-node";
@@ -67,7 +67,7 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
     return filePath;
   }
 
-  private constructor() {
+  constructor() {
     super({
       configName: "lens-cluster-store",
       accessPropertiesByDotNotation: false, // To make dots safe in cluster context names
@@ -100,6 +100,12 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
   @computed get clustersList(): Cluster[] {
     return Array.from(this.clusters.values());
+  }
+
+  @computed get subFrameIds(): number[] {
+    return this.clustersList
+      .map(({ frameId }) => frameId)
+      .filter(id => id)
   }
 
   isActive(id: ClusterId) {
@@ -142,7 +148,7 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
   @action
   addCluster(...models: ClusterModel[]) {
     models.forEach(model => {
-      tracker.event("cluster", "add");
+      Tracker.getInstance().event("cluster", "add");
       const cluster = new Cluster(model);
       this.clusters.set(model.id, cluster);
     })
@@ -150,7 +156,7 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
   @action
   async removeById(clusterId: ClusterId) {
-    tracker.event("cluster", "remove");
+    Tracker.getInstance().event("cluster", "remove");
     const cluster = this.getById(clusterId);
     if (cluster) {
       this.clusters.delete(clusterId);
@@ -210,8 +216,6 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
   }
 }
 
-export const clusterStore = ClusterStore.getInstance<ClusterStore>();
-
 export function getClusterIdFromHost(hostname: string): ClusterId {
   const subDomains = hostname.split(":")[0].split(".");
   return subDomains.slice(-2)[0]; // e.g host == "%clusterId.localhost:45345"
@@ -226,5 +230,5 @@ export function getHostedClusterId() {
 }
 
 export function getHostedCluster(): Cluster {
-  return clusterStore.getById(getHostedClusterId());
+  return ClusterStore.getInstance().getById(getHostedClusterId());
 }

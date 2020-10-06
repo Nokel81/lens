@@ -4,7 +4,7 @@ import { isPath } from '../input/input_validators';
 import { Checkbox } from '../checkbox';
 import { Input } from '../input';
 import { SubTitle } from '../layout/sub-title';
-import { UserPreferences, userStore } from '../../../common/user-store';
+import { UserPreferences, UserStore } from '../../../common/user-store';
 import { observer } from 'mobx-react';
 import { Kubectl } from '../../../main/kubectl';
 import { SelectOption, Select } from '../select';
@@ -46,7 +46,7 @@ export const KubectlBinaries = observer(({ preferences }: { preferences: UserPre
       <Input
         theme="round-black"
         value={downloadPath}
-        placeholder={userStore.getDefaultKubectlPath()}
+        placeholder={UserStore.getInstance().getDefaultKubectlPath()}
         validators={isPath}
         onChange={setDownloadPath}
         onBlur={save}

@@ -1,26 +1,24 @@
 /**
  * Narrowing class instances to the one.
- * Use "private" or "protected" modifier for constructor (when overriding) to disallow "new" usage.
  *
  * @example
- *  const usersStore: UsersStore = UsersStore.getInstance();
+ *  const usersStore = UsersStore.getInstance(); // is `UsersStore`
  */
 
-type Constructor<T = {}> = new (...args: any[]) => T;
+type Constructor<T, R extends any[]> = new (...args: R) => T;
 
 class Singleton {
   private static instances = new WeakMap<object, Singleton>();
 
-  // todo: improve types inferring
-  static getInstance<T>(...args: ConstructorParameters<Constructor<T>>): T {
+  static getInstance<T, R extends any[]>(this: Constructor<T, R>, ...args: ConstructorParameters<Constructor<T, R>>): T {
     if (!Singleton.instances.has(this)) {
-      Singleton.instances.set(this, Reflect.construct(this, args));
+      Singleton.instances.set(this, new this(...args))
     }
-    return Singleton.instances.get(this) as T;
+    return Singleton.instances.get(this) as T
   }
 
   static resetInstance() {
-    Singleton.instances.delete(this);
+    Singleton.instances.delete(this)
   }
 }
 

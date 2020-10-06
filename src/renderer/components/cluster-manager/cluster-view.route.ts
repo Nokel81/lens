@@ -2,7 +2,7 @@ import { reaction } from "mobx";
 import { ipcRenderer } from "electron";
 import { matchPath, RouteProps } from "react-router";
 import { buildURL, navigation } from "../../navigation";
-import { clusterStore } from "../../../common/cluster-store";
+import { ClusterStore } from "../../../common/cluster-store";
 
 export interface IClusterViewRouteParams {
   clusterId: string;
@@ -26,7 +26,7 @@ export function getMatchedClusterId(): string {
 }
 
 export function getMatchedCluster() {
-  return clusterStore.getById(getMatchedClusterId())
+  return ClusterStore.getInstance().getById(getMatchedClusterId())
 }
 
 if (ipcRenderer) {

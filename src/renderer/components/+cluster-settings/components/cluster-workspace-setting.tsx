@@ -2,7 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import { workspacesURL } from "../../+workspaces";
-import { workspaceStore } from "../../../../common/workspace-store";
+import { WorkspaceStore } from "../../../../common/workspace-store";
 import { Cluster } from "../../../../main/cluster";
 import { Select } from "../../../components/select";
 import { SubTitle } from "../../layout/sub-title";
@@ -16,7 +16,7 @@ export class ClusterWorkspaceSetting extends React.Component<Props> {
   render() {
     return (
       <>
-        <SubTitle title="Cluster Workspace"/>
+        <SubTitle title="Cluster Workspace" />
         <p>
           Define cluster{" "}
           <Link to={workspacesURL()}>
@@ -25,9 +25,9 @@ export class ClusterWorkspaceSetting extends React.Component<Props> {
         </p>
         <Select
           value={this.props.cluster.workspace}
-          onChange={({value}) => this.props.cluster.workspace = value}
-          options={workspaceStore.workspacesList.map(w =>
-            ({value: w.id, label: w.name})
+          onChange={({ value }) => this.props.cluster.workspace = value}
+          options={WorkspaceStore.getInstance().workspacesList.map(w =>
+            ({ value: w.id, label: w.name })
           )}
         />
       </>

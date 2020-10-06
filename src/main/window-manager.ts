@@ -1,5 +1,5 @@
 import type { ClusterId } from "../common/cluster-store";
-import { clusterStore } from "../common/cluster-store";
+import { ClusterStore } from "../common/cluster-store";
 import { BrowserWindow, dialog, ipcMain, shell, webContents } from "electron"
 import windowStateKeeper from "electron-window-state"
 import { observable } from "mobx";
@@ -60,7 +60,7 @@ export class WindowManager {
   }
 
   reload({ channel }: { channel: string }) {
-    const frameId = clusterStore.getById(this.activeClusterId)?.frameId;
+    const frameId = ClusterStore.getInstance().getById(this.activeClusterId)?.frameId;
     if (frameId) {
       this.mainView.webContents.sendToFrame(frameId, channel);
     } else {

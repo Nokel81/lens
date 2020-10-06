@@ -58,7 +58,7 @@ export class HelmRepoManager extends Singleton {
   protected async parseHelmEnv() {
     const helm = await helmCli.binaryPath()
     const { stdout } = await promiseExec(`"${helm}" env`).catch((error) => {
-      throw(error.stderr)
+      throw (error.stderr)
     })
     const lines = stdout.split(/\r?\n/) // split by new line feed
     const env: HelmEnv = {}
@@ -113,7 +113,7 @@ export class HelmRepoManager extends Singleton {
     logger.info(`[HELM]: adding repo "${name}" from ${url}`);
     const helm = await helmCli.binaryPath()
     const { stdout } = await promiseExec(`"${helm}" repo add ${name} ${url}`).catch((error) => {
-      throw(error.stderr)
+      throw (error.stderr)
     })
     return stdout
   }
@@ -122,10 +122,8 @@ export class HelmRepoManager extends Singleton {
     logger.info(`[HELM]: removing repo "${name}" from ${url}`);
     const helm = await helmCli.binaryPath()
     const { stdout, stderr } = await promiseExec(`"${helm}" repo remove ${name}`).catch((error) => {
-      throw(error.stderr)
+      throw (error.stderr)
     })
     return stdout
   }
 }
-
-export const repoManager = HelmRepoManager.getInstance<HelmRepoManager>()

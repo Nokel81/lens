@@ -13,10 +13,10 @@ import { shellSync } from "./shell-sync"
 import { getFreePort } from "./port"
 import { mangleProxyEnv } from "./proxy-env"
 import { registerFileProtocol } from "../common/register-protocol";
-import { clusterStore } from "../common/cluster-store"
-import { userStore } from "../common/user-store";
-import { workspaceStore } from "../common/workspace-store";
-import { tracker } from "../common/tracker";
+import { ClusterStore } from "../common/cluster-store"
+import { UserStore } from "../common/user-store";
+import { WorkspaceStore } from "../common/workspace-store";
+import { Tracker } from "../common/tracker";
 import logger from "./logger"
 
 const workingDir = path.join(app.getPath("appData"), appName);
@@ -38,7 +38,7 @@ async function main() {
   await shellSync();
   logger.info(`🚀 Starting Lens from "${workingDir}"`)
 
-  tracker.event("app", "start");
+  Tracker.getInstance().event("app", "start");
   const updater = new AppUpdater()
   updater.start();
 
@@ -56,9 +56,9 @@ async function main() {
 
   // preload configuration from stores
   await Promise.all([
-    userStore.load(),
-    clusterStore.load(),
-    workspaceStore.load(),
+    UserStore.getInstance().init(),
+    ClusterStore.getInstance().init(),
+    WorkspaceStore.getInstance().init(),
   ]);
 
   // create cluster manager
