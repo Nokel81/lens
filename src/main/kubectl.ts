@@ -101,10 +101,6 @@ export class Kubectl {
     this.path = path.join(this.dirname, binaryName)
   }
 
-  public getBundledPath() {
-    return Kubectl.bundledKubectlPath
-  }
-
   public getPathFromPreferences() {
     return UserStore.getInstance().preferences?.kubectlBinariesPath || this.getBundledPath()
   }
@@ -123,7 +119,7 @@ export class Kubectl {
     }
 
     // return binary name if bundled path is not functional
-    if (!await this.checkBinary(this.getBundledPath(), false)) {
+    if (!await this.checkBinary(Kubectl.bundledKubectlPath, false)) {
       Kubectl.invalidBundle = true
       return path.basename(bundledPath)
     }

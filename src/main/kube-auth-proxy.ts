@@ -54,17 +54,19 @@ export class KubeAuthProxy {
       this.exit();
     })
 
-    this.proxyProcess.stdout.on('data', (data) => {
-      let logItem = data.toString()
-      if (logItem.startsWith("Starting to serve on")) {
-        logItem = "Authentication proxy started\n"
+    this.proxyProcess.stdout.on('data', (chunk) => {
+      const data = chunk.toString()
+      if (data.startsWith("Starting to serve on")) {
+        this.sendIpcLogMessage({ data: "Authentication proxy started\n" })
+      } else {
+        this.sendIpcLogMessage({ data })
       }
-      this.sendIpcLogMessage({ data: logItem })
     })
 
-    this.proxyProcess.stderr.on('data', (data) => {
-      this.lastError = this.parseError(data.toString())
-      this.sendIpcLogMessage({ data: data.toString(), error: true })
+    this.proxyProcess.stderr.on('data', (chunk) => {
+      const data = chunk.toString()
+      this.lastError = this.parseError(data)
+      this.sendIpcLogMessage({ data, error: true })
     })
 
     return waitUntilUsed(this.port, 500, 10000)
@@ -72,23 +74,23 @@ export class KubeAuthProxy {
 
   protected parseError(data: string) {
     const error = data.split("http: proxy error:").slice(1).join("").trim()
-    let errorMsg = error
     const jsonError = error.split("Response: ")[1]
     if (jsonError) {
       try {
         const parsedError = JSON.parse(jsonError)
-        errorMsg = parsedError.error_description || parsedError.error || jsonError
+        return parsedError.error_description || parsedError.error || jsonError
       } catch (_) {
-        errorMsg = jsonError.trim()
+        return jsonError.trim()
       }
     }
-    return errorMsg
+
+    return error
   }
 
   protected async sendIpcLogMessage(res: KubeAuthProxyLog) {
     const channel = `kube-auth:${this.cluster.id}`
     logger.info(`[KUBE-AUTH]: out-channel "${channel}"`, { ...res, meta: this.cluster.getMeta() });
-    broadcastIpc({ channel: channel, args: [res] });
+    broadcastIpc({ channel, args: [res] });
   }
 
   public exit() {
