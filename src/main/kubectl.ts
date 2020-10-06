@@ -102,7 +102,7 @@ export class Kubectl {
   }
 
   public getPathFromPreferences() {
-    return UserStore.getInstance().preferences?.kubectlBinariesPath || this.getBundledPath()
+    return UserStore.getInstance().preferences?.kubectlBinariesPath || Kubectl.bundledKubectlPath
   }
 
   protected getDownloadDir() {
@@ -114,6 +114,10 @@ export class Kubectl {
   }
 
   public async getPath(bundled = false): Promise<string> {
+    if (bundled) {
+      return Kubectl.bundledKubectlPath
+    }
+
     if (UserStore.getInstance().preferences?.downloadKubectlBinaries === false) {
       return this.getPathFromPreferences()
     }

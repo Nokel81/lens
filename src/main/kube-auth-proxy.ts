@@ -48,7 +48,6 @@ export class KubeAuthProxy {
       this.sendIpcLogMessage({ data: error.message, error: true })
       this.exit()
     })
-
     this.proxyProcess.on("exit", (code) => {
       this.sendIpcLogMessage({ data: `proxy exited with code: ${code}`, error: code > 0 })
       this.exit();
