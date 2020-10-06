@@ -46,7 +46,7 @@ console = new Console(process.stdout, process.stderr) // fix mockFS
 
 describe("create clusters", () => {
   beforeEach(() => {
-    Object.values(logger).forEach(l => l.mockClear())
+    jest.clearAllMocks()
   })
 
   beforeEach(() => {
@@ -77,7 +77,6 @@ describe("create clusters", () => {
   })
 
   afterEach(() => {
-    mockedRequest.mockClear()
     mockFs.restore()
   })
 

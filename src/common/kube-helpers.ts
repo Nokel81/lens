@@ -55,20 +55,14 @@ export function validateConfig(config: KubeConfig | string): KubeConfig {
  * Breaks kube config into several configs. Each context as it own KubeConfig object
  */
 export function splitConfig(kubeConfig: KubeConfig): KubeConfig[] {
-  const configs: KubeConfig[] = []
-  if (!kubeConfig.contexts) {
-    return configs;
-  }
-  kubeConfig.contexts.forEach(ctx => {
+  return (kubeConfig.contexts || []).map(ctx => {
     const kc = new KubeConfig();
     kc.clusters = [kubeConfig.getCluster(ctx.cluster)].filter(n => n);
     kc.users = [kubeConfig.getUser(ctx.user)].filter(n => n)
     kc.contexts = [kubeConfig.getContextObject(ctx.name)].filter(n => n)
-    kc.setCurrentContext(ctx.name);
-
-    configs.push(kc);
-  });
-  return configs;
+    kc.setCurrentContext(ctx.name)
+    return kc
+  })
 }
 
 export function dumpConfigYaml(kubeConfig: Partial<KubeConfig>): string {
@@ -77,43 +71,37 @@ export function dumpConfigYaml(kubeConfig: Partial<KubeConfig>): string {
     kind: "Config",
     preferences: {},
     'current-context': kubeConfig.currentContext,
-    clusters: kubeConfig.clusters.map(cluster => {
-      return {
-        name: cluster.name,
-        cluster: {
-          'certificate-authority-data': cluster.caData,
-          'certificate-authority': cluster.caFile,
-          server: cluster.server,
-          'insecure-skip-tls-verify': cluster.skipTLSVerify
-        }
+    clusters: kubeConfig.clusters.map(cluster => ({
+      name: cluster.name,
+      cluster: {
+        'certificate-authority-data': cluster.caData,
+        'certificate-authority': cluster.caFile,
+        server: cluster.server,
+        'insecure-skip-tls-verify': cluster.skipTLSVerify
       }
-    }),
-    contexts: kubeConfig.contexts.map(context => {
-      return {
-        name: context.name,
-        context: {
-          cluster: context.cluster,
-          user: context.user,
-          namespace: context.namespace
-        }
+    })),
+    contexts: kubeConfig.contexts.map(context => ({
+      name: context.name,
+      context: {
+        cluster: context.cluster,
+        user: context.user,
+        namespace: context.namespace
       }
-    }),
-    users: kubeConfig.users.map(user => {
-      return {
-        name: user.name,
-        user: {
-          'client-certificate-data': user.certData,
-          'client-certificate': user.certFile,
-          'client-key-data': user.keyData,
-          'client-key': user.keyFile,
-          'auth-provider': user.authProvider,
-          exec: user.exec,
-          token: user.token,
-          username: user.username,
-          password: user.password
-        }
+    })),
+    users: kubeConfig.users.map(user => ({
+      name: user.name,
+      user: {
+        'client-certificate-data': user.certData,
+        'client-certificate': user.certFile,
+        'client-key-data': user.keyData,
+        'client-key': user.keyFile,
+        'auth-provider': user.authProvider,
+        exec: user.exec,
+        token: user.token,
+        username: user.username,
+        password: user.password
       }
-    })
+    }))
   }
 
   logger.debug("Dumping KubeConfig:", config);

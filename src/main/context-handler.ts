@@ -10,7 +10,7 @@ import { getFreePort } from "./port"
 import { KubeAuthProxy } from "./kube-auth-proxy"
 
 export class ContextHandler {
-  public proxyPort: number;
+  public proxyPort?: number;
   public clusterUrl: UrlWithStringQuery;
   protected kubeAuthProxy: KubeAuthProxy
   protected apiTarget: httpProxy.ServerOptions
@@ -99,29 +99,26 @@ export class ContextHandler {
   }
 
   async ensurePort(): Promise<number> {
-    if (!this.proxyPort) {
-      this.proxyPort = await getFreePort();
-    }
-    return this.proxyPort
+    return this.proxyPort ??= await getFreePort()
   }
 
-  async ensureServer() {
-    if (!this.kubeAuthProxy) {
-      await this.ensurePort();
-      const proxyEnv = Object.assign({}, process.env)
-      if (this.cluster.preferences.httpsProxy) {
-        proxyEnv.HTTPS_PROXY = this.cluster.preferences.httpsProxy
-      }
-      this.kubeAuthProxy = new KubeAuthProxy(this.cluster, this.proxyPort, proxyEnv)
-      await this.kubeAuthProxy.run()
+  async ensureServer(): Promise<void> {
+    if (this.kubeAuthProxy) {
+      return
     }
+
+    await this.ensurePort()
+    const proxyEnv = Object.assign({}, process.env)
+    if (this.cluster.preferences.httpsProxy) {
+      proxyEnv.HTTPS_PROXY = this.cluster.preferences.httpsProxy
+    }
+    this.kubeAuthProxy = new KubeAuthProxy(this.cluster, this.proxyPort, proxyEnv)
+    return this.kubeAuthProxy.run()
   }
 
   stopServer() {
-    if (this.kubeAuthProxy) {
-      this.kubeAuthProxy.exit()
-      this.kubeAuthProxy = null
-    }
+    this.kubeAuthProxy?.exit()
+    this.kubeAuthProxy = null
   }
 
   get proxyLastError(): string {
