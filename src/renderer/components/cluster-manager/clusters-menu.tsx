@@ -4,9 +4,9 @@ import React from "react";
 import { observer } from "mobx-react";
 import { _i18n } from "../../i18n";
 import { t, Trans } from "@lingui/macro";
-import { userStore } from "../../../common/user-store";
-import { ClusterId, clusterStore } from "../../../common/cluster-store";
-import { workspaceStore } from "../../../common/workspace-store";
+import { UserStore } from "../../../common/user-store";
+import { ClusterId, ClusterStore } from "../../../common/cluster-store";
+import { WorkspaceStore } from "../../../common/workspace-store";
 import { ClusterIcon } from "../cluster-icon";
 import { Icon } from "../icon";
 import { cssNames, IClassName, autobind } from "../../utils";
@@ -29,13 +29,13 @@ interface Props {
 @observer
 export class ClustersMenu extends React.Component<Props> {
   showCluster = (clusterId: ClusterId) => {
-    clusterStore.setActive(clusterId);
+    ClusterStore.getInstance().setActive(clusterId);
     navigate(clusterViewURL({ params: { clusterId } }));
   }
 
   addCluster = () => {
     navigate(addClusterURL());
-    clusterStore.setActive(null);
+    ClusterStore.getInstance().setActive(null);
   }
 
   showContextMenu = (cluster: Cluster) => {
@@ -45,7 +45,7 @@ export class ClustersMenu extends React.Component<Props> {
     menu.append(new MenuItem({
       label: _i18n._(t`Settings`),
       click: () => {
-        clusterStore.setActive(cluster.id);
+        ClusterStore.getInstance().setActive(cluster.id);
         navigate(clusterSettingsURL({
           params: {
             clusterId: cluster.id
@@ -57,9 +57,9 @@ export class ClustersMenu extends React.Component<Props> {
       menu.append(new MenuItem({
         label: _i18n._(t`Disconnect`),
         click: async () => {
-          if (clusterStore.isActive(cluster.id)) {
+          if (ClusterStore.getInstance().isActive(cluster.id)) {
             navigate(landingURL());
-            clusterStore.setActive(null);
+            ClusterStore.getInstance().setActive(null);
           }
           await clusterIpc.disconnect.invokeFromRenderer(cluster.id);
         }
@@ -75,10 +75,10 @@ export class ClustersMenu extends React.Component<Props> {
             label: _i18n._(t`Remove`),
           },
           ok: () => {
-            if (clusterStore.activeClusterId === cluster.id) {
+            if (ClusterStore.getInstance().activeClusterId === cluster.id) {
               navigate(landingURL());
             }
-            clusterStore.removeById(cluster.id);
+            ClusterStore.getInstance().removeById(cluster.id);
           },
           message: <p>Are you sure want to remove cluster <b title={cluster.id}>{cluster.contextName}</b>?</p>,
         })
@@ -92,19 +92,19 @@ export class ClustersMenu extends React.Component<Props> {
   @autobind()
   swapClusterIconOrder(result: DropResult) {
     if (result.reason === "DROP") {
-      const { currentWorkspaceId } = workspaceStore;
+      const { currentWorkspaceId } = WorkspaceStore.getInstance();
       const {
         source: { index: from },
         destination: { index: to },
       } = result
-      clusterStore.swapIconOrders(currentWorkspaceId, from, to)
+      ClusterStore.getInstance().swapIconOrders(currentWorkspaceId, from, to)
     }
   }
 
   render() {
     const { className } = this.props;
-    const { newContexts } = userStore;
-    const clusters = clusterStore.getByWorkspaceId(workspaceStore.currentWorkspaceId);
+    const { newContexts } = UserStore.getInstance();
+    const clusters = ClusterStore.getInstance().getByWorkspaceId(WorkspaceStore.getInstance().currentWorkspaceId);
     return (
       <div className={cssNames("ClustersMenu flex column", className)}>
         <div className="clusters flex column gaps">
@@ -116,7 +116,7 @@ export class ClustersMenu extends React.Component<Props> {
                   {...provided.droppableProps}
                 >
                   {clusters.map((cluster, index) => {
-                    const isActive = cluster.id === clusterStore.activeClusterId;
+                    const isActive = cluster.id === ClusterStore.getInstance().activeClusterId;
                     return (
                       <Draggable draggableId={cluster.id} index={index} key={cluster.id}>
                         {(provided: DraggableProvided) => (
@@ -136,7 +136,8 @@ export class ClustersMenu extends React.Component<Props> {
                           </div>
                         )}
                       </Draggable>
-                    )}
+                    )
+                  }
                   )}
                   {provided.placeholder}
                 </div>

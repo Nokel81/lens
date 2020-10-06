@@ -1,5 +1,5 @@
 import { app, remote } from "electron";
-import winston from "winston"
+import winston, { format } from "winston"
 import { isDebugging } from "../common/vars";
 
 const logLevel = process.env.LOG_LEVEL ? process.env.LOG_LEVEL : isDebugging ? "debug" : "info"
@@ -20,9 +20,9 @@ const fileOptions: winston.transports.FileTransportOptions = {
 }
 
 const logger = winston.createLogger({
-  format: winston.format.combine(
-    winston.format.colorize(),
-    winston.format.simple(),
+  format: format.combine(
+    format.colorize(),
+    format.simple(),
   ),
   transports: [
     new winston.transports.Console(consoleOptions),

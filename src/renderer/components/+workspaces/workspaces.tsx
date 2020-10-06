@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { computed, observable, toJS } from "mobx";
 import { t, Trans } from "@lingui/macro";
 import { WizardLayout } from "../layout/wizard-layout";
-import { Workspace, WorkspaceId, workspaceStore } from "../../../common/workspace-store";
+import { Workspace, WorkspaceId, WorkspaceStore } from "../../../common/workspace-store";
 import { v4 as uuid } from "uuid"
 import { _i18n } from "../../i18n";
 import { ConfirmDialog } from "../confirm-dialog";
@@ -20,7 +20,7 @@ export class Workspaces extends React.Component {
 
   @computed get workspaces(): Workspace[] {
     const allWorkspaces = new Map([
-      ...workspaceStore.workspaces,
+      ...WorkspaceStore.getInstance().workspaces,
       ...this.editingWorkspaces,
     ]);
     return Array.from(allWorkspaces.values());
@@ -42,7 +42,7 @@ export class Workspaces extends React.Component {
 
   saveWorkspace = (id: WorkspaceId) => {
     const draft = toJS(this.editingWorkspaces.get(id));
-    const workspace = workspaceStore.saveWorkspace(draft);
+    const workspace = WorkspaceStore.getInstance().saveWorkspace(draft);
     if (workspace) {
       this.clearEditing(id);
     }
@@ -58,7 +58,7 @@ export class Workspaces extends React.Component {
   }
 
   editWorkspace = (id: WorkspaceId) => {
-    const workspace = workspaceStore.getById(id);
+    const workspace = WorkspaceStore.getInstance().getById(id);
     this.editingWorkspaces.set(id, toJS(workspace));
   }
 
@@ -67,7 +67,7 @@ export class Workspaces extends React.Component {
   }
 
   removeWorkspace = (id: WorkspaceId) => {
-    const workspace = workspaceStore.getById(id);
+    const workspace = WorkspaceStore.getInstance().getById(id);
     ConfirmDialog.open({
       okButtonProps: {
         label: _i18n._(t`Remove Workspace`),
@@ -76,7 +76,7 @@ export class Workspaces extends React.Component {
       },
       ok: () => {
         this.clearEditing(id);
-        workspaceStore.removeWorkspace(id);
+        WorkspaceStore.getInstance().removeWorkspace(id);
       },
       message: (
         <div className="confirm flex column gaps">
@@ -108,8 +108,8 @@ export class Workspaces extends React.Component {
         </h2>
         <div className="items flex column gaps">
           {this.workspaces.map(({ id: workspaceId, name, description }) => {
-            const isActive = workspaceStore.currentWorkspaceId === workspaceId;
-            const isDefault = workspaceStore.isDefault(workspaceId);
+            const isActive = WorkspaceStore.getInstance().currentWorkspaceId === workspaceId;
+            const isDefault = WorkspaceStore.getInstance().isDefault(workspaceId);
             const isEditing = this.editingWorkspaces.has(workspaceId);
             const editingWorkspace = this.editingWorkspaces.get(workspaceId);
             const className = cssNames("workspace flex gaps", {
@@ -119,14 +119,14 @@ export class Workspaces extends React.Component {
             });
             const existenceValidator: Validator = {
               message: () => `Workspace '${name}' already exists`,
-              validate: value => !workspaceStore.getByName(value.trim())
+              validate: value => !WorkspaceStore.getInstance().getByName(value.trim())
             }
             return (
               <div key={workspaceId} className={className}>
                 {!isEditing && (
                   <Fragment>
                     <span className="name flex gaps align-center">
-                      <a href="#" onClick={prevDefault(() => workspaceStore.setActive(workspaceId))}>{name}</a>
+                      <a href="#" onClick={prevDefault(() => WorkspaceStore.getInstance().setActive(workspaceId))}>{name}</a>
                       {isActive && <span> <Trans>(current)</Trans></span>}
                     </span>
                     <span className="description">{description}</span>

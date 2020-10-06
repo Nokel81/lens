@@ -6,8 +6,7 @@ import * as yaml from "js-yaml";
 import path from "path";
 import * as tempy from "tempy";
 import logger from "./logger"
-import { tracker } from "../common/tracker";
-import { cloneJsonObject } from "../common/utils";
+import { Tracker } from "../common/tracker";
 
 export class ResourceApplier {
   constructor(protected cluster: Cluster) {
@@ -15,7 +14,7 @@ export class ResourceApplier {
 
   async apply(resource: KubernetesObject | any): Promise<string> {
     resource = this.sanitizeObject(resource);
-    tracker.event("resource", "apply")
+    Tracker.getInstance().event("resource", "apply")
     return await this.kubectlApply(yaml.safeDump(resource));
   }
 
@@ -70,7 +69,7 @@ export class ResourceApplier {
   }
 
   protected sanitizeObject(resource: KubernetesObject | any) {
-    resource = cloneJsonObject(resource);
+    resource = JSON.parse(JSON.stringify(resource));
     delete resource.status;
     delete resource.metadata?.resourceVersion;
     const annotations = resource.metadata?.annotations;

@@ -9,8 +9,8 @@ import { Cluster } from "./cluster"
 import { ClusterPreferences } from "../common/cluster-store";
 import { helmCli } from "./helm/helm-cli"
 import { isWindows } from "../common/vars";
-import { tracker } from "../common/tracker";
-import { userStore } from "../common/user-store";
+import { Tracker } from "../common/tracker";
+import { UserStore } from "../common/user-store";
 
 export class ShellSession extends EventEmitter {
   static shellEnvs: Map<string, any> = new Map()
@@ -30,7 +30,7 @@ export class ShellSession extends EventEmitter {
   constructor(socket: WebSocket, cluster: Cluster) {
     super()
     this.websocket = socket
-    this.kubeconfigPath =  cluster.getProxyKubeconfigPath()
+    this.kubeconfigPath = cluster.getProxyKubeconfigPath()
     this.kubectl = new Kubectl(cluster.version)
     this.preferences = cluster.preferences || {}
     this.clusterId = cluster.id
@@ -38,8 +38,8 @@ export class ShellSession extends EventEmitter {
 
   public async open() {
     this.kubectlBinDir = await this.kubectl.binDir()
-    const pathFromPreferences = userStore.preferences.kubectlBinariesPath || Kubectl.bundledKubectlPath
-    this.kubectlPathDir = userStore.preferences.downloadKubectlBinaries ? this.kubectlBinDir : path.dirname(pathFromPreferences)
+    const pathFromPreferences = UserStore.getInstance().preferences.kubectlBinariesPath || Kubectl.bundledKubectlPath
+    this.kubectlPathDir = UserStore.getInstance().preferences.downloadKubectlBinaries ? this.kubectlBinDir : path.dirname(pathFromPreferences)
     this.helmBinDir = helmCli.getBinaryDir()
     const env = await this.getCachedShellEnv()
     const shell = env.PTYSHELL
@@ -58,18 +58,18 @@ export class ShellSession extends EventEmitter {
     this.closeWebsocketOnProcessExit()
     this.exitProcessOnWebsocketClose()
 
-    tracker.event("shell", "open")
+    Tracker.getInstance().event("shell", "open")
   }
 
   protected cwd(): string {
-    if(!this.preferences || !this.preferences.terminalCWD || this.preferences.terminalCWD === "") {
+    if (!this.preferences || !this.preferences.terminalCWD || this.preferences.terminalCWD === "") {
       return null
     }
     return this.preferences.terminalCWD
   }
 
   protected async getShellArgs(shell: string): Promise<Array<string>> {
-    switch(path.basename(shell)) {
+    switch (path.basename(shell)) {
     case "powershell.exe":
       return ["-NoExit", "-command", `& {Set-Location $Env:USERPROFILE; $Env:PATH="${this.helmBinDir};${this.kubectlPathDir};$Env:PATH"}`]
     case "bash":
@@ -102,18 +102,18 @@ export class ShellSession extends EventEmitter {
     const env = JSON.parse(JSON.stringify(await shellEnv()))
     const pathStr = [this.kubectlBinDir, this.helmBinDir, process.env.PATH].join(path.delimiter)
 
-    if(isWindows) {
+    if (isWindows) {
       env["SystemRoot"] = process.env.SystemRoot
       env["PTYSHELL"] = "powershell.exe"
       env["PATH"] = pathStr
-    } else if(typeof(process.env.SHELL) != "undefined") {
+    } else if (typeof (process.env.SHELL) != "undefined") {
       env["PTYSHELL"] = process.env.SHELL
       env["PATH"] = pathStr
     } else {
       env["PTYSHELL"] = "" // blank runs the system default shell
     }
 
-    if(path.basename(env["PTYSHELL"]) === "zsh") {
+    if (path.basename(env["PTYSHELL"]) === "zsh") {
       env["OLD_ZDOTDIR"] = env.ZDOTDIR || env.HOME
       env["ZDOTDIR"] = this.kubectlBinDir
     }
@@ -131,7 +131,7 @@ export class ShellSession extends EventEmitter {
       delete env["DEBUG"]
     }
 
-    return(env)
+    return (env)
   }
 
   protected pipeStdout() {
@@ -173,7 +173,7 @@ export class ShellSession extends EventEmitter {
       let timeout = 0
       if (exitCode > 0) {
         this.sendResponse("Terminal will auto-close in 15 seconds ...")
-        timeout = 15*1000
+        timeout = 15 * 1000
       }
       setTimeout(() => {
         this.exit()
@@ -187,13 +187,13 @@ export class ShellSession extends EventEmitter {
     })
   }
 
-  protected killShellProcess(){
-    if(this.running) {
+  protected killShellProcess() {
+    if (this.running) {
       // On Windows we need to kill the shell process by pid, since Lens won't respond after a while if using `this.shellProcess.kill()`
       if (isWindows) {
         try {
           process.kill(this.shellProcess.pid)
-        } catch(e) {
+        } catch (e) {
           return
         }
       } else {

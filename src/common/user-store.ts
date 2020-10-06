@@ -7,9 +7,10 @@ import { BaseStore } from "./base-store";
 import migrations from "../migrations/user-store"
 import { getAppVersion } from "./utils/app-version";
 import { kubeConfigDefaultPath, loadConfig } from "./kube-helpers";
-import { tracker } from "./tracker";
+import { Tracker } from "./tracker";
 import logger from "../main/logger";
 import path from 'path';
+import { autobind } from "../renderer/utils";
 
 export interface UserStoreModel {
   kubeConfigPath: string;
@@ -32,7 +33,7 @@ export interface UserPreferences {
 export class UserStore extends BaseStore<UserStoreModel> {
   static readonly defaultTheme: ThemeId = "kontena-dark"
 
-  private constructor() {
+  constructor() {
     super({
       // configName: "lens-user-store", // todo: migrate from default "config.json"
       migrations: migrations,
@@ -40,11 +41,10 @@ export class UserStore extends BaseStore<UserStoreModel> {
 
     // track telemetry availability
     reaction(() => this.preferences.allowTelemetry, allowed => {
-      tracker.event("telemetry", allowed ? "enabled" : "disabled");
+      Tracker.getInstance().event("telemetry", allowed ? "enabled" : "disabled");
     });
 
     // refresh new contexts
-    this.whenLoaded.then(this.refreshNewContexts);
     reaction(() => this.kubeConfigPath, this.refreshNewContexts);
   }
 
@@ -77,16 +77,23 @@ export class UserStore extends BaseStore<UserStoreModel> {
 
   @action
   saveLastSeenAppVersion() {
-    tracker.event("app", "whats-new-seen")
+    Tracker.getInstance().event("app", "whats-new-seen")
     this.lastSeenAppVersion = getAppVersion();
   }
 
-  protected refreshNewContexts = async () => {
+  async init() {
+    await super.init()
+    await this.refreshNewContexts()
+  }
+
+  @autobind()
+  protected async refreshNewContexts() {
     try {
       const kubeConfig = await readFile(this.kubeConfigPath, "utf8");
       if (kubeConfig) {
         this.newContexts.clear();
-        loadConfig(kubeConfig).getContexts()
+        loadConfig(kubeConfig)
+          .getContexts()
           .filter(ctx => ctx.cluster)
           .filter(ctx => !this.seenContexts.has(ctx.name))
           .forEach(ctx => this.newContexts.add(ctx.name));
@@ -137,5 +144,3 @@ export class UserStore extends BaseStore<UserStoreModel> {
     })
   }
 }
-
-export const userStore = UserStore.getInstance<UserStore>();

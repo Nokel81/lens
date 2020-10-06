@@ -2,34 +2,36 @@ import path from "path"
 import Config from "conf"
 import { Options as ConfOptions } from "conf/dist/source/types"
 import { app, ipcMain, IpcMainEvent, ipcRenderer, IpcRendererEvent, remote } from "electron"
-import { action, observable, reaction, runInAction, toJS, when } from "mobx";
+import { observable, reaction, runInAction, toJS } from "mobx";
 import Singleton from "./utils/singleton";
 import { getAppVersion } from "./utils/app-version";
 import logger from "../main/logger";
 import { broadcastIpc, IpcBroadcastParams } from "./ipc";
 import isEqual from "lodash/isEqual";
+import { autobind } from "../renderer/utils";
 
-export interface BaseStoreParams<T = any> extends ConfOptions<T> {
-  autoLoad?: boolean;
+export interface BaseStoreParams<T> extends ConfOptions<T> {
   syncEnabled?: boolean;
 }
 
-export class BaseStore<T = any> extends Singleton {
+export abstract class BaseStore<T> extends Singleton {
   protected storeConfig: Config<T>;
-  protected syncDisposers: Function[] = [];
+  protected syncDisposers: (() => void)[] = [];
+  protected syncEnabled: boolean;
 
-  whenLoaded = when(() => this.isLoaded);
-  @observable isLoaded = false;
   @observable protected data: T;
 
-  protected constructor(protected params: BaseStoreParams) {
+  protected constructor(params: BaseStoreParams<T>) {
     super();
-    this.params = {
-      autoLoad: false,
-      syncEnabled: true,
-      ...params,
-    }
-    this.init();
+    const { syncEnabled = true, ...confOptions } = params
+
+    this.syncEnabled = syncEnabled
+    this.storeConfig = new Config({
+      ...confOptions,
+      projectName: "lens",
+      projectVersion: getAppVersion(),
+      cwd: (app || remote.app).getPath("userData")
+    })
   }
 
   get name() {
@@ -40,27 +42,17 @@ export class BaseStore<T = any> extends Singleton {
     return `store-sync:${this.name}`
   }
 
-  protected async init() {
-    if (this.params.autoLoad) {
-      await this.load();
-    }
-    if (this.params.syncEnabled) {
-      await this.whenLoaded;
-      this.enableSync();
+  async init() {
+    await this.load();
+
+    if (this.syncEnabled) {
+      this.startSyncing();
     }
   }
 
-  async load() {
-    const { autoLoad, syncEnabled, ...confOptions } = this.params;
-    this.storeConfig = new Config({
-      ...confOptions,
-      projectName: "lens",
-      projectVersion: getAppVersion(),
-      cwd: (app || remote.app).getPath("userData"),
-    });
-    logger.info(`[STORE]: LOADED from ${this.storeConfig.path}`);
+  protected async load() {
     this.fromStore(this.storeConfig.store);
-    this.isLoaded = true;
+    logger.info(`[STORE]: LOADED from ${this.storeConfig.path}`);
   }
 
   protected async saveToFile(model: T) {
@@ -71,25 +63,29 @@ export class BaseStore<T = any> extends Singleton {
     });
   }
 
-  enableSync() {
+  @autobind()
+  private mainCallback(event: IpcMainEvent, model: T) {
+    logger.silly(`[STORE]: SYNC ${this.name} from renderer`, { model });
+    this.onSync(model);
+  }
+
+  @autobind()
+  private rendererCallback(event: IpcRendererEvent, model: T) {
+    logger.silly(`[STORE]: SYNC ${this.name} from main`, { model });
+    this.onSync(model);
+  }
+
+  startSyncing() {
     this.syncDisposers.push(
       reaction(() => this.toJSON(), model => this.onModelChange(model)),
     );
     if (ipcMain) {
-      const callback = (event: IpcMainEvent, model: T) => {
-        logger.silly(`[STORE]: SYNC ${this.name} from renderer`, { model });
-        this.onSync(model);
-      };
-      ipcMain.on(this.syncChannel, callback);
-      this.syncDisposers.push(() => ipcMain.off(this.syncChannel, callback));
+      ipcMain.on(this.syncChannel, this.mainCallback);
+      this.syncDisposers.push(() => ipcMain.off(this.syncChannel, this.mainCallback));
     }
     if (ipcRenderer) {
-      const callback = (event: IpcRendererEvent, model: T) => {
-        logger.silly(`[STORE]: SYNC ${this.name} from main`, { model });
-        this.onSync(model);
-      };
-      ipcRenderer.on(this.syncChannel, callback);
-      this.syncDisposers.push(() => ipcRenderer.off(this.syncChannel, callback));
+      ipcRenderer.on(this.syncChannel, this.rendererCallback);
+      this.syncDisposers.push(() => ipcRenderer.off(this.syncChannel, this.rendererCallback));
     }
   }
 
@@ -105,8 +101,8 @@ export class BaseStore<T = any> extends Singleton {
   protected applyWithoutSync(callback: () => void) {
     this.disableSync();
     runInAction(callback);
-    if (this.params.syncEnabled) {
-      this.enableSync();
+    if (this.syncEnabled) {
+      this.startSyncing();
     }
   }
 
@@ -134,33 +130,20 @@ export class BaseStore<T = any> extends Singleton {
       args: [model],
     }
     broadcastIpc(msg); // send to all windows (BrowserWindow, webContents)
-    const frames = await this.getSubFrames();
-    frames.forEach(frameId => {
+
+    const { ClusterStore } = await import("./cluster-store")
+
+    for (const frameId of ClusterStore.getInstance().subFrameIds) {
       // send to all sub-frames (e.g. cluster-view managed in iframe)
       broadcastIpc({
         ...msg,
-        frameId: frameId,
+        frameId,
         frameOnly: true,
-      });
-    });
+      })
+    }
   }
 
-  // todo: refactor?
-  protected async getSubFrames(): Promise<number[]> {
-    const subFrames: number[] = [];
-    const { clusterStore } = await import("./cluster-store");
-    clusterStore.clustersList.forEach(cluster => {
-      if (cluster.frameId) {
-        subFrames.push(cluster.frameId)
-      }
-    });
-    return subFrames;
-  }
-
-  @action
-  protected fromStore(data: T) {
-    this.data = data;
-  }
+  protected abstract fromStore(data: T): void;
 
   // todo: use "serializr" ?
   toJSON(): T {

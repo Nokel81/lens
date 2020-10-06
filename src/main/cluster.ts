@@ -14,6 +14,7 @@ import { getFeatures, installFeature, uninstallFeature, upgradeFeature } from ".
 import request, { RequestPromiseOptions } from "request-promise-native"
 import { apiResources } from "../common/rbac";
 import logger from "./logger"
+import _ from "lodash";
 
 export enum ClusterStatus {
   AccessGranted = 2,
@@ -39,13 +40,15 @@ export interface ClusterState extends ClusterModel {
   features: FeatureStatusMap;
 }
 
+type Disposer = () => void
+
 export class Cluster implements ClusterModel {
   public id: ClusterId;
   public frameId: number;
   public kubeCtl: Kubectl
   public contextHandler: ContextHandler;
   protected kubeconfigManager: KubeconfigManager;
-  protected eventDisposers: Function[] = [];
+  protected eventDisposers: (Disposer[] | null) = null;
 
   whenInitialized = when(() => this.initialized);
   whenReady = when(() => this.ready);
@@ -79,8 +82,9 @@ export class Cluster implements ClusterModel {
   constructor(model: ClusterModel) {
     this.updateModel(model);
     const kubeconfig = this.getKubeconfig()
-    if (kubeconfig.getContextObject(this.contextName)) {
-      this.apiUrl = kubeconfig.getCluster(kubeconfig.getContextObject(this.contextName).cluster).server
+    const contextObj = kubeconfig.getContextObject(this.contextName)
+    if (contextObj) {
+      this.apiUrl = kubeconfig.getCluster(contextObj.cluster).server
     }
   }
 
@@ -92,8 +96,12 @@ export class Cluster implements ClusterModel {
   @action
   async init(port: number) {
     try {
+      if (this.initialized) {
+        throw new Error("cannot initialize cluster twice")
+      }
+
       this.contextHandler = new ContextHandler(this);
-      this.kubeconfigManager = new KubeconfigManager(this, this.contextHandler, port);
+      this.kubeconfigManager = await KubeconfigManager.create(this, this.contextHandler, port);
       this.kubeProxyUrl = `http://localhost:${port}${apiKubePrefix}`;
       this.initialized = true;
       logger.info(`[CLUSTER]: "${this.contextName}" init success`, {
@@ -113,28 +121,31 @@ export class Cluster implements ClusterModel {
     logger.info(`[CLUSTER]: bind events`, this.getMeta());
     const refreshTimer = setInterval(() => !this.disconnected && this.refresh(), 30000); // every 30s
 
-    this.eventDisposers.push(
+    this.eventDisposers ??= [
       reaction(this.getState, this.pushState),
-      () => clearInterval(refreshTimer),
-    );
+      clearInterval.bind(refreshTimer), // every 30s
+    ]
   }
 
   protected unbindEvents() {
     logger.info(`[CLUSTER]: unbind events`, this.getMeta());
     this.eventDisposers.forEach(dispose => dispose());
-    this.eventDisposers.length = 0;
+    this.eventDisposers = null;
+  }
+
+  @action
+  protected async ensureConnected() {
+    if (this.disconnected || !this.accessible) {
+      await this.reconnect();
+    }
   }
 
   @action
   async activate() {
-    logger.info(`[CLUSTER]: activate`, this.getMeta());
-    await this.whenInitialized;
-    if (!this.eventDisposers.length) {
-      this.bindEvents();
-    }
-    if (this.disconnected || !this.accessible) {
-      await this.reconnect();
-    }
+    logger.info(`[CLUSTER]: activate`, this.getMeta())
+    await this.whenInitialized
+    this.bindEvents()
+    await this.ensureConnected()
     await this.refreshConnectionStatus()
     if (this.accessible) {
       await this.refreshAllowedResources()
@@ -142,7 +153,7 @@ export class Cluster implements ClusterModel {
       this.kubeCtl = new Kubectl(this.version)
       this.kubeCtl.ensureKubectl() // download kubectl in background, so it's not blocking dashboard
     }
-    return this.pushState();
+    return this.pushState()
   }
 
   @action
@@ -262,23 +273,27 @@ export class Cluster implements ClusterModel {
       return ClusterStatus.AccessGranted;
     } catch (error) {
       logger.error(`Failed to connect cluster "${this.contextName}": ${error}`)
+
       if (error.statusCode) {
         if (error.statusCode >= 400 && error.statusCode < 500) {
           this.failureReason = "Invalid credentials";
           return ClusterStatus.AccessDenied;
-        } else {
-          this.failureReason = error.error || error.message;
-          return ClusterStatus.Offline;
         }
-      } else if (error.failed === true) {
+
+        this.failureReason = error.error || error.message;
+        return ClusterStatus.Offline;
+      }
+
+      if (error.failed === true) {
         if (error.timedOut === true) {
           this.failureReason = "Connection timed out";
           return ClusterStatus.Offline;
-        } else {
-          this.failureReason = "Failed to fetch credentials";
-          return ClusterStatus.AccessDenied;
         }
+
+        this.failureReason = "Failed to fetch credentials";
+        return ClusterStatus.AccessDenied;
       }
+
       this.failureReason = error.message;
       return ClusterStatus.Offline;
     }
@@ -332,30 +347,30 @@ export class Cluster implements ClusterModel {
     if (!this.isAdmin) {
       return 0;
     }
+
     const client = this.getProxyKubeconfig().makeApiClient(CoreV1Api);
     try {
       const response = await client.listEventForAllNamespaces(false, null, null, null, 1000);
       const uniqEventSources = new Set();
       const warnings = response.body.items.filter(e => e.type !== 'Normal');
-      for (const w of warnings) {
-        if (w.involvedObject.kind === 'Pod') {
-          try {
-            const pod = (await client.readNamespacedPod(w.involvedObject.name, w.involvedObject.namespace)).body;
-            logger.debug(`checking pod ${w.involvedObject.namespace}/${w.involvedObject.name}`)
-            if (podHasIssues(pod)) {
-              uniqEventSources.add(w.involvedObject.uid);
-            }
-          } catch (err) {
+      for (const { involvedObject } of warnings) {
+        if (involvedObject.kind !== "Pod") {
+          uniqEventSources.add(involvedObject.uid)
+          continue
+        }
+
+        try {
+          const pod = (await client.readNamespacedPod(involvedObject.name, involvedObject.namespace)).body;
+          logger.debug(`checking pod ${involvedObject.namespace}/${involvedObject.name}`)
+          if (podHasIssues(pod)) {
+            uniqEventSources.add(involvedObject.uid);
           }
-        } else {
-          uniqEventSources.add(w.involvedObject.uid);
+        } catch (err) {
         }
       }
-      let nodeNotificationCount = 0;
+
       const nodes = (await client.listNode()).body.items;
-      nodes.map(n => {
-        nodeNotificationCount = nodeNotificationCount + getNodeWarningConditions(n).length
-      });
+      const nodeNotificationCount = _.sumBy(nodes.map(getNodeWarningConditions), "length")
       return uniqEventSources.size + nodeNotificationCount;
     } catch (error) {
       logger.error("Failed to fetch event count: " + JSON.stringify(error))

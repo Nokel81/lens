@@ -1,6 +1,6 @@
 import { computed, observable, reaction } from "mobx";
 import { autobind } from "./utils/autobind";
-import { userStore } from "../common/user-store";
+import { UserStore } from "../common/user-store";
 import logger from "../main/logger";
 
 export type ThemeId = string;
@@ -30,7 +30,7 @@ export class ThemeStore {
   ];
 
   @computed get activeThemeId() {
-    return userStore.preferences.colorTheme;
+    return UserStore.getInstance().preferences.colorTheme;
   }
 
   @computed get activeTheme(): Theme {
@@ -48,7 +48,7 @@ export class ThemeStore {
         await this.loadTheme(themeId);
         this.applyTheme();
       } catch (err) {
-        userStore.resetTheme();
+        UserStore.getInstance().resetTheme();
       }
     }, {
       fireImmediately: true,

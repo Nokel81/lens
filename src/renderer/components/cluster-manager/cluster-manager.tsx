@@ -12,7 +12,7 @@ import { AddCluster, addClusterRoute } from "../+add-cluster";
 import { ClusterView } from "./cluster-view";
 import { ClusterSettings, clusterSettingsRoute } from "../+cluster-settings";
 import { clusterViewRoute, clusterViewURL, getMatchedCluster, getMatchedClusterId } from "./cluster-view.route";
-import { clusterStore } from "../../../common/cluster-store";
+import { ClusterStore } from "../../../common/cluster-store";
 import { hasLoadedView, initView, lensViews, refreshViews } from "./lens-views";
 import { isMac } from "../../../common/vars";
 
@@ -40,7 +40,7 @@ export class ClusterManager extends React.Component {
   }
 
   get startUrl() {
-    const { activeClusterId } = clusterStore;
+    const { activeClusterId } = ClusterStore.getInstance();
     if (activeClusterId) {
       return clusterViewURL({
         params: {

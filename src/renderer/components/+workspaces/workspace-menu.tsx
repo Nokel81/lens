@@ -7,7 +7,7 @@ import { Trans } from "@lingui/macro";
 import { Menu, MenuItem, MenuProps } from "../menu";
 import { Icon } from "../icon";
 import { observable } from "mobx";
-import { workspaceStore } from "../../../common/workspace-store";
+import { WorkspaceStore } from "../../../common/workspace-store";
 import { cssNames } from "../../utils";
 
 interface Props extends Partial<MenuProps> {
@@ -19,7 +19,7 @@ export class WorkspaceMenu extends React.Component<Props> {
 
   render() {
     const { className, ...menuProps } = this.props;
-    const { workspacesList, currentWorkspace } = workspaceStore;
+    const { workspacesList, currentWorkspace } = WorkspaceStore.getInstance();
     return (
       <Menu
         {...menuProps}
@@ -38,9 +38,9 @@ export class WorkspaceMenu extends React.Component<Props> {
               key={workspaceId}
               title={description}
               active={workspaceId === currentWorkspace.id}
-              onClick={() => workspaceStore.setActive(workspaceId)}
+              onClick={() => WorkspaceStore.getInstance().setActive(workspaceId)}
             >
-              <Icon small material="layers"/>
+              <Icon small material="layers" />
               <span className="workspace">{name}</span>
             </MenuItem>
           )

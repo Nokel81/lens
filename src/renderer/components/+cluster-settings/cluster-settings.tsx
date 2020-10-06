@@ -12,7 +12,7 @@ import { ClusterIcon } from "../cluster-icon";
 import { Icon } from "../icon";
 import { navigate } from "../../navigation";
 import { IClusterSettingsRouteParams } from "./cluster-settings.route";
-import { clusterStore } from "../../../common/cluster-store";
+import { ClusterStore } from "../../../common/cluster-store";
 import { RouteComponentProps } from "react-router";
 import { clusterIpc } from "../../../common/cluster-ipc";
 import { autorun } from "mobx";
@@ -23,7 +23,7 @@ interface Props extends RouteComponentProps<IClusterSettingsRouteParams> {
 @observer
 export class ClusterSettings extends React.Component<Props> {
   get cluster(): Cluster {
-    return clusterStore.getById(this.props.match.params.clusterId);
+    return ClusterStore.getInstance().getById(this.props.match.params.clusterId);
   }
 
   async componentDidMount() {
@@ -47,7 +47,7 @@ export class ClusterSettings extends React.Component<Props> {
   }
 
   refreshCluster = () => {
-    if(this.cluster) {
+    if (this.cluster) {
       clusterIpc.refresh.invokeFromRenderer(this.cluster.id);
     }
   }
@@ -67,7 +67,7 @@ export class ClusterSettings extends React.Component<Props> {
           showTooltip={false}
         />
         <h2>{cluster.preferences.clusterName}</h2>
-        <Icon material="close" onClick={this.close} big/>
+        <Icon material="close" onClick={this.close} big />
       </>
     );
     return (

@@ -1,12 +1,12 @@
 import { createIpcChannel } from "./ipc";
-import { ClusterId, clusterStore } from "./cluster-store";
-import { tracker } from "./tracker";
+import { ClusterId, ClusterStore } from "./cluster-store";
+import { Tracker } from "./tracker";
 
 export const clusterIpc = {
   activate: createIpcChannel({
     channel: "cluster:activate",
     handle: (clusterId: ClusterId, frameId?: number) => {
-      const cluster = clusterStore.getById(clusterId);
+      const cluster = ClusterStore.getInstance().getById(clusterId);
       if (cluster) {
         if (frameId) cluster.frameId = frameId; // save cluster's webFrame.routingId to be able to send push-updates
         return cluster.activate();
@@ -17,7 +17,7 @@ export const clusterIpc = {
   setFrameId: createIpcChannel({
     channel: "cluster:set-frame-id",
     handle: (clusterId: ClusterId, frameId?: number) => {
-      const cluster = clusterStore.getById(clusterId);
+      const cluster = ClusterStore.getInstance().getById(clusterId);
       if (cluster) {
         if (frameId) cluster.frameId = frameId; // save cluster's webFrame.routingId to be able to send push-updates
         return cluster.pushState();
@@ -28,7 +28,7 @@ export const clusterIpc = {
   refresh: createIpcChannel({
     channel: "cluster:refresh",
     handle: (clusterId: ClusterId) => {
-      const cluster = clusterStore.getById(clusterId);
+      const cluster = ClusterStore.getInstance().getById(clusterId);
       if (cluster) return cluster.refresh();
     },
   }),
@@ -36,16 +36,16 @@ export const clusterIpc = {
   disconnect: createIpcChannel({
     channel: "cluster:disconnect",
     handle: (clusterId: ClusterId) => {
-      tracker.event("cluster", "stop");
-      return clusterStore.getById(clusterId)?.disconnect();
+      Tracker.getInstance().event("cluster", "stop");
+      return ClusterStore.getInstance().getById(clusterId)?.disconnect();
     },
   }),
 
   installFeature: createIpcChannel({
     channel: "cluster:install-feature",
     handle: async (clusterId: ClusterId, feature: string, config?: any) => {
-      tracker.event("cluster", "install", feature);
-      const cluster = clusterStore.getById(clusterId);
+      Tracker.getInstance().event("cluster", "install", feature);
+      const cluster = ClusterStore.getInstance().getById(clusterId);
       if (cluster) {
         await cluster.installFeature(feature, config)
       } else {
@@ -57,16 +57,16 @@ export const clusterIpc = {
   uninstallFeature: createIpcChannel({
     channel: "cluster:uninstall-feature",
     handle: (clusterId: ClusterId, feature: string) => {
-      tracker.event("cluster", "uninstall", feature);
-      return clusterStore.getById(clusterId)?.uninstallFeature(feature)
+      Tracker.getInstance().event("cluster", "uninstall", feature);
+      return ClusterStore.getInstance().getById(clusterId)?.uninstallFeature(feature)
     }
   }),
 
   upgradeFeature: createIpcChannel({
     channel: "cluster:upgrade-feature",
     handle: (clusterId: ClusterId, feature: string, config?: any) => {
-      tracker.event("cluster", "upgrade", feature);
-      return clusterStore.getById(clusterId)?.upgradeFeature(feature, config)
+      Tracker.getInstance().event("cluster", "upgrade", feature);
+      return ClusterStore.getInstance().getById(clusterId)?.upgradeFeature(feature, config)
     }
   }),
 }

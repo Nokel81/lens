@@ -3,15 +3,15 @@ import React from "react";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 import { Trans } from "@lingui/macro";
-import { clusterStore } from "../../../common/cluster-store";
-import { workspaceStore } from "../../../common/workspace-store";
+import { ClusterStore } from "../../../common/cluster-store";
+import { WorkspaceStore } from "../../../common/workspace-store";
 
 @observer
 export class LandingPage extends React.Component {
   @observable showHint = true;
 
   render() {
-    const clusters = clusterStore.getByWorkspaceId(workspaceStore.currentWorkspaceId);
+    const clusters = ClusterStore.getInstance().getByWorkspaceId(WorkspaceStore.getInstance().currentWorkspaceId);
     const noClustersInScope = !clusters.length;
     const showStartupHint = this.showHint && noClustersInScope;
     return (

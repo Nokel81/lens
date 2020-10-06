@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import React from "react";
 import { observer } from "mobx-react";
-import { userStore } from "../../../common/user-store"
+import { UserStore } from "../../../common/user-store"
 import { navigate } from "../../navigation";
 import { Button } from "../button";
 import { Trans } from "@lingui/macro";
@@ -15,7 +15,7 @@ export class WhatsNew extends React.Component {
 
   ok = () => {
     navigate("/");
-    userStore.saveLastSeenAppVersion();
+    UserStore.getInstance().saveLastSeenAppVersion();
   }
 
   render() {
@@ -24,7 +24,7 @@ export class WhatsNew extends React.Component {
     return (
       <div className="WhatsNew flex column">
         <div className="content box grow">
-          <img className="logo" src={logo} alt="Lens"/>
+          <img className="logo" src={logo} alt="Lens" />
           <div
             className="release-notes flex column gaps"
             dangerouslySetInnerHTML={{ __html: releaseNotes }}

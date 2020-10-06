@@ -1,8 +1,7 @@
-import { app, App, remote } from "electron"
 import ua from "universal-analytics"
 import { machineIdSync } from "node-machine-id"
 import Singleton from "./utils/singleton";
-import { userStore } from "./user-store"
+import { UserStore } from "./user-store"
 import logger from "../main/logger";
 
 export class Tracker extends Singleton {
@@ -15,7 +14,7 @@ export class Tracker extends Singleton {
   protected locale: string;
   protected electronUA: string;
 
-  private constructor(app: App) {
+  constructor() {
     super();
     try {
       this.visitor = ua(Tracker.GA_ID, machineIdSync(), { strictCidFormat: false })
@@ -26,13 +25,12 @@ export class Tracker extends Singleton {
   }
 
   protected async isTelemetryAllowed(): Promise<boolean> {
-    return userStore.preferences.allowTelemetry;
+    return UserStore.getInstance().preferences.allowTelemetry;
   }
 
   async event(eventCategory: string, eventAction: string, otherParams = {}) {
     try {
-      const allowed = await this.isTelemetryAllowed();
-      if (!allowed) {
+      if (!await this.isTelemetryAllowed()) {
         return;
       }
       this.visitor.event({
@@ -45,5 +43,3 @@ export class Tracker extends Singleton {
     }
   }
 }
-
-export const tracker = Tracker.getInstance<Tracker>(app || remote.app);

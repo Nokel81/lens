@@ -2,9 +2,9 @@ import "./components/app.scss"
 import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import { isMac } from "../common/vars";
-import { userStore } from "../common/user-store";
-import { workspaceStore } from "../common/workspace-store";
-import { clusterStore } from "../common/cluster-store";
+import { UserStore } from "../common/user-store";
+import { WorkspaceStore } from "../common/workspace-store";
+import { ClusterStore } from "../common/cluster-store";
 import { i18nStore } from "./i18n";
 import { themeStore } from "./theme.store";
 import { App } from "./components/app";
@@ -20,15 +20,15 @@ export async function bootstrap(App: AppComponent) {
 
   // preload common stores
   await Promise.all([
-    userStore.load(),
-    workspaceStore.load(),
-    clusterStore.load(),
+    UserStore.getInstance().init(),
+    WorkspaceStore.getInstance().init(),
+    ClusterStore.getInstance().init(),
     i18nStore.init(),
     themeStore.init(),
   ]);
 
   // Register additional store listeners
-  clusterStore.registerIpcListener();
+  ClusterStore.getInstance().registerIpcListener();
 
   // init app's dependencies if any
   if (App.init) {
@@ -36,9 +36,9 @@ export async function bootstrap(App: AppComponent) {
   }
   window.addEventListener("message", (ev: MessageEvent) => {
     if (ev.data === "teardown") {
-      userStore.unregisterIpcListener()
-      workspaceStore.unregisterIpcListener()
-      clusterStore.unregisterIpcListener()
+      UserStore.getInstance().unregisterIpcListener()
+      WorkspaceStore.getInstance().unregisterIpcListener()
+      ClusterStore.getInstance().unregisterIpcListener()
       unmountComponentAtNode(rootElem)
       window.location.href = "about:blank"
     }

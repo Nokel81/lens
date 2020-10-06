@@ -1,18 +1,25 @@
 // Convert object's keys to camelCase format
-import { camelCase, isPlainObject } from "lodash";
+import _ from "lodash";
 
-export function toCamelCase(obj: Record<string, any>): any {
-  if (Array.isArray(obj)) {
-    return obj.map(toCamelCase);
+export function toCamelCase(arg: string): string;
+export function toCamelCase(arg: string[]): string[];
+export function toCamelCase(arg: Record<string, any>): Record<string, any>;
+export function toCamelCase(arg: Record<string, any>[]): Record<string, any>;
+export function toCamelCase(arg: any): any {
+  if (typeof arg === "string") {
+    return _.camelCase(arg)
   }
-  else if (isPlainObject(obj)) {
-    return Object.keys(obj).reduce((result, key) => {
-      const value = obj[key];
-      result[camelCase(key)] = typeof value === "object" ? toCamelCase(value) : value;
-      return result;
-    }, {} as any);
+
+  if (Array.isArray(arg)) {
+    return arg.map(toCamelCase);
   }
-  else {
-    return obj;
+
+  if (_.isPlainObject(arg)) {
+    return Object.fromEntries(
+      Object.entries(arg)
+        .map(([key, val]) => [_.camelCase(key), toCamelCase(val)])
+    )
   }
+
+  return arg;
 }
