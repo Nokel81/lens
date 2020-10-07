@@ -32,7 +32,6 @@ import { getFreePort } from "../port";
 import fse from "fs-extra"
 import { loadYaml } from "@kubernetes/client-node";
 import { Console } from "console";
-import util from "util"
 
 console = new Console(process.stdout, process.stderr) // fix mockFS
 

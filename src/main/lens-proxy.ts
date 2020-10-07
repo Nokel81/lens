@@ -10,6 +10,7 @@ import { Router } from "./router"
 import { ClusterManager } from "./cluster-manager"
 import { ContextHandler } from "./context-handler";
 import logger from "./logger"
+import _ from "lodash";
 
 export class LensProxy {
   protected origin: string
@@ -27,7 +28,7 @@ export class LensProxy {
     this.router = new Router();
   }
 
-  listen(port = this.port): this {
+  private listen(port = this.port): this {
     this.proxyServer = this.buildCustomProxy().listen(port);
     logger.info(`LensProxy server has started at ${this.origin}`);
     return this;
@@ -64,44 +65,45 @@ export class LensProxy {
 
   protected async handleProxyUpgrade(proxy: httpProxy, req: http.IncomingMessage, socket: net.Socket, head: Buffer) {
     const cluster = this.clusterManager.getClusterForRequest(req)
-    if (cluster) {
-      const proxyUrl = await cluster.contextHandler.resolveAuthProxyUrl() + req.url.replace(apiKubePrefix, "")
-      const apiUrl = url.parse(cluster.apiUrl)
-      const pUrl = url.parse(proxyUrl)
-      const connectOpts = { port: parseInt(pUrl.port), host: pUrl.hostname }
-      const proxySocket = new net.Socket()
-      proxySocket.connect(connectOpts, () => {
-        proxySocket.write(`${req.method} ${pUrl.path} HTTP/1.1\r\n`)
-        proxySocket.write(`Host: ${apiUrl.host}\r\n`)
-        for (let i = 0; i < req.rawHeaders.length; i += 2) {
-          const key = req.rawHeaders[i]
-          if (key !== "Host" && key !== "Authorization") {
-            proxySocket.write(`${req.rawHeaders[i]}: ${req.rawHeaders[i+1]}\r\n`)
-          }
-        }
-        proxySocket.write("\r\n")
-        proxySocket.write(head)
-      })
-      proxySocket.on('data', function (chunk) {
-        socket.write(chunk)
-      })
-      proxySocket.on('end', function () {
-        socket.end()
-      })
-      proxySocket.on('error', function (err) {
-        socket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
-        socket.end()
-      })
-      socket.on('data', function (chunk) {
-        proxySocket.write(chunk)
-      })
-      socket.on('end', function () {
-        proxySocket.end()
-      })
-      socket.on('error', function () {
-        proxySocket.end()
-      })
+    if (!cluster) {
+      return
     }
+
+    const proxyUrl = (await cluster.contextHandler.resolveAuthProxyUrl()) + req.url.replace(apiKubePrefix, "")
+    const apiUrl = url.parse(cluster.apiUrl)
+    const pUrl = url.parse(proxyUrl)
+    const connectOpts = { port: parseInt(pUrl.port), host: pUrl.hostname }
+    const proxySocket = new net.Socket()
+    proxySocket.connect(connectOpts, () => {
+      proxySocket.write(`${req.method} ${pUrl.path} HTTP/1.1\r\n`)
+      proxySocket.write(`Host: ${apiUrl.host}\r\n`)
+
+      _.chunk(req.rawHeaders, 2)
+        .filter(([key]) => !["Host", "Authorization"].includes(key))
+        .forEach(([key, value]) => proxySocket.write(`${key}: ${value}\r\n`))
+
+      proxySocket.write("\r\n")
+      proxySocket.write(head)
+    })
+    proxySocket.on('data', function (chunk) {
+      socket.write(chunk)
+    })
+    proxySocket.on('end', function () {
+      socket.end()
+    })
+    proxySocket.on('error', function (err) {
+      socket.write(`HTTP/${req.httpVersion} 500 Connection error\r\n\r\n`);
+      socket.end()
+    })
+    socket.on('data', function (chunk) {
+      proxySocket.write(chunk)
+    })
+    socket.on('end', function () {
+      proxySocket.end()
+    })
+    socket.on('error', function () {
+      proxySocket.end()
+    })
   }
 
   protected createProxy(): httpProxy {
@@ -115,9 +117,9 @@ export class LensProxy {
         if (req.method === "GET" && (!res.statusCode || res.statusCode >= 500)) {
           const reqId = this.getRequestId(req);
           const retryCount = this.retryCounters.get(reqId) || 0
-          const timeoutMs = retryCount * 250
           if (retryCount < 20) {
             logger.debug(`Retrying proxy request to url: ${reqId}`)
+            const timeoutMs = retryCount * 250
             setTimeout(() => {
               this.retryCounters.set(reqId, retryCount + 1)
               this.handleRequest(proxy, req, res)

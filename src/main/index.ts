@@ -25,14 +25,12 @@ if (!process.env.CICD) {
   app.setPath("userData", workingDir);
 }
 
-let windowManager: WindowManager;
-let clusterManager: ClusterManager;
-let proxyServer: LensProxy;
-
 mangleProxyEnv()
 if (app.commandLine.getSwitchValue("proxy-server") !== "") {
   process.env.HTTPS_PROXY = app.commandLine.getSwitchValue("proxy-server")
 }
+
+const onQuit: (() => void)[] = []
 
 async function main() {
   await shellSync();
@@ -62,11 +60,13 @@ async function main() {
   ]);
 
   // create cluster manager
-  clusterManager = new ClusterManager(proxyPort);
+  const clusterManager = new ClusterManager(proxyPort);
+  onQuit.push(() => clusterManager.stop())
 
   // run proxy
   try {
-    proxyServer = LensProxy.create(proxyPort, clusterManager);
+    const proxyServer = LensProxy.create(proxyPort, clusterManager);
+    onQuit.push(() => proxyServer.close())
   } catch (error) {
     logger.error(`Could not start proxy (127.0.0:${proxyPort}): ${error.message}`)
     dialog.showErrorBox("Lens Error", `Could not start proxy (127.0.0:${proxyPort}): ${error.message || "unknown error"}`)
@@ -74,14 +74,16 @@ async function main() {
   }
 
   // create window manager and open app
-  windowManager = new WindowManager(proxyPort);
+  const windowManager = new WindowManager(proxyPort);
+  onQuit.push(() => windowManager.destroy())
 }
 
 app.on("ready", main);
 
 app.on("will-quit", async (event) => {
   event.preventDefault(); // To allow mixpanel sending to be executed
-  if (proxyServer) proxyServer.close()
-  if (clusterManager) clusterManager.stop()
+  for (const cleanup of onQuit) {
+    cleanup()
+  }
   app.exit();
 })
